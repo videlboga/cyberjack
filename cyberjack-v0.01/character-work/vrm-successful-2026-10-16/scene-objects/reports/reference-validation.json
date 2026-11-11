@@ -1,0 +1,310 @@
+{
+  "sourceArchives": [
+    {
+      "source": "h/common/01.unity3d",
+      "sha256": "d0bb289b1308752ca6cb0587ded7462ad2497b7853831d1203c04aa1ff08d609",
+      "matchesOriginal": true,
+      "bytes": 22632981
+    },
+    {
+      "source": "h/common/71.unity3d",
+      "sha256": "72867fab6366d235811a2aec720b1515b960c3e3aeaa8bbfe3d448440862bbf4",
+      "matchesOriginal": true,
+      "bytes": 1975651
+    },
+    {
+      "source": "map/scene/aquariuminside.unity3d",
+      "sha256": "a168fe417d47fe39154b646a95c8284099909951574dbcad6b0a498c4956a063",
+      "matchesOriginal": true,
+      "bytes": 17083434
+    },
+    {
+      "source": "map/scene/aquariumoutside.unity3d",
+      "sha256": "8c4b3592e5485b8c42618653ed48e498366b238b0775a7ff329854fa322fd2cb",
+      "matchesOriginal": true,
+      "bytes": 4469770
+    },
+    {
+      "source": "map/scene/bathroom.unity3d",
+      "sha256": "fa0bba030708805f1c168374bddbaf31ae547ca2c3bab1253814c61f16b37ad6",
+      "matchesOriginal": true,
+      "bytes": 1434912
+    },
+    {
+      "source": "map/scene/beach.unity3d",
+      "sha256": "c058dd0fb6190e8aa1a4138cd2a78ac63e4f70600850a35fb3914e02b736dc9f",
+      "matchesOriginal": true,
+      "bytes": 4374961
+    },
+    {
+      "source": "map/scene/beachkouisitu.unity3d",
+      "sha256": "6313bf52bcc8c5ab484be8b01ff998d7ebf67ca04b93348944f27d8333ef2f69",
+      "matchesOriginal": true,
+      "bytes": 1598003
+    },
+    {
+      "source": "map/scene/estheticroom.unity3d",
+      "sha256": "040de2f4c528143bb836dc371f0e2d1db9dd716eba27e1a60fb7c8c6df241ada",
+      "matchesOriginal": true,
+      "bytes": 3019391
+    },
+    {
+      "source": "map/scene/fittingroom.unity3d",
+      "sha256": "b9b1cae55b73a1eeec28276e787943503e8512cfe2d93052c233f7f5ff0903bc",
+      "matchesOriginal": true,
+      "bytes": 267698
+    },
+    {
+      "source": "map/scene/forest.unity3d",
+      "sha256": "4400a1ac2b506612e365e449e1626ee6b8bed427131f3de34d9d0aa53317f980",
+      "matchesOriginal": true,
+      "bytes": 9531636
+    },
+    {
+      "source": "map/scene/gassyukulobby.unity3d",
+      "sha256": "e071005684fe0f016d49fc12474b11cccda65d289a7b166f65aa511c617647d8",
+      "matchesOriginal": true,
+      "bytes": 11781741
+    },
+    {
+      "source": "map/scene/gassyukuoutside.unity3d",
+      "sha256": "dcdca3890f9927786f494a39082efa45ff362e83fe70b53037279a4fb3bedd1d",
+      "matchesOriginal": true,
+      "bytes": 4004500
+    },
+    {
+      "source": "map/scene/gasyukumyroom.unity3d",
+      "sha256": "36659b9d70ee40b7747ecbc9030597770022a68172d7013872b3b84ae274c85a",
+      "matchesOriginal": true,
+      "bytes": 1388553
+    },
+    {
+      "source": "map/scene/harbor.unity3d",
+      "sha256": "3b410e4bdb34419bf9a07e19ba23f01c864fa4ec6167016a5e0964a9a53a357e",
+      "matchesOriginal": true,
+      "bytes": 5589913
+    },
+    {
+      "source": "map/scene/hotelkouisitu.unity3d",
+      "sha256": "3dd6896d536089ceb331969f516b92e1db127b0aa0ee2592f1c0204f74723d50",
+      "matchesOriginal": true,
+      "bytes": 2744424
+    },
+    {
+      "source": "map/scene/hotellobby.unity3d",
+      "sha256": "9e825d5af7a46d6d3087495c3c101217927904c9f773b2f29b894bb3b6b8bebe",
+      "matchesOriginal": true,
+      "bytes": 5026459
+    },
+    {
+      "source": "map/scene/hotelmyroom.unity3d",
+      "sha256": "4c35e0dc0403572c5ca26a0ff379b2b478ae4fd861e82c6a892eccb5c3f13781",
+      "matchesOriginal": true,
+      "bytes": 1396508
+    },
+    {
+      "source": "map/scene/hoteloutside.unity3d",
+      "sha256": "cce4e1b5ad8d574a446d4f89c2b86709706ce630cae1b152a79e98710bf98bb0",
+      "matchesOriginal": true,
+      "bytes": 5375499
+    },
+    {
+      "source": "map/scene/hotelsuite.unity3d",
+      "sha256": "743239415445145c51f8dd67519dba413306920fc4203ada384ca5d4119c405d",
+      "matchesOriginal": true,
+      "bytes": 244702320
+    },
+    {
+      "source": "map/scene/hukuya.unity3d",
+      "sha256": "b90dbbc639e58b3e3185326ac46e52b27dbe7434e1598a1ecd7cf342f105d96a",
+      "matchesOriginal": true,
+      "bytes": 2577557
+    },
+    {
+      "source": "map/scene/ishigaki.unity3d",
+      "sha256": "7c8fe12cc63c9b1f8f54b9f8374651f366208f2ca7df346553dffeedf002fecd",
+      "matchesOriginal": true,
+      "bytes": 4691730
+    },
+    {
+      "source": "map/scene/lighthouse.unity3d",
+      "sha256": "73f4f96972ae9f0d3fe59a841260ef8659ece78d76abe953feb6e3e6f2941e55",
+      "matchesOriginal": true,
+      "bytes": 7510962
+    },
+    {
+      "source": "map/scene/minsyukulobby.unity3d",
+      "sha256": "9a629309852ce9c75e3d3b4783bd63add15fe360fca6c6d2f85128bcda5928ce",
+      "matchesOriginal": true,
+      "bytes": 3061096
+    },
+    {
+      "source": "map/scene/minsyukumyroom.unity3d",
+      "sha256": "c5aa67fa12b45e8c77f3bdd47c60eaf6887523f9ff48192e56e2509e2387d49e",
+      "matchesOriginal": true,
+      "bytes": 1266886
+    },
+    {
+      "source": "map/scene/minsyukuoutside.unity3d",
+      "sha256": "41d9dcc2b99a487950f00ad1f87b4bf2c4056944c866db766fd4bd6c715dbb75",
+      "matchesOriginal": true,
+      "bytes": 12791265
+    },
+    {
+      "source": "map/scene/omiyageya.unity3d",
+      "sha256": "6be37d8c1359b34142124076af5a764f56324d809cb81ec8237e93d81f510290",
+      "matchesOriginal": true,
+      "bytes": 3410082
+    },
+    {
+      "source": "map/scene/publictoilet.unity3d",
+      "sha256": "73053f5a38da858f39edb8ee8bdffc4b3c491d4bb14e4789baac74bf0b893571",
+      "matchesOriginal": true,
+      "bytes": 1347662
+    },
+    {
+      "source": "map/scene/publictoilethama.unity3d",
+      "sha256": "20bd669b6bee008b38fa80db877866403df55580f39be134e055ea5b8265d4d9",
+      "matchesOriginal": true,
+      "bytes": 1344231
+    },
+    {
+      "source": "map/scene/publictoiletsui.unity3d",
+      "sha256": "696fad9940735cc267b428672f880ae35cdc02f16c46bec9d84084745dd59677",
+      "matchesOriginal": true,
+      "bytes": 1344306
+    },
+    {
+      "source": "map/scene/seacretbeach.unity3d",
+      "sha256": "bf36b673ff2dbdf1b7d6fa634bc96debf19561da2aaabe1f3d4ffb6e504f4ba9",
+      "matchesOriginal": true,
+      "bytes": 18356458
+    },
+    {
+      "source": "map/scene/showerroom.unity3d",
+      "sha256": "6d1ee9e36adcb34ef08589aaf25ae4a004e17551b6fce51611a06737540aef30",
+      "matchesOriginal": true,
+      "bytes": 2819051
+    },
+    {
+      "source": "map/scene/showerroomnozoki.unity3d",
+      "sha256": "647bf47c75128c665166ad434b99c737fc5059832b0e96c276393e12d2d2e67e",
+      "matchesOriginal": true,
+      "bytes": 7251103
+    },
+    {
+      "source": "map/scene/toiletnozoki.unity3d",
+      "sha256": "8fb50f59a8313a016758b03d05caa7693dc4a7967b57251442de85caad4a1925",
+      "matchesOriginal": true,
+      "bytes": 21619394
+    },
+    {
+      "source": "map/object/00.unity3d",
+      "sha256": "f8966a73b21acd215a202ba687da4c76adc0c6b1c9974411bc47fe6e63c2d807",
+      "matchesOriginal": true,
+      "bytes": 57204
+    },
+    {
+      "source": "map/materials/00.unity3d",
+      "sha256": "8530e3b4650c5b6eca2ec7ead4126cfa4e310101f57998fe2c2a5fd53121017e",
+      "matchesOriginal": true,
+      "bytes": 854937760
+    },
+    {
+      "source": "map/common/00.unity3d",
+      "sha256": "fa01d9aca7134f9a90685307606e1d20376f63d596e67040680f9f72f59a3cfd",
+      "matchesOriginal": true,
+      "bytes": 5558986
+    },
+    {
+      "source": "map/list/calcgateinfo/00.unity3d",
+      "sha256": "08fcc2414b0817e5f5e841f00679c1425ccfa65e116a7d36f0e6ae0a26aea334",
+      "matchesOriginal": true,
+      "bytes": 13103
+    },
+    {
+      "source": "map/list/calcgateinfo/70.unity3d",
+      "sha256": "1e2e0b513283217005f1db57f208dfa76a19a9a3eb569325c8e5d9a48f2ea7fd",
+      "matchesOriginal": true,
+      "bytes": 13292
+    },
+    {
+      "source": "map/list/mapinfo/00.unity3d",
+      "sha256": "1ee328b3250878873e5b84cbdaec876a42a1c24c03773d897ee8db775506eb38",
+      "matchesOriginal": true,
+      "bytes": 4121
+    },
+    {
+      "source": "map/list/mapinfo/70.unity3d",
+      "sha256": "13d3bb8197419cc59823dcccaa2b795948d3d818ec2ae2f43af129c3d0def371",
+      "matchesOriginal": true,
+      "bytes": 2299
+    },
+    {
+      "source": "map/list/mapthumbnailinfo/00.unity3d",
+      "sha256": "1e7d9962217a974249eb7caa0957a7ab45bbaa632b35a926d6744624b3d6c332",
+      "matchesOriginal": true,
+      "bytes": 3229
+    },
+    {
+      "source": "map/list/mapthumbnailinfo/70.unity3d",
+      "sha256": "9d33833e5daae059575cc6c773c8b3fc02c5cb96c73602f9bef0912d3f204940",
+      "matchesOriginal": true,
+      "bytes": 2007
+    },
+    {
+      "source": "map/list/navigationinfo/00.unity3d",
+      "sha256": "4ac589e3cf5db3d725f1e98ff7dae0cddf0adbc29dbab201ed3101a379c59f90",
+      "matchesOriginal": true,
+      "bytes": 21691
+    },
+    {
+      "source": "map/list/navigationinfo/70.unity3d",
+      "sha256": "dbf0020555c2f189e1fc4ac95db68f6782b70389b3447708cd39dc9b41247e1d",
+      "matchesOriginal": true,
+      "bytes": 22879
+    }
+  ],
+  "counts": {
+    "models": 385,
+    "skins": 2,
+    "meshes": 2550,
+    "objects": 22,
+    "placements": 112,
+    "maps": 31,
+    "furniture": 389,
+    "animatedItemRows": 8,
+    "sourceArchives": 44
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "kind": "missing-item-table-in-original-source",
+      "scene": "afb4105e9c2f7facfd224839:56",
+      "table": "item_khh_f_56"
+    },
+    {
+      "kind": "missing-item-table-in-original-source",
+      "scene": "f5779cf02c19c764ad9072c9:7",
+      "table": "item_kht_f_05"
+    },
+    {
+      "kind": "missing-item-table-in-original-source",
+      "scene": "220781804b4135b7f8372e51:56",
+      "table": "item_khh_f_56"
+    },
+    {
+      "kind": "missing-item-table-in-original-source",
+      "scene": "93b6cfdc97db66c622a53573:7",
+      "table": "item_kht_f_05"
+    },
+    {
+      "kind": "missing-in-original-source",
+      "table": "item_khh_f_61",
+      "object": "p_null",
+      "animator": "khh_p_61",
+      "controllers": [],
+      "assets": []
+    }
+  ]
+}

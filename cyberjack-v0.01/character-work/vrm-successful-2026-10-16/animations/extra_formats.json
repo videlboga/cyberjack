@@ -1,0 +1,100 @@
+{
+  "additionalFormats": [
+    {
+      "archive": "mods/Sideloader Modpack/JM/[jm] elysia v0.9.zipmod",
+      "entry": "abdata/chara/elysia_hair/p_acs_hair5/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 57824
+    },
+    {
+      "archive": "mods/Sideloader Modpack/murara/[murara] Rhodes_Jacket v1.0.zipmod",
+      "entry": "abdata/chara/jacket_acc/p_o_top_jacket_chan/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 1331888
+    },
+    {
+      "archive": "mods/Sideloader Modpack/viNovel/[viNovel] Leopard_Yoru_No_Yatterman_1 v1.0.zipmod",
+      "entry": "abdata/chara/Cz/6.fbx",
+      "ext": ".fbx",
+      "bytes": 1417020
+    },
+    {
+      "archive": "mods/Sideloader Modpack/viNovel/[viNovel] jil_valentine_remake1 v1.0.zipmod",
+      "entry": "abdata/chara/Cz/jil_valentine_remake/jil_valentine_remake_hat/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 46864
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip.fbx",
+      "ext": ".fbx",
+      "bytes": 236524
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip1009.fbx",
+      "ext": ".fbx",
+      "bytes": 242844
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip2.fbx",
+      "ext": ".fbx",
+      "bytes": 237148
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip3.fbx",
+      "ext": ".fbx",
+      "bytes": 236556
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip334.fbx",
+      "ext": ".fbx",
+      "bytes": 237980
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip34.fbx",
+      "ext": ".fbx",
+      "bytes": 237292
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip99.fbx",
+      "ext": ".fbx",
+      "bytes": 238636
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflipw332.fbx",
+      "ext": ".fbx",
+      "bytes": 237980
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 219936
+    }
+  ],
+  "archiveErrors": [],
+  "vrSerializedAssets": [
+    "KoikatsuSunshine_VR_Data/globalgamemanagers",
+    "KoikatsuSunshine_VR_Data/sharedassets0.assets",
+    "KoikatsuSunshine_VR_Data/globalgamemanagers.assets",
+    "KoikatsuSunshine_VR_Data/level5",
+    "KoikatsuSunshine_VR_Data/level4",
+    "KoikatsuSunshine_VR_Data/level0",
+    "KoikatsuSunshine_VR_Data/sharedassets5.assets",
+    "KoikatsuSunshine_VR_Data/sharedassets3.assets",
+    "KoikatsuSunshine_VR_Data/level3",
+    "KoikatsuSunshine_VR_Data/level2",
+    "KoikatsuSunshine_VR_Data/sharedassets4.assets",
+    "KoikatsuSunshine_VR_Data/level1",
+    "KoikatsuSunshine_VR_Data/resources.assets",
+    "KoikatsuSunshine_VR_Data/sharedassets2.assets",
+    "KoikatsuSunshine_VR_Data/sharedassets1.assets"
+  ]
+}

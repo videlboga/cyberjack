@@ -1,0 +1,12 @@
+{
+  "id": "80bda99772567992c53b6e9e",
+  "name": "p_item_rotor_L",
+  "kind": "item",
+  "source": "h/common/71.unity3d",
+  "sourceIdentity": "CAB-7d0d7ef6d3a34d95c038c33b2feb87f0:-4847326567719446031",
+  "native": "native/80bda99772567992c53b6e9e.json.gz",
+  "nodes": 4,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_item_rotor_L-80bda99772567992c53b6e9e.glb"
+}

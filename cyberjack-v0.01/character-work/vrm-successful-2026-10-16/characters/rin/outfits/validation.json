@@ -1,0 +1,801 @@
+[
+  {
+    "file": "outputs/rin_four_outfits/Rin_outfit_00.vrm",
+    "bytes": 75031532,
+    "errors": 0,
+    "warnings": 27,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_materials_mtoon'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/2"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_vrm'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/3"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_springBone'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/4"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/0/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/1/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/2/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/3/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/4/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/5/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/6/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/7/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/8/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/9/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/10/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/11/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/12/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/13/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/14/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/15/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/16/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/17/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/18/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/19/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/20/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/21/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/22/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/9/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/10/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/1/primitives/3/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/2/primitives/0/material"
+      }
+    ],
+    "nodes": 939,
+    "meshes": 3,
+    "images": 53,
+    "embeddedImages": true,
+    "humanoid": 54,
+    "springs": 12,
+    "colliders": 41,
+    "meshNames": [
+      "Body 春野千佳",
+      "Hair Outfit 00 春野千佳",
+      "Outfit 00 春野千佳"
+    ]
+  },
+  {
+    "file": "outputs/rin_four_outfits/Rin_outfit_01.vrm",
+    "bytes": 78924108,
+    "errors": 0,
+    "warnings": 23,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_materials_mtoon'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/2"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_vrm'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/3"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_springBone'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/4"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/0/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/1/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/2/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/3/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/4/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/5/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/6/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/7/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/8/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/9/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/10/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/11/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/12/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/13/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/14/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/15/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/16/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/17/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/9/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/10/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/1/primitives/3/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/2/primitives/0/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/2/primitives/1/material"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/7"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/9"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/11"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/13"
+      }
+    ],
+    "nodes": 931,
+    "meshes": 3,
+    "images": 41,
+    "embeddedImages": true,
+    "humanoid": 54,
+    "springs": 4,
+    "colliders": 37,
+    "meshNames": [
+      "Body 春野千佳",
+      "Hair Outfit 01 春野千佳",
+      "Outfit 01 春野千佳"
+    ]
+  },
+  {
+    "file": "outputs/rin_four_outfits/Rin_outfit_02.vrm",
+    "bytes": 71626596,
+    "errors": 0,
+    "warnings": 25,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_materials_mtoon'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/2"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_vrm'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/3"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_springBone'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/4"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/0/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/1/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/2/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/3/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/4/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/5/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/6/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/7/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/8/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/9/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/10/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/11/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/12/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/13/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/14/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/15/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/16/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/17/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/18/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/9/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/10/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/1/primitives/3/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/2/primitives/0/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/2/primitives/1/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/2/primitives/2/material"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/7"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/9"
+      }
+    ],
+    "nodes": 931,
+    "meshes": 3,
+    "images": 44,
+    "embeddedImages": true,
+    "humanoid": 54,
+    "springs": 4,
+    "colliders": 37,
+    "meshNames": [
+      "Body 春野千佳",
+      "Hair Outfit 02 春野千佳",
+      "Outfit 02 春野千佳"
+    ]
+  },
+  {
+    "file": "outputs/rin_four_outfits/Rin_outfit_03.vrm",
+    "bytes": 69060616,
+    "errors": 0,
+    "warnings": 19,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_materials_mtoon'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/2"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_vrm'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/3"
+      },
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'VRMC_springBone'.",
+        "severity": 2,
+        "pointer": "/extensionsUsed/4"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/0/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/1/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/2/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/3/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/4/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/5/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/6/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/7/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/8/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/9/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/10/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/11/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/12/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/13/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/14/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MULTIPLE_EXTENSIONS",
+        "message": "This extension may be incompatible with other extensions for the object.",
+        "severity": 1,
+        "pointer": "/materials/15/extensions/KHR_materials_unlit"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/9/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/0/primitives/10/material"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "severity": 1,
+        "pointer": "/meshes/1/primitives/3/material"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/7"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/9"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/11"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/13"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/15"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/17"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/19"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/accessors/21"
+      }
+    ],
+    "nodes": 930,
+    "meshes": 2,
+    "images": 35,
+    "embeddedImages": true,
+    "humanoid": 54,
+    "springs": 4,
+    "colliders": 37,
+    "meshNames": [
+      "Body 春野千佳",
+      "Hair Outfit 03 春野千佳"
+    ]
+  }
+]

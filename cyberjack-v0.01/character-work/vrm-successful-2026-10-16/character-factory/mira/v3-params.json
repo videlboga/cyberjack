@@ -1,0 +1,24 @@
+{
+ "height_cm": 154.3,
+ "leg": 1.06,
+ "torso": 1.03,
+ "shoulder": 0.96,
+ "head": 0.93,
+ "bust": 0.78,
+ "keys": {
+  "B": 1.0,
+  "HipSize": 0.0,
+  "GlutesSize": 0.0,
+  "ThighsSize": 0.0,
+  "ShinsSize": 0.0,
+  "Abs": 0.3,
+  "Thigh Choke": 0.35,
+  "Butt fix": 0.0,
+  "BreastsSize": 0.0,
+  "BreastsDiameter": 0.0,
+  "BreastsImplants": 0.0,
+  "BreastsCleavage": 0.0,
+  "BreastShape08": 0.0,
+  "Neck Fix": 0.0
+ }
+}

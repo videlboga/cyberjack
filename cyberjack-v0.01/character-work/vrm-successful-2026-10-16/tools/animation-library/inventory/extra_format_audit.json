@@ -1,0 +1,567 @@
+{
+  "fbxFiles": [
+    {
+      "archive": "mods/Sideloader Modpack/JM/[jm] elysia v0.9.zipmod",
+      "entry": "abdata/chara/elysia_hair/p_acs_hair5/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 57824,
+      "objects": {
+        "NodeAttribute": 9,
+        "Geometry": 1,
+        "Model": 10,
+        "Pose": 1,
+        "Material": 1,
+        "Deformer": 5,
+        "Video": 1,
+        "Texture": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/murara/[murara] Rhodes_Jacket v1.0.zipmod",
+      "entry": "abdata/chara/jacket_acc/p_o_top_jacket_chan/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 1331888,
+      "objects": {
+        "NodeAttribute": 86,
+        "Geometry": 1,
+        "Model": 87,
+        "Pose": 1,
+        "Material": 1,
+        "Deformer": 33,
+        "Video": 1,
+        "Texture": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/viNovel/[viNovel] Leopard_Yoru_No_Yatterman_1 v1.0.zipmod",
+      "entry": "abdata/chara/Cz/6.fbx",
+      "ext": ".fbx",
+      "bytes": 1417020,
+      "objects": {
+        "NodeAttribute": 345,
+        "Geometry": 4,
+        "Model": 349,
+        "Pose": 4,
+        "Deformer": 84,
+        "Material": 4,
+        "Texture": 1,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/viNovel/[viNovel] jil_valentine_remake1 v1.0.zipmod",
+      "entry": "abdata/chara/Cz/jil_valentine_remake/jil_valentine_remake_hat/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 46864,
+      "objects": {
+        "NodeAttribute": 4,
+        "Geometry": 1,
+        "Model": 5,
+        "Pose": 1,
+        "Material": 1,
+        "Video": 1,
+        "Texture": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip.fbx",
+      "ext": ".fbx",
+      "bytes": 236524,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip1009.fbx",
+      "ext": ".fbx",
+      "bytes": 242844,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip2.fbx",
+      "ext": ".fbx",
+      "bytes": 237148,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 2,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip3.fbx",
+      "ext": ".fbx",
+      "bytes": 236556,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip334.fbx",
+      "ext": ".fbx",
+      "bytes": 237980,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip34.fbx",
+      "ext": ".fbx",
+      "bytes": 237292,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflip99.fbx",
+      "ext": ".fbx",
+      "bytes": 238636,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/anneflipw332.fbx",
+      "ext": ".fbx",
+      "bytes": 237980,
+      "objects": {
+        "NodeAttribute": 15,
+        "Geometry": 2,
+        "Model": 17,
+        "Pose": 2,
+        "Deformer": 30,
+        "Material": 2,
+        "Texture": 4,
+        "Video": 1
+      },
+      "hasAnimation": false
+    },
+    {
+      "archive": "mods/Sideloader Modpack/Misc/[Misc] AnnHairFlipped.zipmod",
+      "entry": "abdata/chara/mt_mask_body_22/p_acs_gf_ann_hair/meshes0.fbx",
+      "ext": ".fbx",
+      "bytes": 219936,
+      "objects": {
+        "NodeAttribute": 14,
+        "Geometry": 2,
+        "Model": 16,
+        "Pose": 1,
+        "Material": 2,
+        "Deformer": 14,
+        "Video": 1,
+        "Texture": 1
+      },
+      "hasAnimation": false
+    }
+  ],
+  "vrAssets": [
+    {
+      "source": "KoikatsuSunshine_VR_Data/globalgamemanagers",
+      "category": "vr-player-data",
+      "bytes": 373484,
+      "types": {
+        "PlayerSettings": 1,
+        "InputManager": 1,
+        "TagManager": 1,
+        "AudioManager": 1,
+        "ScriptMapper": 1,
+        "MonoManager": 1,
+        "GraphicsSettings": 1,
+        "TimeManager": 1,
+        "DelayedCallManager": 1,
+        "PhysicsManager": 1,
+        "BuildSettings": 1,
+        "QualitySettings": 1,
+        "ResourceManager": 1,
+        "NavMeshProjectSettings": 1,
+        "Physics2DSettings": 1,
+        "RuntimeInitializeOnLoadManager": 1,
+        "StreamingManager": 1,
+        "VFXManager": 1
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/sharedassets0.assets",
+      "category": "vr-player-data",
+      "bytes": 11872,
+      "types": {
+        "PreloadData": 1,
+        "Material": 1,
+        "Shader": 1
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/globalgamemanagers.assets",
+      "category": "vr-player-data",
+      "bytes": 1430932,
+      "types": {
+        "PreloadData": 1,
+        "Material": 1,
+        "Texture2D": 1,
+        "Shader": 22,
+        "MonoScript": 4825
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/level5",
+      "category": "vr-player-data",
+      "bytes": 12424,
+      "types": {
+        "Cubemap": 1,
+        "LightProbes": 1,
+        "GameObject": 14,
+        "Transform": 2,
+        "Camera": 1,
+        "Rigidbody": 1,
+        "BoxCollider": 1,
+        "Animator": 1,
+        "RenderSettings": 1,
+        "LightmapSettings": 1,
+        "NavMeshSettings": 1,
+        "CanvasRenderer": 8,
+        "Canvas": 1,
+        "RectTransform": 12,
+        "CanvasGroup": 1,
+        "MonoBehaviour": 31
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/level4",
+      "category": "vr-player-data",
+      "bytes": 786092,
+      "types": {
+        "Material": 1,
+        "Cubemap": 1,
+        "LightProbes": 1,
+        "GameObject": 1161,
+        "Transform": 118,
+        "Camera": 3,
+        "MeshRenderer": 10,
+        "MeshFilter": 10,
+        "Rigidbody": 4,
+        "MeshCollider": 6,
+        "BoxCollider": 4,
+        "Animator": 23,
+        "RenderSettings": 1,
+        "Light": 1,
+        "FlareLayer": 1,
+        "SphereCollider": 1,
+        "SkinnedMeshRenderer": 4,
+        "LightmapSettings": 1,
+        "NavMeshSettings": 1,
+        "CanvasRenderer": 849,
+        "Canvas": 5,
+        "RectTransform": 1043,
+        "CanvasGroup": 1,
+        "MonoBehaviour": 1911
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/level0",
+      "category": "vr-player-data",
+      "bytes": 4888,
+      "types": {
+        "Cubemap": 1,
+        "LightProbes": 1,
+        "GameObject": 1,
+        "Transform": 1,
+        "RenderSettings": 1,
+        "LightmapSettings": 1,
+        "NavMeshSettings": 1,
+        "MonoBehaviour": 1
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/sharedassets5.assets",
+      "category": "vr-player-data",
+      "bytes": 8796,
+      "types": {
+        "PreloadData": 1,
+        "Texture2D": 6,
+        "Sprite": 6
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/sharedassets3.assets",
+      "category": "vr-player-data",
+      "bytes": 44120,
+      "types": {
+        "PreloadData": 1,
+        "Material": 10,
+        "Texture2D": 29,
+        "Sprite": 29
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/level3",
+      "category": "vr-player-data",
+      "bytes": 327244,
+      "types": {
+        "Cubemap": 1,
+        "LightProbes": 1,
+        "GameObject": 625,
+        "Transform": 88,
+        "Camera": 2,
+        "MeshRenderer": 2,
+        "MeshFilter": 2,
+        "Rigidbody": 3,
+        "BoxCollider": 3,
+        "Animator": 2,
+        "RenderSettings": 1,
+        "Light": 1,
+        "FlareLayer": 1,
+        "SkinnedMeshRenderer": 4,
+        "LightmapSettings": 1,
+        "NavMeshSettings": 1,
+        "CanvasRenderer": 455,
+        "Canvas": 5,
+        "RectTransform": 537,
+        "CanvasGroup": 1,
+        "MonoBehaviour": 744
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/level2",
+      "category": "vr-player-data",
+      "bytes": 50340,
+      "types": {
+        "Cubemap": 1,
+        "LightProbes": 1,
+        "GameObject": 123,
+        "Transform": 88,
+        "Camera": 2,
+        "MeshRenderer": 2,
+        "MeshFilter": 2,
+        "Rigidbody": 3,
+        "BoxCollider": 3,
+        "Animator": 2,
+        "RenderSettings": 1,
+        "Light": 1,
+        "FlareLayer": 1,
+        "SkinnedMeshRenderer": 4,
+        "LightmapSettings": 1,
+        "NavMeshSettings": 1,
+        "CanvasRenderer": 27,
+        "Canvas": 5,
+        "RectTransform": 35,
+        "CanvasGroup": 1,
+        "MonoBehaviour": 100
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/sharedassets4.assets",
+      "category": "vr-player-data",
+      "bytes": 318780,
+      "types": {
+        "PreloadData": 1,
+        "Material": 14,
+        "Texture2D": 157,
+        "Mesh": 3,
+        "Shader": 2,
+        "AnimationClip": 3,
+        "AnimatorController": 1,
+        "Sprite": 156,
+        "GameObject": 1,
+        "Transform": 1,
+        "MeshRenderer": 1,
+        "MeshFilter": 1,
+        "SphereCollider": 1,
+        "MonoBehaviour": 4
+      },
+      "clipCount": 3,
+      "bundle": "__playerdata/KoikatsuSunshine_VR_Data/sharedassets4.assets",
+      "extractedPath": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/animation-library/inventory/supplemental-sources/__playerdata/KoikatsuSunshine_VR_Data/sharedassets4.assets",
+      "clips": [
+        "178",
+        "179",
+        "180"
+      ]
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/level1",
+      "category": "vr-player-data",
+      "bytes": 37020,
+      "types": {
+        "Cubemap": 1,
+        "LightProbes": 1,
+        "GameObject": 102,
+        "Transform": 87,
+        "Camera": 2,
+        "MeshRenderer": 3,
+        "MeshFilter": 3,
+        "Rigidbody": 2,
+        "BoxCollider": 2,
+        "Animator": 2,
+        "RenderSettings": 1,
+        "Light": 1,
+        "FlareLayer": 1,
+        "SkinnedMeshRenderer": 4,
+        "LightmapSettings": 1,
+        "NavMeshSettings": 1,
+        "CanvasRenderer": 10,
+        "Canvas": 5,
+        "RectTransform": 15,
+        "CanvasGroup": 1,
+        "MonoBehaviour": 66
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/resources.assets",
+      "category": "vr-player-data",
+      "bytes": 9071608,
+      "types": {
+        "Material": 48,
+        "Texture2D": 28,
+        "Mesh": 38,
+        "Shader": 106,
+        "TextAsset": 2,
+        "ComputeShader": 1,
+        "AnimationClip": 2,
+        "Avatar": 4,
+        "AnimatorController": 2,
+        "Font": 1,
+        "Sprite": 23,
+        "GameObject": 728,
+        "Transform": 523,
+        "Camera": 1,
+        "MeshRenderer": 76,
+        "MeshFilter": 77,
+        "BoxCollider": 23,
+        "Animator": 16,
+        "SphereCollider": 2,
+        "CapsuleCollider": 8,
+        "SkinnedMeshRenderer": 14,
+        "CanvasRenderer": 177,
+        "Canvas": 2,
+        "RectTransform": 205,
+        "CanvasGroup": 1,
+        "MonoBehaviour": 378
+      },
+      "clipCount": 2,
+      "bundle": "__playerdata/KoikatsuSunshine_VR_Data/resources.assets",
+      "extractedPath": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/animation-library/inventory/supplemental-sources/__playerdata/KoikatsuSunshine_VR_Data/resources.assets",
+      "clips": [
+        "224",
+        "225"
+      ]
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/sharedassets2.assets",
+      "category": "vr-player-data",
+      "bytes": 1904380,
+      "types": {
+        "PreloadData": 1,
+        "Material": 3,
+        "Texture2D": 7,
+        "Font": 1,
+        "Sprite": 6,
+        "GameObject": 4,
+        "Transform": 4,
+        "BoxCollider": 2
+      },
+      "clipCount": 0
+    },
+    {
+      "source": "KoikatsuSunshine_VR_Data/sharedassets1.assets",
+      "category": "vr-player-data",
+      "bytes": 1095020,
+      "types": {
+        "PreloadData": 1,
+        "Material": 6,
+        "Texture2D": 9,
+        "Mesh": 2,
+        "Shader": 15,
+        "AnimationClip": 2,
+        "Avatar": 2,
+        "AnimatorController": 2,
+        "Sprite": 3,
+        "MonoBehaviour": 1
+      },
+      "clipCount": 2,
+      "bundle": "__playerdata/KoikatsuSunshine_VR_Data/sharedassets1.assets",
+      "extractedPath": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/animation-library/inventory/supplemental-sources/__playerdata/KoikatsuSunshine_VR_Data/sharedassets1.assets",
+      "clips": [
+        "34",
+        "35"
+      ]
+    }
+  ]
+}

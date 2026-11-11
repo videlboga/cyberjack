@@ -1,0 +1,153 @@
+{
+ "note": "VRM-выражения, собранные из атомарных ключей Koikatsu",
+ "expressions": {
+  "VRM_A": {
+   "sources": [
+    [
+     "vrc.v_aa",
+     1.0
+    ]
+   ],
+   "max_mm": 11.24
+  },
+  "VRM_I": {
+   "sources": [
+    [
+     "vrc.v_ih",
+     1.0
+    ]
+   ],
+   "max_mm": 5.53
+  },
+  "VRM_U": {
+   "sources": [
+    [
+     "vrc.v_ou",
+     1.0
+    ]
+   ],
+   "max_mm": 11.26
+  },
+  "VRM_E": {
+   "sources": [
+    [
+     "vrc.v_e",
+     1.0
+    ]
+   ],
+   "max_mm": 5.42
+  },
+  "VRM_O": {
+   "sources": [
+    [
+     "vrc.v_oh",
+     1.0
+    ]
+   ],
+   "max_mm": 11.25
+  },
+  "VRM_Blink": {
+   "sources": [
+    [
+     "00_Ani_CloseEye",
+     1.0
+    ]
+   ],
+   "max_mm": 18.79
+  },
+  "VRM_Joy": {
+   "sources": [
+    [
+     "Mouth_00_Smile04",
+     1.0
+    ],
+    [
+     "Eye_00_Gentle01",
+     0.7
+    ],
+    [
+     "Brow_00_Gentle",
+     0.5
+    ]
+   ],
+   "max_mm": 10.22
+  },
+  "VRM_Angry": {
+   "sources": [
+    [
+     "Mouth_00_Angry04",
+     0.8
+    ],
+    [
+     "Eye_00_Angry01",
+     0.8
+    ],
+    [
+     "Brow_00_Angry",
+     0.8
+    ]
+   ],
+   "max_mm": 9.35
+  },
+  "VRM_Sorrow": {
+   "sources": [
+    [
+     "Mouth_00_Worry02",
+     0.8
+    ],
+    [
+     "Eye_00_Doubt01",
+     0.6
+    ],
+    [
+     "Brow_00_Trouble",
+     0.8
+    ]
+   ],
+   "max_mm": 7.31
+  },
+  "VRM_Fun": {
+   "sources": [
+    [
+     "Mouth_00_Smile04",
+     0.7
+    ],
+    [
+     "Eye_00_Gentle02",
+     1.0
+    ],
+    [
+     "Brow_00_Up",
+     0.3
+    ]
+   ],
+   "max_mm": 10.13
+  },
+  "VRM_Neutral": {
+   "sources": [],
+   "max_mm": 0.0
+  },
+  "VRM_Blink_L": {
+   "sources": [
+    [
+     "00_Ani_CloseEye",
+     1.0
+    ]
+   ],
+   "mask": "x>центр",
+   "vertices": 1013,
+   "max_mm": 18.79
+  },
+  "VRM_Blink_R": {
+   "sources": [
+    [
+     "00_Ani_CloseEye",
+     1.0
+    ]
+   ],
+   "mask": "x<центр",
+   "vertices": 1020,
+   "max_mm": 18.79
+  }
+ }
+}

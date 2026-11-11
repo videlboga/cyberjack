@@ -1,0 +1,5 @@
+import assert from 'node:assert/strict';import {summarizeEffect,poseRms,effectPositions} from '../review/correction-effect.mjs';import {Matrix4,Quaternion,Vector3} from 'three';
+const a=[0,0,0,0,1,0,1,0,0,1,1,0];assert(!summarizeEffect([{before:a,after:[...a]}],1.5).visible);
+const b=[...a];b[4]+=.2;b[10]+=.2;const effect=summarizeEffect([{before:a,after:b}],1.5);assert(effect.visible);assert(Math.abs(effect.leftWristMeters-.2)<1e-9);assert(Math.abs(effect.rightWristMeters-.2)<1e-9);assert(poseRms(b,[...b],1.5)<.012);
+const names=['forearm01_L','hand_L','forearm01_R','hand_R'],mixer={index:new Map(names.map((n,i)=>['cf_j_'+n,i]))},pose=names.map((_,i)=>({world:new Matrix4().makeTranslation(...a.slice(i*3,i*3+3)),q:new Quaternion()})),before=effectPositions(mixer,pose);for(const p of pose)p.q.setFromAxisAngle(new Vector3(0,1,0),Math.PI);assert(!summarizeEffect([{before,after:effectPositions(mixer,pose)}],1.5).visible,'Local twists without elbow/wrist travel must not count as visible corrections');
+console.log('PASS visible endpoint motion, no-op/twist rejection, near-identical effect distance, centimeter reporting');

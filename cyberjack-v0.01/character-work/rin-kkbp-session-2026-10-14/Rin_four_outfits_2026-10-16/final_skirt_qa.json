@@ -1,0 +1,30 @@
+[
+  {
+    "id": "Idle_00_00",
+    "finite": true
+  },
+  {
+    "id": "Stand_00_00",
+    "finite": true
+  },
+  {
+    "id": "Stand_01_00",
+    "finite": true
+  },
+  {
+    "id": "Stand_03_00",
+    "finite": true
+  },
+  {
+    "id": "Stand_07_00",
+    "finite": true
+  },
+  {
+    "id": "Stand_17_00",
+    "finite": true
+  },
+  {
+    "id": "Stand_Joy_01",
+    "finite": true
+  }
+]

@@ -1,0 +1,7 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import {createMixer} from '../review/mix-core.mjs';
+const bank=JSON.parse(fs.readFileSync(import.meta.dirname+'/../data/mix-bank.json')),m=createMixer(bank),config={recipe:'raise',base:'sitting',mask:'right',shoulder:true,fingers:'donor',weight:1,torso:0,blendIn:.5,blendOut:.5,holdLoops:1};
+for(const base of ['sitting','standing','lying'])for(const mask of ['right','both'])for(const torso of [0,.3,1])for(let t=0;t<=8;t+=.13){const p=m.evaluate(t,{...config,base,mask,torso});assert(p.legDelta<1e-10,'leg support changed');assert(p.mixed.every(n=>n.q.toArray().every(Number.isFinite)));assert(p.weight>=0&&p.weight<=1)}
+for(const t of [0,m.duration(config)])assert.equal(m.evaluate(t,config).weight,0);
+const p=m.evaluate(2,{...config,weight:0});for(let i=0;i<m.rig.length;i++)assert.deepEqual(p.base[i].q.toArray(),p.mixed[i].q.toArray());
+const p2=m.evaluate(2,{...config,blendIn:0,blendOut:0});for(const n of ['cf_j_arm00_R','cf_j_forearm01_R','cf_j_hand_R']){const i=m.index.get(n);assert.deepEqual(p2.mixed[i].q.toArray(),p2.donor[i].q.toArray())}
+const c1=m.evaluate(bank.clips.raiseIn.duration-.0001,config).mixed.map(n=>n.q.clone()),c2=m.evaluate(bank.clips.raiseIn.duration+.0001,config).mixed;const error=Math.max(...c2.map((n,i)=>n.q.angleTo(c1[i])));assert(error<.01);console.log('PASS 3 bases × 2 masks × 3 torso weights; preserved pelvis/legs, finite rotations, envelope, donor chain, sequence continuity');

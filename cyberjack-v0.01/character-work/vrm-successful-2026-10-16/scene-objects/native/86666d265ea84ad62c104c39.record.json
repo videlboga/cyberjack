@@ -1,0 +1,12 @@
+{
+  "id": "86666d265ea84ad62c104c39",
+  "name": "HPoint_18",
+  "kind": "placement",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:-3824223176914976540",
+  "native": "native/86666d265ea84ad62c104c39.json.gz",
+  "nodes": 41,
+  "meshes": 12,
+  "skins": 0,
+  "model": "models/HPoint_18-86666d265ea84ad62c104c39.glb"
+}

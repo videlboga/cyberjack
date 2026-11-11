@@ -1,0 +1,22 @@
+[
+  {
+    "file": "sumi+head+hair.glb",
+    "bytes": 68017856,
+    "sha256": "111a032dcd04e68c46ab131a53a1643994caa60b4b0030d7e3df80081116710f"
+  },
+  {
+    "file": "Sumi+T.glb",
+    "bytes": 6229768,
+    "sha256": "9e0015042f09a2eccd54fe92178c190e74a8e4051bb946a9d27e8d7f8db6707e"
+  },
+  {
+    "file": "Sumi+head.glb",
+    "bytes": 57533264,
+    "sha256": "1513ee2a79501b1b2b354ff8ce31158b3345f1e765a7e36995997e0f3f9baf79"
+  },
+  {
+    "file": "Sumi+nude.glb",
+    "bytes": 3485900,
+    "sha256": "f6830a3fbddfa17d9d9456076459b94693ede2eea95259390e3ae561d65f0755"
+  }
+]

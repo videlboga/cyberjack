@@ -1,0 +1,12 @@
+{
+  "id": "25b580615b0fc512425db8b7",
+  "name": "p_o_kois_ei_tabletennis_racket (3)",
+  "kind": "furniture",
+  "source": "map/scene/gassyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuLobby:436",
+  "native": "native/25b580615b0fc512425db8b7.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_o_kois_ei_tabletennis_racket_3_-25b580615b0fc512425db8b7.glb"
+}

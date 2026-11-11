@@ -1,0 +1,12 @@
+{
+  "id": "1f164fe8ba28a3e65032f30c",
+  "name": "p_ks_r01_chair01 (1)",
+  "kind": "furniture",
+  "source": "map/scene/hukuya.unity3d",
+  "sourceIdentity": "BuildPlayer-Hukuya:202",
+  "native": "native/1f164fe8ba28a3e65032f30c.json.gz",
+  "nodes": 2,
+  "meshes": 2,
+  "skins": 0,
+  "model": "models/p_ks_r01_chair01_1_-1f164fe8ba28a3e65032f30c.glb"
+}

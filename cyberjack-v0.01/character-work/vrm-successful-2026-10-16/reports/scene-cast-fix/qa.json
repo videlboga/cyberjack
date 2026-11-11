@@ -1,0 +1,143 @@
+{
+  "result": {
+    "scene": "f474515fcfe3d19ce45c646c:3",
+    "kai": {
+      "state": {
+        "active": true,
+        "paused": false,
+        "cast": [
+          {
+            "role": "male",
+            "character": "kai",
+            "main": true,
+            "label": "Kai · мужская роль",
+            "controller": "70a3c2ad404ee36f3d6122cd"
+          },
+          {
+            "role": "female",
+            "character": "rin",
+            "main": false,
+            "label": "Rin · основная женская роль",
+            "controller": "2e246ea6d854c291311e85d2"
+          },
+          {
+            "role": "second",
+            "character": "mira",
+            "main": false,
+            "label": "Mira · третья роль",
+            "controller": "ea143bcf390926880ef441a0"
+          }
+        ],
+        "castMode": "cast",
+        "face": {
+          "active": false,
+          "profile": "kai"
+        },
+        "scene": "f474515fcfe3d19ce45c646c:3",
+        "sceneName": "後背位手マン入れ替え",
+        "controller": "70a3c2ad404ee36f3d6122cd",
+        "body": true,
+        "tongue": false,
+        "elapsed": 0.24999999999999997,
+        "machines": [
+          {
+            "controller": "70a3c2ad404ee36f3d6122cd",
+            "layer": 0,
+            "state": "L_WLoop1",
+            "elapsed": 0.24999999999999997,
+            "transition": null,
+            "history": []
+          },
+          {
+            "controller": "2e246ea6d854c291311e85d2",
+            "layer": 0,
+            "state": "L_WLoop1",
+            "elapsed": 0.24999999999999997,
+            "transition": null,
+            "history": []
+          },
+          {
+            "controller": "ea143bcf390926880ef441a0",
+            "layer": 0,
+            "state": "L_WLoop1",
+            "elapsed": 0.24999999999999997,
+            "transition": null,
+            "history": []
+          }
+        ]
+      },
+      "actors": [
+        {
+          "role": "female",
+          "name": "Rin · Outfit 00"
+        },
+        {
+          "role": "second",
+          "name": "Mira · Outfit 00"
+        }
+      ],
+      "status": "Загружено 3 из 3 · вся сцена\nKai · мужская роль\nRin · основная женская роль\nMira · третья роль",
+      "controller": "khs3_m_01"
+    }
+  },
+  "next": {
+    "solo": {
+      "count": 1,
+      "actors": 0,
+      "main": {
+        "role": "male",
+        "character": "kai",
+        "main": true,
+        "label": "Kai · мужская роль",
+        "controller": "70a3c2ad404ee36f3d6122cd"
+      },
+      "status": "Загружено 1 из 1 · одиночный просмотр роли\nKai · мужская роль"
+    },
+    "rin": {
+      "cast": [
+        {
+          "role": "female",
+          "character": "rin",
+          "main": true,
+          "label": "Rin · основная женская роль",
+          "controller": "420a86998bcb4e6a3336fbd7"
+        },
+        {
+          "role": "male",
+          "character": "kai",
+          "main": false,
+          "label": "Kai · мужская роль",
+          "controller": "cdce4ae1e1e8550a321cb6d8"
+        },
+        {
+          "role": "second",
+          "character": "mira",
+          "main": false,
+          "label": "Mira · третья роль",
+          "controller": "15ac9d86bfdc6c29fbd6d364"
+        }
+      ],
+      "actors": 2
+    },
+    "pair": {
+      "cast": [
+        {
+          "role": "female",
+          "character": "rin",
+          "main": true,
+          "label": "Rin · основная женская роль",
+          "controller": "15274d60622dc4263bac5245"
+        },
+        {
+          "role": "male",
+          "character": "kai",
+          "main": false,
+          "label": "Kai · мужская роль",
+          "controller": "e47c8115bffde09cbef5d7a6"
+        }
+      ],
+      "actors": 1
+    }
+  },
+  "errors": []
+}

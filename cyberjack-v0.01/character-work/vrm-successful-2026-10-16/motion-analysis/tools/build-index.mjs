@@ -1,0 +1,20 @@
+import {completeDescriptor} from './descriptor-summary.mjs';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {spawn} from 'node:child_process';import {VERSION} from './geometry.mjs';
+const here=import.meta.dirname,root=path.resolve(here,'../..'),out=path.resolve(here,'../data');const workers=Number(process.env.MOTION_WORKERS||4),limit=process.env.MOTION_LIMIT||'';fs.mkdirSync(out,{recursive:true});const started=new Date().toISOString();
+const hash=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');const provenance={version:VERSION,started,catalogSha256:hash(root+'/animations/catalog.json'),rigSha256:hash(root+'/animations/source_rigs.json'),analyzerSha256:hash(here+'/geometry.mjs'),classificationSha256:hash(here+'/classification.mjs'),descriptorSummarySha256:hash(here+'/descriptor-summary.mjs'),limit:limit?Number(limit):null};fs.writeFileSync(out+'/progress.json',JSON.stringify({...provenance,complete:false}));
+await Promise.all(Array.from({length:workers},(_,i)=>new Promise((resolve,reject)=>{const p=spawn(process.execPath,[here+'/worker.mjs',String(i),String(workers),limit],{stdio:'inherit'});p.on('exit',code=>code===0?resolve():reject(Error('worker '+i+' exit '+code)))})));
+const latest=new Map();for(let i=0;i<workers;i++)for(const line of fs.readFileSync(out+'/scan-'+i+'.jsonl','utf8').split('\n')){try{const r=JSON.parse(line);if(r.version===VERSION)latest.set(r.id,r)}catch{}}
+const catalog=JSON.parse(fs.readFileSync(root+'/animations/catalog.json')).clips.slice(0,limit?Number(limit):undefined),ru=JSON.parse(fs.readFileSync(root+'/animations/ru_names.json')).names||{},organization=JSON.parse(fs.readFileSync(root+'/animations/organization.json'));
+const rows=catalog.map(c=>{const r=latest.get(c.id)||{status:'missing'};const {windows,payloadSha256,mtime,size,version,...summary}=r;if(summary.classification){const {phases,...compact}=summary.classification;summary.classification=completeDescriptor(compact)}return {...summary,id:c.id,name:c.name,title:ru[c.id]||c.name,source:c.source,rig:c.rig,role:organization.items?.[c.id]?.role||'unverified',duration:c.duration}});
+const counts={};for(const r of rows)counts[r.status]=(counts[r.status]||0)+1;
+const groups=new Map();for(const r of rows.filter(r=>r.status==='ok'&&r.coverage>=.75)){
+ const c=r.classification,key=c?[c.body.value,c.stance.value,c.legPattern,c.dominantMotion,c.arms.L.position.value,c.arms.R.position.value].join('/'):[r.posture,r.arms,r.rig].join('/');
+ r.cluster=key;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r);
+}
+const vector=r=>r.classification?Object.values(r.classification.activity).map(v=>v.mean).concat(['L','R'].map(s=>r.classification.legs[s].kneeRange/180)):[0];
+const clusters=[...groups.entries()].map(([key,items])=>{
+ const vectors=items.map(vector),median=vectors[0].map((_,i)=>vectors.map(v=>v[i]).sort((a,b)=>a-b)[Math.floor(vectors.length/2)]);
+ const distance=v=>v.reduce((n,x,i)=>n+(x-median[i])**2,0);let best=0;for(let i=1;i<items.length;i++)if(distance(vectors[i])<distance(vectors[best]))best=i;
+ return {key,count:items.length,representative:items[best].id,representativeMethod:'nearest-component-median'};
+}).sort((a,b)=>b.count-a.count);
+const manifest={...provenance,completed:new Date().toISOString(),complete:rows.every(r=>r.status!=='missing'),total:rows.length,counts,clusters:clusters.length,objectRigAudit:fs.existsSync(out+'/object-rig-audit.json')?JSON.parse(fs.readFileSync(out+'/object-rig-audit.json')).checked:null,sampling:'8 Hz target; max 241 uniformly spaced samples per clip; short events may be missed; no object geometry or contact IK'};
+for(const [file,value]of [['index.json',rows],['clusters.json',clusters],['manifest.json',manifest]]){fs.writeFileSync(out+'/'+file+'.tmp',JSON.stringify(value));fs.renameSync(out+'/'+file+'.tmp',out+'/'+file)}fs.writeFileSync(out+'/progress.json',JSON.stringify(manifest,null,2));console.log(JSON.stringify(manifest,null,2));

@@ -1,0 +1,12 @@
+{
+  "id": "a258f12909f2a5174ed59d37",
+  "name": "p_item_bananabort",
+  "kind": "item",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:-779897687719023151",
+  "native": "native/a258f12909f2a5174ed59d37.json.gz",
+  "nodes": 2,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_item_bananabort-a258f12909f2a5174ed59d37.glb"
+}

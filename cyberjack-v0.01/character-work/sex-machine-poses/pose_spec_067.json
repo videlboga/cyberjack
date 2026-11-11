@@ -1,0 +1,31 @@
+{
+  "machine": "SexMachineModel-067",
+  "figureIndex": 0,
+  "source": "prepared-2026-10-16/reference-full/SexMachineModel-067.glb node 7 '1.stl', metadata figureReferences[0]",
+  "units": "metres",
+  "spaces": {
+    "machine_glb": "glTF Y-up right-handed, metres; used as-is in viewer",
+    "fig_local": "STL local: +Y along body feet->head (0..0.739), -Z = figure forward (face/toes), +X = figure left",
+    "blender": "Z-up right-handed; VRM armature in metres, T-pose, Hips at z~1.076 (Mira)"
+  },
+  "contacts_machine_world": {
+    "feet": {"min": [0.772, 0.0419, -1.8914], "note": "lowest figure verts; platform top ~0.042"},
+    "hands": {"note": "hands at the two round console ports, figure-local Y~0.55, X +-(0.24..0.28), Z~ -0.36; world: see placement"},
+    "buttocks": {"note": "thigh/pelvis underside rests on platform edge near figure-local Y~0.30, Z~-0.26"}
+  },
+  "target_joints_fig_local": {
+    "ankle":  [0.0, 0.086, 0.07],
+    "knee":   [0.0, 0.187, 0.20],
+    "hip":    [0.0, 0.332, -0.262],
+    "shoulder": [0.0, 0.580, -0.354],
+    "neck":   [0.0, 0.640, -0.357],
+    "headtop":[0.0, 0.720, -0.430],
+    "hand":   [0.0, 0.551, -0.361]
+  },
+  "segment_lengths": {"ankle_knee": 0.165, "knee_hip": 0.484, "hip_shoulder": 0.265, "shoulder_neck": 0.060, "neck_headtop": 0.108},
+  "pose_description": "Kneeling, shins vertical on platform edge, knees forward (+Z fig-local), thighs angled up-back to pelvis; torso folded forward nearly horizontal (hip->neck drifts -Z), head lowered looking down-forward into console; both arms extended forward (-Z) slightly down into console ports; feet plantar on platform, toes pointing back (-Z fig-local = backward).",
+  "ik_targets": {
+    "lfk_basis": "VRM humanoid bones: hips, spine, chest, upperChest, neck, head, left/rightShoulder, left/rightUpperArm, left/rightLowerArm, left/rightHand, left/rightUpperLeg, left/rightLowerLeg, left/rightFoot, left/rightToes",
+    "method": "Two-bone IK per limb in Blender pose mode using pole targets; spine chain FK; then bake to pose bones; export VRM with rest = current pose via VRM addon 'pose as rest' or matrix_basis bake."
+  }
+}

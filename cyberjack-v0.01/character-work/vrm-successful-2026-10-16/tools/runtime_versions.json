@@ -1,0 +1,15 @@
+{
+  "blender": "5.2.1 LTS /usr/bin/blender",
+  "three": "0.185.1",
+  "three-vrm": "3.5.4",
+  "addons": {
+    "kkbp": "9.5.0",
+    "vrm": "4.10.2",
+    "mmd_tools": "4.5.14"
+  },
+  "animation_library": {
+    "python": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+    "UnityPy": "1.25.4",
+    "orjson": "3.11.9"
+  }
+}

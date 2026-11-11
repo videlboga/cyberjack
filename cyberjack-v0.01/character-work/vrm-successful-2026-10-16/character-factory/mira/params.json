@@ -1,0 +1,27 @@
+{
+ "params": {
+  "leg_len": 0.75,
+  "knee_frac": null,
+  "torso_len": 1.04,
+  "calf_w": 0.8,
+  "thigh_w": 0.93,
+  "hip_w": 1.55,
+  "waist_w": 0.98,
+  "shoulder_w": 1.4,
+  "calf_d": 1.1,
+  "thigh_d": 1.15,
+  "glute_d": 1.16,
+  "torso_d": 1.08,
+  "bust_d": 1.1,
+  "chest_w": 1.18,
+  "head_w": 1.14
+ },
+ "widths": {
+  "0.26": 0.1295,
+  "0.42": 0.2003,
+  "0.53": 0.4417,
+  "0.825": 0.2246,
+  "0.615": 0.1126
+ },
+ "height_cm": 140.6
+}

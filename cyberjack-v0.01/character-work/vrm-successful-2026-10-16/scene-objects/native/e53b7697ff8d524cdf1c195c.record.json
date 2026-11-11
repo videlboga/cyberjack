@@ -1,0 +1,12 @@
+{
+  "id": "e53b7697ff8d524cdf1c195c",
+  "name": "HPointBase",
+  "kind": "placement",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:3424383376696830695",
+  "native": "native/e53b7697ff8d524cdf1c195c.json.gz",
+  "nodes": 10,
+  "meshes": 3,
+  "skins": 0,
+  "model": "models/HPointBase-e53b7697ff8d524cdf1c195c.glb"
+}

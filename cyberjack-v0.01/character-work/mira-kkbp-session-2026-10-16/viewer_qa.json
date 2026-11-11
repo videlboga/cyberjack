@@ -1,0 +1,113 @@
+{
+  "errors": [],
+  "report": [
+    {
+      "model": "Mira_outfit_00.vrm",
+      "character": "mira",
+      "outfit": "0",
+      "options": [
+        "00 · куртка и шорты",
+        "01 · бельё",
+        "02 · платье",
+        "03 · без одежды"
+      ],
+      "finite": true,
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "model": "Mira_outfit_01.vrm",
+      "character": "mira",
+      "outfit": "1",
+      "options": [
+        "00 · куртка и шорты",
+        "01 · бельё",
+        "02 · платье",
+        "03 · без одежды"
+      ],
+      "finite": true,
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "model": "Mira_outfit_02.vrm",
+      "character": "mira",
+      "outfit": "2",
+      "options": [
+        "00 · куртка и шорты",
+        "01 · бельё",
+        "02 · платье",
+        "03 · без одежды"
+      ],
+      "finite": true,
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "model": "Mira_outfit_03.vrm",
+      "character": "mira",
+      "outfit": "3",
+      "options": [
+        "00 · куртка и шорты",
+        "01 · бельё",
+        "02 · платье",
+        "03 · без одежды"
+      ],
+      "finite": true,
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "rinOptions": [
+        "00 · топ и длинная юбка",
+        "01 · платье",
+        "02 · розовый комплект",
+        "03 · без одежды"
+      ]
+    }
+  ]
+}

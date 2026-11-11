@@ -1,0 +1,11 @@
+{
+  "id": "310acabce154547dc15fdf3a",
+  "name": "p_item_hand",
+  "kind": "item",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:4577309061494617685",
+  "native": "native/310acabce154547dc15fdf3a.json.gz",
+  "nodes": 5,
+  "meshes": 0,
+  "skins": 0
+}

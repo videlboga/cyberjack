@@ -1,0 +1,12 @@
+{
+  "id": "d79231e86bd1a7bd87de88ee",
+  "name": "p_ks_m06_bench00_00",
+  "kind": "furniture",
+  "source": "map/scene/aquariumoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-AquariumOutside:675",
+  "native": "native/d79231e86bd1a7bd87de88ee.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m06_bench00_00-d79231e86bd1a7bd87de88ee.glb"
+}

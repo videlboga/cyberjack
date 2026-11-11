@@ -1,0 +1,22 @@
+schema_version = "1.0.0"
+# https://docs.blender.org/manual/en/latest/advanced/extensions/getting_started.html
+
+id = "kkbp"
+version = "9.5.0"
+# exporter_version = "5.5"
+
+name = "KKBP (Koikatsu Blender Porter)"
+tagline = "Imports Koikatsu models into Blender"
+maintainer = "kkbp-dev"
+type = "add-on"
+website = "https://gitgoon.dev/kkbp-dev/KKBP_Importer"
+tags = ["Import-Export"]
+blender_version_min = "4.5.0"
+license = ["SPDX:MIT"]
+platforms = ["windows-x64", "macos-arm64", "linux-x64"]
+
+#wheel_placeholder
+
+[permissions]
+files = "Imports Koikatsu .pmx models, exports .fbx and texture files"
+network = "Installs pillow package from pypi"

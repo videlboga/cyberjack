@@ -1,0 +1,54 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Сцена с предметом · как это работает</title>
+<script type="importmap">{"imports":{"three":"/vendor/build/three.module.js","three/addons/":"/vendor/examples/jsm/"}}</script>
+<style>
+body{margin:0;font:13px system-ui;background:#f2f4f6;color:#1d2733}
+header{display:flex;gap:12px;align-items:baseline;padding:10px 16px;background:#fff;border-bottom:1px solid #dde3e9}
+h1{font-size:16px;margin:0}
+main{display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 44px)}
+aside{overflow:auto;padding:12px;border-right:1px solid #dde3e9;background:#fff}
+aside h3{margin:12px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#5b6b7c}
+select{width:100%;padding:6px;margin-bottom:8px;font:inherit}
+.prop{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed #e6ebf0}
+.prop span:last-child{color:#40546a;text-align:right}
+.stage{position:relative}
+#viewport{position:absolute;inset:0}
+.transport{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:10px;align-items:center;background:#ffffffe6;border:1px solid #dde3e9;border-radius:8px;padding:8px}
+.transport input[type=range]{flex:1}
+small{color:#5b6b7c}
+</style>
+<header><h1>Сцена с предметом</h1><small id="title">—</small><a href="/" style="margin-left:auto">← классификатор</a></header>
+<main>
+<aside>
+  <h3>Клип персонажа</h3>
+  <select id="char"></select>
+  <div id="meta"></div>
+  <h3>База позы</h3>
+  <select id="baseSelect"></select>
+  <h3>Предмет (из таблицы игры)</h3>
+  <select id="aibuItem"><option value="">— по умолчанию —</option></select>
+  <div id="aibuInfo"></div>
+  <h3>Анимация предмета</h3>
+  <select id="itemClip"></select>
+  <details style="font-size:12px;margin:6px 0">
+    <summary>Ручная подгонка (по умолчанию выключена)</summary>
+    <label style="display:flex;gap:6px;align-items:center;margin:6px 0"><input type="checkbox" id="useTrack" checked> Применять смещение из клипа предмета</label>
+    <input id="offX" type="range" min="-30" max="30" step="0.5" value="0" aria-label="смещение X">
+    <input id="offY" type="range" min="-30" max="30" step="0.5" value="0" aria-label="смещение Y">
+    <input id="offZ" type="range" min="-30" max="30" step="0.5" value="0" aria-label="смещение Z">
+    <input id="itemScale" type="range" min="0.2" max="2" step="0.05" value="1" aria-label="масштаб">
+  </details>
+  <h3>Крепление</h3>
+  <select id="anchor"><option value="waist">Поясница (k_f_kosi02, как в игре)</option><option value="hips">Таз</option><option value="handL">Кисть L</option><option value="handR">Кисть R</option></select>
+  <h3>Вариант клипа</h3>
+  <select id="side"><option value="L">L</option><option value="R">R</option><option value="LR">Оба</option></select>
+  <h3>Парные клипы предмета</h3>
+  <div id="props"></div>
+  <small id="status"></small>
+</aside>
+<section class="stage"><div id="viewport"></div>
+  <div class="transport"><button id="play">Ⅱ</button><input id="timeline" type="range" min="0" max="1.3" step=".001" value="0"><span id="time">0.00 / 1.30 с</span></div>
+</section>
+</main>
+<script type="module" src="/prop.js"></script>
+</body></html>

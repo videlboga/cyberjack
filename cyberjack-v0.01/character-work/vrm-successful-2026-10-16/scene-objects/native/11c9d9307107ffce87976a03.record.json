@@ -1,0 +1,12 @@
+{
+  "id": "11c9d9307107ffce87976a03",
+  "name": "HPoint_3P_6",
+  "kind": "placement",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:6496997153255253007",
+  "native": "native/11c9d9307107ffce87976a03.json.gz",
+  "nodes": 31,
+  "meshes": 9,
+  "skins": 0,
+  "model": "models/HPoint_3P_6-11c9d9307107ffce87976a03.glb"
+}

@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Физика волос — цепочки и пружины</title>
+<style>
+  html,body{margin:0;height:100%;background:#0d0f14;color:#dfe4ee;font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+  #c{position:fixed;inset:0}
+  #panel{position:fixed;top:12px;right:12px;width:270px;background:#161a22ee;border:1px solid #2a3140;border-radius:12px;padding:12px;backdrop-filter:blur(6px)}
+  h1{font-size:13px;margin:0 0 8px;color:#9fb4d8;font-weight:600;letter-spacing:.02em}
+  label{display:block;margin:9px 0 2px;font-size:12px;color:#93a2bd;display:flex;justify-content:space-between}
+  input[type=range]{width:100%;accent-color:#6ea8ff}
+  button{margin:6px 4px 0 0;padding:6px 10px;background:#222a38;color:#dfe4ee;border:1px solid #33405a;border-radius:8px;cursor:pointer;font-size:12px}
+  button:hover{background:#2b3547}
+  button.on{background:#2f5fd0;border-color:#4a7ae0}
+  #stat{position:fixed;left:12px;bottom:12px;font:12px/1.5 ui-monospace,monospace;color:#7f8ea8;white-space:pre}
+  #fps{position:fixed;right:12px;bottom:12px;font:12px ui-monospace,monospace;color:#5f6f88}
+  #err{position:fixed;inset:0;display:none;place-items:center;color:#ff8b8b;padding:20px;text-align:center;background:#0d0f14ee;z-index:9}
+  #load{position:fixed;inset:0;display:grid;place-items:center;color:#8fa6cc;font-size:15px;pointer-events:none;z-index:5}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="panel">
+  <h1>Волосы · исправленная привязка</h1><div style="font-size:11px;color:#93a2bd">Верх закреплён на голове · пружины 120 Гц</div>
+  <label>Жёсткость <span id="v_stiff">0.35</span></label>
+  <input id="stiff" type="range" min="0" max="1" step="0.01" value="0.35">
+  <label>Затухание <span id="v_drag">0.12</span></label>
+  <input id="drag" type="range" min="0" max="0.6" step="0.01" value="0.12">
+  <label>Гравитация <span id="v_grav">9.8</span></label>
+  <input id="grav" type="range" min="0" max="25" step="0.5" value="9.8">
+  <label>Толщина коллайдеров, мм <span id="v_col">6</span></label>
+  <input id="col" type="range" min="0" max="90" step="1" value="6">
+  <label>Матовость волос <span id="v_rough">0.72</span></label>
+  <input id="rough" type="range" min="0.2" max="1" step="0.02" value="0.72">
+  <div>
+    <button id="phys" class="on">Физика: вкл</button>
+  </div>
+  <div>
+    <button id="preset-soft">Мягко</button>
+    <button id="preset-mid">Средне</button>
+    <button id="preset-hard">Жёстко</button>
+  </div>
+  <div>
+    <button id="shake">Тряхнуть головой</button>
+    <button id="sway">Покачивание</button>
+    <button id="stop">Стоп</button>
+  </div>
+  <div>
+    <button id="reset">Сброс прядей</button>
+    <button id="stats">Статистика</button>
+    <button id="fit">Вписать модель</button><button id="front">Спереди</button><button id="side">Сбоку</button><button id="back">Сзади</button>
+  </div>
+</div>
+<div id="stat"></div>
+<div id="fps"></div>
+<div id="err"></div>
+<div id="load">загрузка модели… <span id="pct">0%</span></div>
+
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from './vendor/three/controls/OrbitControls.js';
+import {GLTFLoader} from './vendor/three/loaders/GLTFLoader.js';
+
+const cvs = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas: cvs, antialias: true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0f14);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 30);
+camera.position.set(0.85, 1.55, 1.25);
+const controls = new OrbitControls(camera, cvs);
+controls.target.set(0, 1.15, 0);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x202430, 1.1));
+const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(1.4, 2.6, 1.8); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x9fb8ff, 0.8); dl2.position.set(-1.6, 1.2, -1.2); scene.add(dl2);
+
+console.log('ЭТАП: модуль стартовал');
+renderer.setSize(cvs.clientWidth || innerWidth, cvs.clientHeight || innerHeight, false);
+document.getElementById('stat').textContent = 'загрузка волос…';
+const P = {stiff: 0.35, drag: 0.12, grav: 9.8, col: 6};
+const state = {mode: 'stop', t: 0, shakeT: 0, phys: true};
+
+const err = document.getElementById('err');
+window.addEventListener('error', e => { document.getElementById('stat').textContent = 'ОШИБКА: ' + e.message; });
+window.addEventListener('unhandledrejection', e => { document.getElementById('stat').textContent = 'ОШИБКА2: ' + (e.reason && e.reason.message || e.reason); });
+let rootBone = null, bodyHead = null, chains = [], colliders = [], hairRootRest = null;
+let bodyHeadRestQuat=null;
+let bodyHeadRestWorld = null, hairRootRestWorld = null, neckBone = null, neckRest = null;
+
+// пересчёт параметров из URL
+if (location.hash.length > 1) {
+  location.hash.slice(1).split('&').forEach(pair => {
+    const [k, v] = pair.split('=');
+    if (k in P) {
+      P[k] = parseFloat(v);
+      const el = document.getElementById(k);
+      if (el) { el.value = v; document.getElementById('v_' + k).textContent = v; }
+    }
+  });
+}
+
+console.log('ЭТАП: начинаю загрузку');
+const QS = new URLSearchParams(location.search);
+if(QS.get('physics')==='0'){state.phys=false;document.getElementById('phys').textContent='Физика: выкл';document.getElementById('phys').classList.remove('on');}
+const SRC_MODEL = QS.get('src') || './hair-repaired.glb';
+const loadEl = document.getElementById('load');
+const pctEl = document.getElementById('pct');
+new GLTFLoader().load(SRC_MODEL, async gltf => {
+  loadEl.style.display = 'none';
+  console.log('ЭТАП: GLB загружен');
+  scene.add(gltf.scene);
+  gltf.scene.traverse(o => {
+    if (o.isMesh || o.isSkinnedMesh) {
+      o.frustumCulled = false;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach(m => { if (m) { m.side = THREE.DoubleSide; m.needsUpdate = true; } });
+    }
+    if (o.isBone && o.name === 'hair_root') rootBone = o;
+  });
+  if (!rootBone) { err.style.display = 'grid'; err.textContent = 'в файле нет кости hair_root'; return; }
+  // материал парика: glTF по умолчанию даёт metallic=1 (металлический блеск)
+  gltf.scene.traverse(o => {
+    if (!o.isMesh && !o.isSkinnedMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    mats.forEach(m => {
+      if (!m) return;
+      m.metalnessMap = null;
+      m.metalness = 0.0;
+      m.roughness = 0.72;
+      m.envMapIntensity = 0.55;
+      m.needsUpdate = true;
+    });
+  });
+  scene.traverse(o => { if (o.isBone && o.name === 'head') bodyHead = o; });
+  console.log('ЭТАП: строю цепочки');
+  scene.updateMatrixWorld(true);
+  if (bodyHead) {
+    bodyHeadRestQuat=bodyHead.quaternion.clone();
+    bodyHeadRestWorld = bodyHead.matrixWorld.clone();
+    hairRootRestWorld = rootBone.matrixWorld.clone();
+    console.log('ЭТАП: рест головы ' + bodyHeadRestWorld.elements.slice(12, 15).map(v => v.toFixed(3)) +
+                ' | рест корня парика ' + hairRootRestWorld.elements.slice(12, 15).map(v => v.toFixed(3)));
+  }
+  scene.traverse(o => { if (o.isBone && o.name === 'neck') neckBone = o; });
+  if (neckBone) neckRest = neckBone.quaternion.clone();
+  buildBodyGrid();
+  await loadSDF();
+  buildChains();
+  console.log('ЭТАП: цепочки ' + chains.length);
+  setupHairCollision();
+  if(window.__vertexPush)buildAdjacency();
+  buildColliders();
+  window.__hair = {chains, colliders, rootBone, camera, scene, controls};
+
+  simulate(1 / 60);
+  document.getElementById('stats').click();
+  fitCamera();
+  const STEPS = parseInt(QS.get('steps') || '0', 10);
+  if (STEPS > 0) {
+    simulate(1 / 60);                       // инициализация частиц
+    const rest = chains.map(c => c.cur[c.cur.length - 1].clone());
+    for (let k = 0; k < STEPS; k++) {
+      state.t += 1 / 60;
+      animateHead(state.t);
+      scene.updateMatrixWorld(true);
+      placeHairRoot();
+      simulate(1 / 60);
+    }
+    let mx = 0, sum = 0;
+    chains.forEach((c, i) => {
+      const d = c.cur[c.cur.length - 1].distanceTo(rest[i]);
+      mx = Math.max(mx, d); sum += d;
+    });
+    document.getElementById('stat').textContent =
+      `прогон ${STEPS} кадров | цепочек ${chains.length} | смещение кончиков: среднее ${(sum / chains.length * 1000).toFixed(1)} мм, макс ${(mx * 1000).toFixed(1)} мм`;
+    window.__done = true;
+  }
+
+  console.log('ЭТАП: готово');
+}, ev => {
+  if (ev.total) pctEl.textContent = Math.round(ev.loaded / ev.total * 100) + '%';
+  else pctEl.textContent = (ev.loaded / 1048576).toFixed(1) + ' МБ';
+}, e => {
+  loadEl.style.display = 'none';
+  err.style.display = 'grid';
+  err.textContent = 'не загрузилась модель: ' + SRC_MODEL + ' — ' + e;
+  document.getElementById('stat').textContent = 'ОШИБКА ЗАГРУЗКИ: ' + e;
+});
+
+function buildChains() {
+  const byName = new Map();
+  rootBone.traverse(o => { if (o.isBone) byName.set(o.name, o); });
+  const map = new Map();
+  byName.forEach((b, name) => {
+    const m = name.match(/^hair_(\d+)_(\d+)$/);
+    if (!m) return;
+    const ci = +m[1], bi = +m[2];
+    if (!map.has(ci)) map.set(ci, []);
+    map.get(ci)[bi] = b;
+  });
+  scene.updateMatrixWorld(true);
+  hairRootRest = rootBone.matrixWorld.clone();
+  const rootQ = new THREE.Quaternion().setFromRotationMatrix(hairRootRest);
+  const rootQInv = rootQ.clone().invert();
+  const rootPos = new THREE.Vector3().setFromMatrixPosition(hairRootRest);
+
+  map.forEach((bones, ci) => {
+    const segs = [];
+    let lastDir = null, lastLen = 0;
+    const restLocal = [];      // головы костей в системе hair_root
+    const restWorldDirs = [];
+    for (let i = 0; i < bones.length; i++) {
+      const b = bones[i];
+      if (!b) continue;
+      const bp = new THREE.Vector3().setFromMatrixPosition(b.matrixWorld);
+      let dir, len;
+      if (b.children.length && b.children[0].isBone) {
+        dir = new THREE.Vector3().setFromMatrixPosition(b.children[0].matrixWorld).sub(bp);
+        len = dir.length() || 0.02;
+        dir.normalize();
+      } else {
+        // последняя кость: направление и длину берём у предыдущего сегмента
+        dir = lastDir ? lastDir.clone() : new THREE.Vector3(0, -1, 0);
+        len = lastLen || 0.02;
+      }
+      lastDir = dir.clone();
+      lastLen = len;
+      restLocal.push(bp.clone().sub(rootPos).applyQuaternion(rootQInv));
+      restWorldDirs.push(dir.clone());
+      segs.push({bone: b, len, restDirLocal: dir.clone().applyQuaternion(rootQInv), restLocalQuat: b.quaternion.clone(), restDirParent: dir.clone().applyQuaternion(new THREE.Quaternion().setFromRotationMatrix(b.parent.matrixWorld).invert()).normalize()});
+    }
+    // частицы: 0 — голова первой кости, дальше суставы
+    const pts = restLocal.map((p, i) => p.clone());
+    const last = segs[segs.length - 1];
+    const tipLocal = pts[pts.length - 1].clone().add(last.restDirLocal.clone().multiplyScalar(last.len));
+    pts.push(tipLocal);
+    chains.push({
+      ci, segs, pts, pinned: Math.max(1,pts.filter(p=>p.clone().applyMatrix4(hairRootRest).y>1.45).length),
+      cur: pts.map(p => p.clone()),
+      prev: pts.map(p => p.clone()),
+      init: false
+    });
+  });
+  document.getElementById('stat').textContent =
+    `цепочек ${chains.length}, костей ${chains.reduce((a, c) => a + c.segs.length, 0)}`;
+}
+
+function fitCamera() {
+  const box = new THREE.Box3();
+  scene.traverse(o => { if ((o.isMesh || o.isSkinnedMesh) && o.visible) box.expandByObject(o); });
+  if (box.isEmpty()) return;
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const dist = (maxDim / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.2;
+  controls.target.copy(center);
+  const dir = new THREE.Vector3(0.55, 0.25, 0.9).normalize();
+  camera.position.copy(center).add(dir.multiplyScalar(dist));
+  camera.near = Math.max(0.01, dist / 100);
+  camera.far = dist * 20;
+  camera.updateProjectionMatrix();
+  controls.update();
+  document.getElementById('stat').textContent += `\nкадр: центр ${center.y.toFixed(2)} м, дистанция ${dist.toFixed(2)} м`;
+}
+
+window.__penetration = (step = 15, thr = 0.005) => {
+  let wig = null;
+  scene.traverse(o => { if (o.isSkinnedMesh && o.geometry.attributes.position.count > 20000) wig = o; });
+  if (!wig || !sdf) return null;
+  const pos = wig.geometry.attributes.position;
+  const v = new THREE.Vector3();
+  let inside = 0, tested = 0, worst = 0;
+  for (let i = 0; i < pos.count; i += step) {
+    wig.applyBoneTransform(i, v.fromBufferAttribute(pos, i));
+    if (hairPush) { v.x += hairPush[i * 3]; v.y += hairPush[i * 3 + 1]; v.z += hairPush[i * 3 + 2]; }
+    v.applyMatrix4(wig.matrixWorld);
+    if (v.y > (window.__penYMax || 99)) continue;
+    const b = toB(v.x, v.y, v.z);
+    const d = sdfSample(b[0], b[1], b[2]);
+    if (!isFinite(d) || d >= 0.35) continue;
+    tested++;
+    if (d < -thr) { inside++; worst = Math.min(worst, d); }
+  }
+  return {проверено: tested, внутри: inside, худшее_мм: +(worst * 1000).toFixed(1)};
+};
+
+function nearestBodyIndex(p) {
+  if (!bodyGrid) return -1;
+  const {cell, map, verts} = bodyGrid;
+  const cx = Math.floor(p.x / cell), cy = Math.floor(p.y / cell), cz = Math.floor(p.z / cell);
+  let best = -1, bestD = 0.12;
+  for (let dx = -4; dx <= 4; dx++) for (let dy = -4; dy <= 4; dy++) for (let dz = -4; dz <= 4; dz++) {
+    const arr = map.get(`${cx + dx},${cy + dy},${cz + dz}`);
+    if (!arr) continue;
+    for (const i of arr) {
+      const ddx = p.x - verts[i * 3], ddy = p.y - verts[i * 3 + 1], ddz = p.z - verts[i * 3 + 2];
+      const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+      if (d2 < bestD * bestD) { bestD = Math.sqrt(d2); best = i; }
+    }
+  }
+  return best;
+}
+
+window.__fitInfo = () => {
+  const box = new THREE.Box3();
+  scene.traverse(o => { if ((o.isMesh || o.isSkinnedMesh) && o.visible) box.expandByObject(o); });
+  if (box.isEmpty()) return null;
+  const xs = [], ys = [];
+  for (let i = 0; i < 8; i++) {
+    const v = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z);
+    v.project(camera); xs.push(v.x); ys.push(v.y);
+  }
+  return {xMin: +Math.min(...xs).toFixed(2), xMax: +Math.max(...xs).toFixed(2),
+          yMin: +Math.min(...ys).toFixed(2), yMax: +Math.max(...ys).toFixed(2),
+          dist: +camera.position.distanceTo(controls.target).toFixed(2),
+          aspect: +camera.aspect.toFixed(2), h: box.max.y - box.min.y};
+};
+
+
+// --- сетка вершин тела для точных коллизий ---
+let bodyGrid = null;
+
+
+// --- поле расстояний от тела (SDF) ---
+let sdf = null;
+
+async function loadSDF() {
+  try {
+    const [bin, meta] = await Promise.all([
+      fetch('./body-sdf.bin').then(r => r.arrayBuffer()),
+      fetch('./body-sdf.json').then(r => r.json())
+    ]);
+    const N = meta.size;
+    sdf = {data: new Int8Array(bin), N, min: meta.min, max: meta.max, scale: meta.scale,
+           step: [(meta.max[0] - meta.min[0]) / (N[0] - 1), (meta.max[1] - meta.min[1]) / (N[1] - 1), (meta.max[2] - meta.min[2]) / (N[2] - 1)]};
+    console.log('ЭТАП: SDF ' + N.join('x') + ' загружено');
+    window.__sdfTest = (x,y,z) => { const b = toB(x,y,z); return sdf ? +sdfSample(b[0],b[1],b[2]).toFixed(3) : 'нет'; };
+  } catch (e) { console.log('SDF не загрузился: ' + e); }
+}
+
+function sdfSample(x, y, z) {
+  if (!sdf) return 1;
+  const {N, min, step, data} = sdf;
+  const fx = (x - min[0]) / step[0], fy = (y - min[1]) / step[1], fz = (z - min[2]) / step[2];
+  if (fx < 0 || fy < 0 || fz < 0 || fx >= N[0] - 1 || fy >= N[1] - 1 || fz >= N[2] - 1) return 1;
+  const i0 = Math.floor(fx), j0 = Math.floor(fy), k0 = Math.floor(fz);
+  const tx = fx - i0, ty = fy - j0, tz = fz - k0;
+  const at = (i, j, k) => data[(k * N[1] + j) * N[0] + i] / 127 * sdf.scale;
+  const c00 = at(i0, j0, k0) * (1 - tx) + at(i0 + 1, j0, k0) * tx;
+  const c10 = at(i0, j0 + 1, k0) * (1 - tx) + at(i0 + 1, j0 + 1, k0) * tx;
+  const c01 = at(i0, j0, k0 + 1) * (1 - tx) + at(i0 + 1, j0, k0 + 1) * tx;
+  const c11 = at(i0, j0 + 1, k0 + 1) * (1 - tx) + at(i0 + 1, j0 + 1, k0 + 1) * tx;
+  return (c00 * (1 - ty) + c10 * ty) * (1 - tz) + (c01 * (1 - ty) + c11 * ty) * tz;
+}
+
+// три (x, y вверх, z) → блендер (x, -z, y)
+const toB = (x, y, z) => [x, -z, y];
+const dirToThree = (dx, dy, dz) => [dx, dz, -dy];
+
+function sdfPush(p, R) {
+  const [bx, by, bz] = toB(p.x, p.y, p.z);
+  const d = sdfSample(bx, by, bz);
+  if (!isFinite(d) || d >= R) return 0;
+  const h = 0.02;
+  const gx = sdfSample(bx + h, by, bz) - sdfSample(bx - h, by, bz);
+  const gy = sdfSample(bx, by + h, bz) - sdfSample(bx, by - h, bz);
+  const gz = sdfSample(bx, by, bz + h) - sdfSample(bx, by, bz - h);
+  const gl = Math.hypot(gx, gy, gz);
+  if (gl < 1e-6) return 0;
+  const need = Math.min(R - d, 0.015);
+  const [ux, uy, uz] = dirToThree(gx/gl*need, gy/gl*need, gz/gl*need);
+  p.x += ux; p.y += uy; p.z += uz;
+  return 1;
+}
+
+function buildBodyGrid() {
+  const verts = [], norms = [];
+  const v = new THREE.Vector3(), n = new THREE.Vector3();
+  const nm = new THREE.Matrix3();
+  scene.traverse(o => {
+    if (!o.isMesh || !/Foot/i.test(o.name)) return;
+    const pos = o.geometry.attributes.position;
+    const nor = o.geometry.attributes.normal;
+    nm.getNormalMatrix(o.matrixWorld);
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      n.fromBufferAttribute(nor, i).applyMatrix3(nm).normalize();
+      verts.push(v.x, v.y, v.z);
+      norms.push(n.x, n.y, n.z);
+    }
+  });
+  if (!verts.length) { bodyGrid = null; return; }
+  const cell = 0.03;
+  const map = new Map();
+  const key = (x, y, z) => `${x},${y},${z}`;
+  for (let i = 0; i < verts.length / 3; i++) {
+    const x = verts[i * 3], y = verts[i * 3 + 1], z = verts[i * 3 + 2];
+    const k = key(Math.floor(x / cell), Math.floor(y / cell), Math.floor(z / cell));
+    let arr = map.get(k);
+    if (!arr) { arr = []; map.set(k, arr); }
+    arr.push(i);
+  }
+  bodyGrid = {cell, map, verts: new Float32Array(verts), norms: new Float32Array(norms), count: verts.length / 3};
+  console.log('ЭТАП: сетка тела ' + bodyGrid.count + ' вершин, ячеек ' + map.size);
+}
+
+function pushOutOfBody(p, radius) {
+  if (!bodyGrid) return 0;
+  const {cell, map, verts, norms} = bodyGrid;
+  const cx = Math.floor(p.x / cell), cy = Math.floor(p.y / cell), cz = Math.floor(p.z / cell);
+  let best = -1, bestD = radius;
+  for (let dx = -2; dx <= 2; dx++) {
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dz = -2; dz <= 2; dz++) {
+        const arr = map.get(`${cx + dx},${cy + dy},${cz + dz}`);
+        if (!arr) continue;
+        for (const i of arr) {
+          const ddx = p.x - verts[i * 3], ddy = p.y - verts[i * 3 + 1], ddz = p.z - verts[i * 3 + 2];
+          const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+          if (d2 < bestD * bestD) { bestD = Math.sqrt(d2); best = i; }
+        }
+      }
+    }
+  }
+  if (best < 0) return 0;
+  const nx = norms[best * 3], ny = norms[best * 3 + 1], nz = norms[best * 3 + 2];
+  const vx = verts[best * 3], vy = verts[best * 3 + 1], vz = verts[best * 3 + 2];
+  const cur = (p.x - vx) * nx + (p.y - vy) * ny + (p.z - vz) * nz;
+  const need = radius - cur;
+  if (need <= 0) return 0;
+  p.x += nx * need; p.y += ny * need; p.z += nz * need;
+  return 1;
+}
+
+
+// --- выталкивание вершин парика из тела (на уровне шейдера) ---
+let hairMesh = null, hairPush = null, hairCand = [], candCursor = 0;
+
+function setupHairCollision() {
+  scene.traverse(o => {
+    if (o.isSkinnedMesh && o.skeleton.bones.includes(rootBone)) hairMesh = o;
+  });
+  if (!hairMesh || !bodyGrid) return;
+  const geo = hairMesh.geometry;
+  const pos = geo.attributes.position;
+  hairPush = new Float32Array(pos.count * 3);
+  const attr = new THREE.BufferAttribute(hairPush, 3);
+  attr.setUsage(THREE.DynamicDrawUsage);
+  geo.setAttribute('aPush', attr);
+  const patch = mat => {
+    mat.onBeforeCompile = shader => {
+      shader.vertexShader = 'attribute vec3 aPush;\n' + shader.vertexShader.replace(
+        '#include <skinning_vertex>',
+        '#include <skinning_vertex>\n  transformed += aPush;'
+      );
+    };
+    mat.needsUpdate = true;
+  };
+  (Array.isArray(hairMesh.material) ? hairMesh.material : [hairMesh.material]).forEach(patch);
+  console.log('ЭТАП: выталкивание вершин включено, вершин ' + pos.count);
+}
+
+function updateHairPush(budget = 9000) {
+  if (!hairMesh || !hairPush || !bodyGrid) return;
+  const geo = hairMesh.geometry;
+  const posA = geo.attributes.position;
+  const siA = geo.attributes.skinIndex, swA = geo.attributes.skinWeight;
+  const bm = hairMesh.skeleton.boneMatrices;
+  const inv = new THREE.Matrix4().copy(hairMesh.matrixWorld).invert();
+  const nm = new THREE.Matrix3().getNormalMatrix(inv);
+  const p = new THREE.Vector3(), out = new THREE.Vector3();
+  const {cell, map, verts, norms} = bodyGrid;
+  const R0 = 0.010 + P.col / 1000 * 0.5;
+  const total = posA.count;
+  const mw = hairMesh.matrixWorld;
+
+  for (let k = 0; k < budget; k++) {
+    const i = (candCursor + k) % total;
+    const vx = posA.getX(i), vy = posA.getY(i), vz = posA.getZ(i);
+    let x = 0, y = 0, z = 0;
+    for (let w = 0; w < 4; w++) {
+      const bw = swA.getComponent(i, w);
+      if (!bw) continue;
+      const bi = siA.getComponent(i, w) * 16;
+      x += bw * (bm[bi] * vx + bm[bi + 4] * vy + bm[bi + 8] * vz + bm[bi + 12]);
+      y += bw * (bm[bi + 1] * vx + bm[bi + 5] * vy + bm[bi + 9] * vz + bm[bi + 13]);
+      z += bw * (bm[bi + 2] * vx + bm[bi + 6] * vy + bm[bi + 10] * vz + bm[bi + 14]);
+    }
+    p.set(x, y, z).applyMatrix4(mw);
+    if (p.y > 1.34) { const o3 = i * 3; hairPush[o3] *= 0.7; hairPush[o3 + 1] *= 0.7; hairPush[o3 + 2] *= 0.7; continue; }
+
+    let px = 0, py = 0, pz = 0;
+    if (!window.__noPush) {
+      const bx = p.x, by = -p.z, bz = p.y;
+      const d = sdfSample(bx, by, bz);
+      const R = 0.006 + P.col / 1000 * 0.30;
+      if (isFinite(d) && d < R) {
+        const h = 0.02;
+        const gx = sdfSample(bx + h, by, bz) - sdfSample(bx - h, by, bz);
+        const gy = sdfSample(bx, by + h, bz) - sdfSample(bx, by - h, bz);
+        const gz = sdfSample(bx, by, bz + h) - sdfSample(bx, by, bz - h);
+        const gh = Math.hypot(gx, gz);
+        const gl = gh || Math.hypot(gx, gy, gz);
+        if (gl > 1e-6) {
+          const need = Math.min(R - d, 0.030);
+          const ux = gx / gl * need;
+          const uy = (gh < 1e-5 ? gy / gl : 0) * need;
+          const uz = gz / gl * need;
+          out.set(ux, uz, -uy).applyMatrix3(nm);   // блендер → три → объект
+          px = out.x; py = out.y; pz = out.z;
+        }
+      }
+    }
+    const o3 = i * 3;
+    hairPush[o3] = hairPush[o3] * 0.6 + px * 0.4;
+    hairPush[o3 + 1] = hairPush[o3 + 1] * 0.6 + py * 0.4;
+    hairPush[o3 + 2] = hairPush[o3 + 2] * 0.6 + pz * 0.4;
+  }
+  candCursor = (candCursor + budget) % total;
+  geo.attributes.aPush.needsUpdate = true;
+}
+
+
+// --- соседи вершин для сглаживания смещений ---
+let hairAdj = null;
+
+function buildAdjacency() {
+  if (!hairMesh) return;
+  const geo = hairMesh.geometry;
+  const idx = geo.index;
+  const n = geo.attributes.position.count;
+  const lists = Array.from({length: n}, () => []);
+  if (idx) {
+    for (let t = 0; t < idx.count; t += 3) {
+      const a = idx.getX(t), b = idx.getX(t + 1), c = idx.getX(t + 2);
+      lists[a].push(b, c); lists[b].push(a, c); lists[c].push(a, b);
+    }
+  }
+  hairAdj = lists.map(l => Array.from(new Set(l)));
+  console.log('ЭТАП: соседей посчитано, вершин ' + n);
+}
+
+function smoothPush(iters = 1, k = 0.5) {
+  if (!hairPush || !hairAdj) return;
+  const tmp = new Float32Array(hairPush.length);
+  for (let it = 0; it < iters; it++) {
+    tmp.set(hairPush);
+    for (let i = 0; i < hairAdj.length; i++) {
+      const nb = hairAdj[i];
+      if (!nb.length) continue;
+      let ax = 0, ay = 0, az = 0;
+      for (const j of nb) { ax += tmp[j * 3]; ay += tmp[j * 3 + 1]; az += tmp[j * 3 + 2]; }
+      ax /= nb.length; ay /= nb.length; az /= nb.length;
+      hairPush[i * 3] = tmp[i * 3] * (1 - k) + ax * k;
+      hairPush[i * 3 + 1] = tmp[i * 3 + 1] * (1 - k) + ay * k;
+      hairPush[i * 3 + 2] = tmp[i * 3 + 2] * (1 - k) + az * k;
+    }
+  }
+  hairMesh.geometry.attributes.aPush.needsUpdate = true;
+}
+
+function buildColliders() {
+  // коллайдеры живут на костях тела и считаются в мире каждый кадр
+  const bones = {};
+  scene.traverse(o => { if (o.isBone) bones[o.name] = o; });
+  const defs = [
+    {type: 'sphere',  bone: 'head',       off: [0, 0.030, 0.010], r: 0.100},
+    {type: 'capsule', bone: 'neck',       a: [0, 0.010, 0], b: [0, 0.070, 0], r: 0.060},
+    {type: 'capsule', bone: 'upperchest', a: [-0.15, 0.02, 0], b: [0.15, 0.02, 0], r: 0.085},
+    {type: 'sphere',  bone: 'upperchest', off: [-0.16, 0.01, 0], r: 0.065},
+    {type: 'sphere',  bone: 'upperchest', off: [0.16, 0.01, 0], r: 0.065},
+    {type: 'sphere',  bone: 'waist',      off: [-0.055, -0.02, 0.055], r: 0.070},
+    {type: 'sphere',  bone: 'waist',      off: [0.055, -0.02, 0.055], r: 0.070},
+    {type: 'capsule', bone: 'waist',      a: [0, 0.02, 0.01], b: [0, -0.12, 0], r: 0.110},
+    {type: 'capsule', bone: 'pelvis',     a: [0, 0.02, 0], b: [0, -0.12, 0], r: 0.130}
+  ];
+  colliders = defs.map(d => ({...d, node: bones[d.bone] || null}));
+  const missing = colliders.filter(c => !c.node).map(c => c.bone);
+  if (missing.length) console.log('нет костей для коллайдеров: ' + missing.join(', '));
+}
+
+function worldColliders() {
+  const v = new THREE.Vector3();
+  return colliders.filter(c => c.node).map(c => {
+    if (c.type === 'sphere') {
+      v.set(c.off[0], c.off[1], c.off[2]).applyMatrix4(c.node.matrixWorld);
+      return {type: 'sphere', c: v.clone(), r: c.r};
+    }
+    const a = new THREE.Vector3(c.a[0], c.a[1], c.a[2]).applyMatrix4(c.node.matrixWorld);
+    const b = new THREE.Vector3(c.b[0], c.b[1], c.b[2]).applyMatrix4(c.node.matrixWorld);
+    return {type: 'capsule', a, b, r: c.r};
+  });
+}
+
+const tmpClosest=new THREE.Vector3(),tmpDelta=new THREE.Vector3();
+const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), upY = new THREE.Vector3(0, 1, 0);
+
+function simulate(dt) {
+  if (!rootBone) return;
+  if (!state.phys) {
+    for (const ch of chains) {
+      for (const seg of ch.segs) seg.bone.quaternion.copy(seg.restLocalQuat);
+      for(let i=0;i<ch.cur.length;i++){ch.cur[i].copy(ch.pts[i]).applyMatrix4(rootBone.matrixWorld);ch.prev[i].copy(ch.cur[i]);}
+      ch.init=false;
+    }
+    rootBone.updateMatrixWorld(true);
+    return;
+  }
+  scene.updateMatrixWorld(true);
+  const rootM = rootBone.matrixWorld;
+  const rootQ = new THREE.Quaternion().setFromRotationMatrix(rootM);
+  const rootP = new THREE.Vector3().setFromMatrixPosition(rootM);
+  const g = new THREE.Vector3(0, -P.grav * dt * dt, 0);
+  const colR = P.col / 1000;
+  const cols = worldColliders();
+  pushed = 0;
+
+  for (const ch of chains) {
+    if (!state.phys) { ch.init = false; }
+    // целевые (жёсткие) положения при текущей позе головы
+    const target = ch.pts.map(p => p.clone().applyMatrix4(rootM));
+    if (!ch.init) {
+      for (let i = 0; i < ch.cur.length; i++) {
+        ch.cur[i].copy(target[i]);
+        ch.prev[i].copy(target[i]);
+      }
+      ch.init = true;
+    }
+    for (let i = ch.pinned; i < ch.cur.length; i++) {
+      const c = ch.cur[i], pv = ch.prev[i];
+      const vx = (c.x - pv.x) * Math.pow(1 - P.drag,dt*60);
+      const vy = (c.y - pv.y) * Math.pow(1 - P.drag,dt*60);
+      const vz = (c.z - pv.z) * Math.pow(1 - P.drag,dt*60);
+      pv.copy(c);
+      c.x += vx + g.x;
+      c.y += vy + g.y;
+      c.z += vz + g.z;
+      // пружина к целевой позе
+      c.lerp(target[i], 1-Math.pow(1-P.stiff*.35,dt*60));
+    }
+    if (!state.phys) {
+      for (let i = 0; i < ch.cur.length; i++) { ch.cur[i].copy(target[i]); ch.prev[i].copy(target[i]); }
+      ch.init = true;
+    }
+    for(let i=0;i<ch.pinned;i++){ch.cur[i].copy(target[i]);ch.prev[i].copy(target[i]);}
+    // ограничения длин
+    for (let it = 0; it < 4; it++) {
+      for (let i = ch.pinned-1; i < ch.segs.length; i++) {
+        const a = ch.cur[i], b = ch.cur[i + 1], L = ch.segs[i].len;
+        tmpV.subVectors(b, a);
+        const d = tmpV.length() || 1e-6;
+        tmpV.multiplyScalar((d - L) / d);
+        if (i === ch.pinned-1) b.sub(tmpV);
+        else { b.sub(tmpV.multiplyScalar(0.5)); a.add(tmpV); }
+      }
+      // геометрия тела: SDF, иначе сетка вершин
+      for (let i = ch.pinned; i < ch.cur.length; i++) {
+        if (sdf && !window.__noPush) pushed += sdfPush(ch.cur[i], 0.004 + colR);
+        else pushed += pushOutOfBody(ch.cur[i], 0.004 + colR);
+      }
+      // коллайдеры
+      for (let i = ch.pinned; i < ch.cur.length; i++) {
+        const p = ch.cur[i];
+        for (const col of cols) {
+          const rr = col.r + colR;
+          if (col.type === 'sphere') {
+            tmpV.subVectors(p, col.c);
+            const d = tmpV.length();
+            if (d < rr && d > 1e-6) p.copy(col.c).add(tmpV.multiplyScalar(rr / d));
+          } else {
+            tmpV.subVectors(col.b, col.a);
+            const t = Math.max(0, Math.min(1, tmpDelta.subVectors(p, col.a).dot(tmpV) / tmpV.lengthSq()));
+            const closest = tmpClosest.copy(col.a).add(tmpV.multiplyScalar(t));
+            const dv = tmpDelta.subVectors(p, closest);
+            const d = dv.length();
+            if (d < rr && d > 1e-6) p.copy(closest).add(dv.multiplyScalar(rr / d));
+          }
+        }
+      }
+    }
+    // Reconcile particles with the forward kinematic chain after collision projection.
+    for(let i=0;i<ch.pinned;i++){ch.cur[i].copy(target[i]);ch.prev[i].copy(target[i]);}
+    for(let i=ch.pinned-1;i<ch.segs.length;i++){
+      tmpV.subVectors(ch.cur[i+1],ch.cur[i]);
+      if(tmpV.lengthSq()<1e-12)tmpV.copy(ch.segs[i].restDirLocal).applyQuaternion(rootQ);
+      ch.cur[i+1].copy(ch.cur[i]).add(tmpV.normalize().multiplyScalar(ch.segs[i].len));
+    }
+    // превращаем частицы в повороты костей
+    for (let i = 0; i < ch.segs.length; i++) {
+      const bone = ch.segs[i].bone;
+      const parent = bone.parent;
+      parent.updateWorldMatrix(true, false);
+      const pq = new THREE.Quaternion().setFromRotationMatrix(parent.matrixWorld).invert();
+      const dirWorld = new THREE.Vector3().subVectors(ch.cur[i + 1], ch.cur[i]).normalize();
+      const dirLocal = dirWorld.clone().applyQuaternion(pq).normalize();
+      const restDirLocal = ch.segs[i].restDirParent.clone();
+      tmpQ.setFromUnitVectors(restDirLocal, dirLocal);
+      bone.quaternion.copy(tmpQ).multiply(ch.segs[i].restLocalQuat);
+      bone.updateMatrixWorld(true);
+    }
+  }
+}
+
+function placeHairRoot() {
+  if (!bodyHead || !bodyHeadRestWorld || !hairRootRestWorld || !rootBone) return;
+  const delta = new THREE.Matrix4().multiplyMatrices(bodyHead.matrixWorld, new THREE.Matrix4().copy(bodyHeadRestWorld).invert());
+  const desired = new THREE.Matrix4().multiplyMatrices(delta, hairRootRestWorld);
+  const parentInv = new THREE.Matrix4().copy(rootBone.parent.matrixWorld).invert();
+  const local = new THREE.Matrix4().multiplyMatrices(parentInv, new THREE.Matrix4().multiplyMatrices(desired, new THREE.Matrix4()));
+  local.decompose(rootBone.position, rootBone.quaternion, rootBone.scale);
+  rootBone.updateMatrixWorld(true);
+}
+
+function animateHead(t) {
+  if (!rootBone) return;
+  let yaw = 0, pitch = 0;
+  if (state.mode === 'sway') {
+    yaw = Math.sin(t * 2.4) * 0.55;
+    pitch = Math.sin(t * 1.3) * 0.18;
+  } else if (state.mode === 'shake') {
+    const k = Math.max(0, 1 - state.shakeT / 1.2);
+    yaw = Math.sin(t * 17) * 0.45 * k;
+    pitch = Math.sin(t * 11) * 0.25 * k;
+    state.shakeT = Math.min(1.3,state.t-state.shakeStart);
+    if (state.shakeT > 1.2) state.mode = 'stop';
+  }
+  if (window.__forceYaw !== undefined) { yaw = window.__forceYaw; pitch = window.__forcePitch || 0; }
+  if (bodyHead) {
+    bodyHead.quaternion.copy(bodyHeadRestQuat).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch,yaw,0)));
+    if (neckBone) neckBone.quaternion.copy(neckRest).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch*.35,yaw*.3,0)));
+  } else {
+    rootBone.rotation.set(pitch, yaw, 0);
+  }
+}
+
+const clock = new THREE.Clock();
+let acc = 0;
+let pushed = 0, frameNo = 0, fpsT = 0, fps = 0;
+function loop() {
+  const dt = Math.min(clock.getDelta(), .1);
+  acc += dt;
+  while(acc >= 1/120){
+    state.t += 1/120;
+    animateHead(state.t);
+    scene.updateMatrixWorld(true);
+    placeHairRoot();
+    simulate(1/120);
+    acc -= 1/120;
+  }
+  if (state.phys && window.__vertexPush) { updateHairPush(); if (hairAdj) smoothPush(2, 0.6); }
+  controls.update();
+  const w = window.innerWidth, h = window.innerHeight;
+  if (cvs.width !== Math.floor(w * renderer.getPixelRatio()) || cvs.height !== Math.floor(h * renderer.getPixelRatio())) {
+    renderer.setSize(w, h, false);
+  }
+  if (Math.abs(camera.aspect - w / h) > 1e-4) {
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  renderer.render(scene, camera);
+  frameNo++; fpsT += dt;
+  if (fpsT > 0.5) { fps = Math.round(frameNo / fpsT); frameNo = 0; fpsT = 0; }
+  document.getElementById('fps').textContent = `кадров: ${fps}/с | выталкиваний: ${pushed}`;
+  requestAnimationFrame(loop);
+}
+loop();
+
+const bind = (id, key, fmt) => {
+  const el = document.getElementById(id);
+  el.oninput = () => { P[key] = parseFloat(el.value); document.getElementById('v_' + key).textContent = el.value; };
+};
+bind('stiff', 'stiff'); bind('drag', 'drag'); bind('grav', 'grav'); bind('col', 'col');
+document.getElementById('rough').oninput = e => {
+  const r = parseFloat(e.target.value);
+  document.getElementById('v_rough').textContent = r.toFixed(2);
+  scene.traverse(o => {
+    if (o!==hairMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    mats.forEach(m => { if (m && m.metalness !== undefined) { m.roughness = r; m.needsUpdate = true; } });
+  });
+};
+document.getElementById('shake').onclick = () => { state.shakeT = 0; state.shakeStart=state.t; state.mode = 'shake'; };
+document.getElementById('sway').onclick = e => { state.mode = state.mode === 'sway' ? 'stop' : 'sway';e.target.classList.toggle('on',state.mode==='sway'); };
+document.getElementById('stop').onclick = () => { state.mode = 'stop';document.getElementById('sway').classList.remove('on'); };
+document.getElementById('reset').onclick = () => { chains.forEach(c => c.init = false); };
+document.getElementById('phys').onclick = e => {
+  state.phys = !state.phys;
+  e.target.classList.toggle('on', state.phys);
+  e.target.textContent = state.phys ? 'Физика: вкл' : 'Физика: выкл';
+  if (state.phys) chains.forEach(c => c.init = false);
+};
+const setPreset = (st, dr, gr) => {
+  P.stiff = st; P.drag = dr; P.grav = gr;
+  document.getElementById('stiff').value = st; document.getElementById('v_stiff').textContent = st;
+  document.getElementById('drag').value = dr; document.getElementById('v_drag').textContent = dr;
+  document.getElementById('grav').value = gr; document.getElementById('v_grav').textContent = gr;
+};
+document.getElementById('preset-soft').onclick = () => setPreset(0.12, 0.08, 9.8);
+document.getElementById('preset-mid').onclick = () => setPreset(0.35, 0.12, 9.8);
+document.getElementById('preset-hard').onclick = () => setPreset(0.75, 0.25, 9.8);
+document.getElementById('fit').onclick = () => fitCamera();
+for(const [id,dir] of [['front',[0,0,1]],['side',[1,0,0]],['back',[0,0,-1]]])document.getElementById(id).onclick=()=>{const d=camera.position.distanceTo(controls.target);camera.position.copy(controls.target).add(new THREE.Vector3(...dir).multiplyScalar(d));controls.update();};
+document.getElementById('stats').onclick = () => {
+  let minZ = 1e9, maxZ = -1e9;
+  chains.forEach(c => c.cur.forEach(p => { minZ = Math.min(minZ, p.y); maxZ = Math.max(maxZ, p.y); }));
+  document.getElementById('stat').textContent =
+    `цепочек ${chains.length} | костей ${chains.reduce((a, c) => a + c.segs.length, 0)} | коллайдеров ${colliders.length}\n` +
+    `кончики по высоте ${minZ.toFixed(3)}..${maxZ.toFixed(3)} м`;
+};
+</script>
+</body>
+</html>

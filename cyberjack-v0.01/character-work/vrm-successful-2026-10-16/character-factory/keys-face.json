@@ -1,0 +1,4022 @@
+{
+ "summary": {
+  "total": 252,
+  "dead": 14,
+  "groups": {
+   "blink": 1,
+   "brow": 28,
+   "emotion": 12,
+   "eye": 44,
+   "mouth": 133,
+   "other": 28,
+   "viseme": 6
+  },
+  "max_delta_mm": 37.57
+ },
+ "keys": [
+  {
+   "key": "00_Ani_Blink",
+   "group": "blink",
+   "caption": "Глаза прикрыты (моргание).",
+   "max_mm": 8.38,
+   "moved_vertices": 2033,
+   "moved_frac": 0.682,
+   "center": [
+    0.0,
+    -0.049,
+    1.453
+   ],
+   "spread_z": 0.126,
+   "file": "003_00_Ani_Blink",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Shy",
+   "group": "brow",
+   "caption": "Брови приподняты и сдвинуты к центру, выражая застенчивость.",
+   "max_mm": 22.23,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "042_Brow_02_Shy",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Shy",
+   "group": "brow",
+   "caption": "Брови приподняты и сдвинуты к центру, выражая застенчивость.",
+   "max_mm": 19.98,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "024_Brow_00_Shy",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Gentle",
+   "group": "brow",
+   "caption": "Брови стали более мягкими и плавными.",
+   "max_mm": 17.89,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "041_Brow_02_Gentle",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Gentle",
+   "group": "brow",
+   "caption": "Брови стали более мягкими, выражая спокойствие.",
+   "max_mm": 16.67,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "023_Brow_00_Gentle",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Up",
+   "group": "brow",
+   "caption": "Брови приподняты.",
+   "max_mm": 16.51,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "045_Brow_02_Up",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Up",
+   "group": "brow",
+   "caption": "Брови подняты.",
+   "max_mm": 15.27,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "027_Brow_00_Up",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Shy",
+   "group": "brow",
+   "caption": "Брови приподняты и изогнуты, выражая застенчивость.",
+   "max_mm": 14.91,
+   "moved_vertices": 220,
+   "moved_frac": 0.074,
+   "center": [
+    0.0,
+    -0.051,
+    1.487
+   ],
+   "spread_z": 0.066,
+   "file": "033_Brow_01_Shy",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Doubt",
+   "group": "brow",
+   "caption": "Брови приподняты, выражая сомнение.",
+   "max_mm": 14.51,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "039_Brow_02_Doubt",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Down",
+   "group": "brow",
+   "caption": "Брови опущены.",
+   "max_mm": 14.4,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "040_Brow_02_Down",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Gentle",
+   "group": "brow",
+   "caption": "Брови стали более мягкими, выражая спокойствие.",
+   "max_mm": 13.55,
+   "moved_vertices": 214,
+   "moved_frac": 0.072,
+   "center": [
+    0.0,
+    -0.052,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "032_Brow_01_Gentle",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Doubt",
+   "group": "brow",
+   "caption": "Левая бровь приподнята, выражая сомнение.",
+   "max_mm": 13.38,
+   "moved_vertices": 218,
+   "moved_frac": 0.073,
+   "center": [
+    0.0,
+    -0.05,
+    1.49
+   ],
+   "spread_z": 0.064,
+   "file": "021_Brow_00_Doubt",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Doubt",
+   "group": "brow",
+   "caption": "Правая бровь приподнята, выражая сомнение.",
+   "max_mm": 12.47,
+   "moved_vertices": 223,
+   "moved_frac": 0.075,
+   "center": [
+    -0.0,
+    -0.051,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "030_Brow_01_Doubt",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Trouble",
+   "group": "brow",
+   "caption": "Брови приподняты и сдвинуты к центру, выражая беспокойство.",
+   "max_mm": 12.41,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "044_Brow_02_Trouble",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Trouble",
+   "group": "brow",
+   "caption": "Брови приподняты и сдвинуты к центру, выражая беспокойство.",
+   "max_mm": 12.35,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "035_Brow_01_Trouble",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Default",
+   "group": "brow",
+   "caption": "Брови приподняты.",
+   "max_mm": 12.18,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "038_Brow_02_Default",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Surprise",
+   "group": "brow",
+   "caption": "Брови приподняты, выражая удивление.",
+   "max_mm": 12.05,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "025_Brow_00_Surprise",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Surprise",
+   "group": "brow",
+   "caption": "Брови приподняты, выражая удивление.",
+   "max_mm": 10.88,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "043_Brow_02_Surprise",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Angry",
+   "group": "brow",
+   "caption": "Брови опущены и сдвинуты к центру, выражая гнев.",
+   "max_mm": 9.9,
+   "moved_vertices": 208,
+   "moved_frac": 0.07,
+   "center": [
+    0.0,
+    -0.052,
+    1.49
+   ],
+   "spread_z": 0.065,
+   "file": "028_Brow_01_Angry",
+   "dead": false
+  },
+  {
+   "key": "Brow_02_Angry",
+   "group": "brow",
+   "caption": "Брови опущены и сдвинуты к центру, выражая гнев.",
+   "max_mm": 9.56,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "037_Brow_02_Angry",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Default",
+   "group": "brow",
+   "caption": "Брови приподняты.",
+   "max_mm": 9.39,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "020_Brow_00_Default",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Trouble",
+   "group": "brow",
+   "caption": "Брови приподняты и сдвинуты к центру, выражая беспокойство.",
+   "max_mm": 9.14,
+   "moved_vertices": 225,
+   "moved_frac": 0.075,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.069,
+   "file": "026_Brow_00_Trouble",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Up",
+   "group": "brow",
+   "caption": "Брови приподняты.",
+   "max_mm": 8.47,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "036_Brow_01_Up",
+   "dead": false
+  },
+  {
+   "key": "00_Default_Brow",
+   "group": "brow",
+   "caption": "Брови не меняются.",
+   "max_mm": 8.38,
+   "moved_vertices": 217,
+   "moved_frac": 0.073,
+   "center": [
+    0.0,
+    -0.051,
+    1.486
+   ],
+   "spread_z": 0.061,
+   "file": "015_00_Default_Brow",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Down",
+   "group": "brow",
+   "caption": "Брови опущены.",
+   "max_mm": 7.53,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.487
+   ],
+   "spread_z": 0.069,
+   "file": "031_Brow_01_Down",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Down",
+   "group": "brow",
+   "caption": "Брови опущены.",
+   "max_mm": 7.5,
+   "moved_vertices": 224,
+   "moved_frac": 0.075,
+   "center": [
+    0.0,
+    -0.05,
+    1.487
+   ],
+   "spread_z": 0.066,
+   "file": "022_Brow_00_Down",
+   "dead": false
+  },
+  {
+   "key": "Brow_00_Angry",
+   "group": "brow",
+   "caption": "Брови опущены к переносице, выражая гнев.",
+   "max_mm": 6.63,
+   "moved_vertices": 224,
+   "moved_frac": 0.075,
+   "center": [
+    0.0,
+    -0.05,
+    1.486
+   ],
+   "spread_z": 0.066,
+   "file": "019_Brow_00_Angry",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Surprise",
+   "group": "brow",
+   "caption": "Брови приподняты, выражая удивление.",
+   "max_mm": 5.12,
+   "moved_vertices": 221,
+   "moved_frac": 0.074,
+   "center": [
+    0.0,
+    -0.051,
+    1.488
+   ],
+   "spread_z": 0.069,
+   "file": "034_Brow_01_Surprise",
+   "dead": false
+  },
+  {
+   "key": "Brow_01_Default",
+   "group": "brow",
+   "caption": "Брови приподняты.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "029_Brow_01_Default",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "なごみ",
+   "group": "emotion",
+   "caption": "Рот слегка приоткрыт в мягкой, умиротворенной улыбке.",
+   "max_mm": 37.57,
+   "moved_vertices": 1046,
+   "moved_frac": 0.351,
+   "center": [
+    0.0,
+    -0.045,
+    1.449
+   ],
+   "spread_z": 0.046,
+   "file": "235_key",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_Battle_Hit",
+   "group": "emotion",
+   "caption": "Глаза и брови прищурены, выражение лица — легкий шок или болезненный удар.",
+   "max_mm": 13.78,
+   "moved_vertices": 2162,
+   "moved_frac": 0.725,
+   "center": [
+    0.0,
+    -0.051,
+    1.456
+   ],
+   "spread_z": 0.132,
+   "file": "001_00_Ani_Battle_Hit",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_Battle_Stun",
+   "group": "emotion",
+   "caption": "Глаза прикрыты, выражение лица — оглушение.",
+   "max_mm": 13.78,
+   "moved_vertices": 2162,
+   "moved_frac": 0.725,
+   "center": [
+    0.0,
+    -0.051,
+    1.456
+   ],
+   "spread_z": 0.132,
+   "file": "002_00_Ani_Battle_Stun",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_PhotoGraph_Trouble",
+   "group": "emotion",
+   "caption": "Брови приподняты и изогнуты, выражая беспокойство.",
+   "max_mm": 11.96,
+   "moved_vertices": 2197,
+   "moved_frac": 0.737,
+   "center": [
+    0.0,
+    -0.05,
+    1.455
+   ],
+   "spread_z": 0.129,
+   "file": "011_00_Ani_PhotoGraph_Trouble",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_PhotoGraph_Shy",
+   "group": "emotion",
+   "caption": "Глаза прищурены, взгляд опущен, выражение лица — застенчивость.",
+   "max_mm": 11.26,
+   "moved_vertices": 2199,
+   "moved_frac": 0.737,
+   "center": [
+    0.0,
+    -0.05,
+    1.456
+   ],
+   "spread_z": 0.132,
+   "file": "009_00_Ani_PhotoGraph_Shy",
+   "dead": false
+  },
+  {
+   "key": "びっくり",
+   "group": "emotion",
+   "caption": "Глаза стали шире, выражая удивление.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "236_key",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_PhotoGraph_Gentle",
+   "group": "emotion",
+   "caption": "Глаза стали более прищуренными, создавая мягкое и доброе выражение лица.",
+   "max_mm": 10.05,
+   "moved_vertices": 2163,
+   "moved_frac": 0.725,
+   "center": [
+    0.0,
+    -0.049,
+    1.453
+   ],
+   "spread_z": 0.126,
+   "file": "008_00_Ani_PhotoGraph_Gentle",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_PhotoGraph_Surprise",
+   "group": "emotion",
+   "caption": "Рот приоткрыт, выражая удивление.",
+   "max_mm": 9.04,
+   "moved_vertices": 2189,
+   "moved_frac": 0.734,
+   "center": [
+    0.0,
+    -0.05,
+    1.448
+   ],
+   "spread_z": 0.117,
+   "file": "010_00_Ani_PhotoGraph_Surprise",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_PhotoGraph_Angry",
+   "group": "emotion",
+   "caption": "Брови опущены и сдвинуты к центру, выражая гнев.",
+   "max_mm": 7.67,
+   "moved_vertices": 2162,
+   "moved_frac": 0.725,
+   "center": [
+    0.0,
+    -0.05,
+    1.456
+   ],
+   "spread_z": 0.132,
+   "file": "007_00_Ani_PhotoGraph_Angry",
+   "dead": false
+  },
+  {
+   "key": "ぎゃーす",
+   "group": "emotion",
+   "caption": "Глаза стали более прищуренными и узкими.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "249_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "がーん",
+   "group": "emotion",
+   "caption": "Глаза стали более прикрытыми, выражая разочарование или шок.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "250_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "ギギギ",
+   "group": "emotion",
+   "caption": "Не меняется.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "251_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "00_Ani_CloseEye",
+   "group": "eye",
+   "caption": "Глаза закрыты.",
+   "max_mm": 18.79,
+   "moved_vertices": 2035,
+   "moved_frac": 0.682,
+   "center": [
+    0.0,
+    -0.049,
+    1.453
+   ],
+   "spread_z": 0.126,
+   "file": "004_00_Ani_CloseEye",
+   "dead": false
+  },
+  {
+   "key": "00_Close01_Eye",
+   "group": "eye",
+   "caption": "Глаза закрыты.",
+   "max_mm": 18.79,
+   "moved_vertices": 1044,
+   "moved_frac": 0.35,
+   "center": [
+    0.0,
+    -0.045,
+    1.453
+   ],
+   "spread_z": 0.041,
+   "file": "012_00_Close01_Eye",
+   "dead": false
+  },
+  {
+   "key": "00_Close03_Eye",
+   "group": "eye",
+   "caption": "Глаза закрыты.",
+   "max_mm": 13.23,
+   "moved_vertices": 1046,
+   "moved_frac": 0.351,
+   "center": [
+    0.0,
+    -0.045,
+    1.453
+   ],
+   "spread_z": 0.041,
+   "file": "014_00_Close03_Eye",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Angry01",
+   "group": "eye",
+   "caption": "Глаза сузились, выражая гнев.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "068_Eye_02_Angry01",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Angry02",
+   "group": "eye",
+   "caption": "Брови опущены и сдвинуты к центру, выражая гнев.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "069_Eye_02_Angry02",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Default",
+   "group": "eye",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "070_Eye_02_Default",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Doubt01",
+   "group": "eye",
+   "caption": "Глаза прищурены, выражая сомнение.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.039,
+   "file": "071_Eye_02_Doubt01",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Doubt02",
+   "group": "eye",
+   "caption": "Глаза прищурены, выражая сомнение.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "072_Eye_02_Doubt02",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Gentle01",
+   "group": "eye",
+   "caption": "Глаза стали более мягкими и добрыми.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "073_Eye_02_Gentle01",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Gentle02",
+   "group": "eye",
+   "caption": "Глаза стали более мягкими и прищуренными.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "074_Eye_02_Gentle02",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Surprise01",
+   "group": "eye",
+   "caption": "Глаза расширены, выражая удивление.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "075_Eye_02_Surprise01",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Surprise02",
+   "group": "eye",
+   "caption": "Глаза стали шире, выражая удивление.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "076_Eye_02_Surprise02",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Sweat01",
+   "group": "eye",
+   "caption": "Глаза прищурены.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "077_Eye_02_Sweat01",
+   "dead": false
+  },
+  {
+   "key": "Eye_02_Sweat02",
+   "group": "eye",
+   "caption": "Глаза прищурены.",
+   "max_mm": 12.76,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.039,
+    1.456
+   ],
+   "spread_z": 0.039,
+   "file": "078_Eye_02_Sweat02",
+   "dead": false
+  },
+  {
+   "key": "00_Close02_Eye",
+   "group": "eye",
+   "caption": "Глаза закрыты.",
+   "max_mm": 10.72,
+   "moved_vertices": 1044,
+   "moved_frac": 0.35,
+   "center": [
+    0.0,
+    -0.044,
+    1.453
+   ],
+   "spread_z": 0.041,
+   "file": "013_00_Close02_Eye",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Angry01",
+   "group": "eye",
+   "caption": "Брови опущены к переносице, выражая гнев.",
+   "max_mm": 10.44,
+   "moved_vertices": 734,
+   "moved_frac": 0.246,
+   "center": [
+    0.0,
+    -0.054,
+    1.451
+   ],
+   "spread_z": 0.046,
+   "file": "057_Eye_01_Angry01",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Angry02",
+   "group": "eye",
+   "caption": "Глаза и брови придали лицу выражение гнева.",
+   "max_mm": 10.44,
+   "moved_vertices": 940,
+   "moved_frac": 0.315,
+   "center": [
+    0.0,
+    -0.052,
+    1.451
+   ],
+   "spread_z": 0.046,
+   "file": "058_Eye_01_Angry02",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Default",
+   "group": "eye",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 10.44,
+   "moved_vertices": 102,
+   "moved_frac": 0.034,
+   "center": [
+    0.0,
+    -0.056,
+    1.445
+   ],
+   "spread_z": 0.034,
+   "file": "059_Eye_01_Default",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Doubt01",
+   "group": "eye",
+   "caption": "Глаза прищурены, выражая сомнение.",
+   "max_mm": 10.44,
+   "moved_vertices": 950,
+   "moved_frac": 0.318,
+   "center": [
+    0.0,
+    -0.052,
+    1.451
+   ],
+   "spread_z": 0.047,
+   "file": "060_Eye_01_Doubt01",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Doubt02",
+   "group": "eye",
+   "caption": "Левый глаз прищурен, выражая сомнение.",
+   "max_mm": 10.44,
+   "moved_vertices": 948,
+   "moved_frac": 0.318,
+   "center": [
+    0.002,
+    -0.052,
+    1.448
+   ],
+   "spread_z": 0.054,
+   "file": "061_Eye_01_Doubt02",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Gentle01",
+   "group": "eye",
+   "caption": "Глаза стали более мягкими и добрыми.",
+   "max_mm": 10.44,
+   "moved_vertices": 759,
+   "moved_frac": 0.254,
+   "center": [
+    0.0,
+    -0.052,
+    1.448
+   ],
+   "spread_z": 0.041,
+   "file": "062_Eye_01_Gentle01",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Gentle02",
+   "group": "eye",
+   "caption": "Глаза стали более мягкими и прищуренными.",
+   "max_mm": 10.44,
+   "moved_vertices": 910,
+   "moved_frac": 0.305,
+   "center": [
+    -0.0,
+    -0.052,
+    1.448
+   ],
+   "spread_z": 0.04,
+   "file": "063_Eye_01_Gentle02",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Surprise01",
+   "group": "eye",
+   "caption": "Глаза расширены, выражение удивления.",
+   "max_mm": 10.44,
+   "moved_vertices": 932,
+   "moved_frac": 0.312,
+   "center": [
+    0.0,
+    -0.052,
+    1.452
+   ],
+   "spread_z": 0.048,
+   "file": "064_Eye_01_Surprise01",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Surprise02",
+   "group": "eye",
+   "caption": "Глаза стали шире, выражая удивление.",
+   "max_mm": 10.44,
+   "moved_vertices": 943,
+   "moved_frac": 0.316,
+   "center": [
+    0.0,
+    -0.052,
+    1.452
+   ],
+   "spread_z": 0.048,
+   "file": "065_Eye_01_Surprise02",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Sweat01",
+   "group": "eye",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 10.44,
+   "moved_vertices": 846,
+   "moved_frac": 0.284,
+   "center": [
+    0.0,
+    -0.052,
+    1.446
+   ],
+   "spread_z": 0.037,
+   "file": "066_Eye_01_Sweat01",
+   "dead": false
+  },
+  {
+   "key": "Eye_01_Sweat02",
+   "group": "eye",
+   "caption": "Глаза прищурены.",
+   "max_mm": 10.44,
+   "moved_vertices": 986,
+   "moved_frac": 0.331,
+   "center": [
+    0.0,
+    -0.052,
+    1.447
+   ],
+   "spread_z": 0.052,
+   "file": "067_Eye_01_Sweat02",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Angry01",
+   "group": "eye",
+   "caption": "Брови опущены к переносице, выражая гнев.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "046_Eye_00_Angry01",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Angry02",
+   "group": "eye",
+   "caption": "Глаза и брови стали выражать гнев.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "047_Eye_00_Angry02",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Default",
+   "group": "eye",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "048_Eye_00_Default",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Doubt01",
+   "group": "eye",
+   "caption": "Глаза прищурены, выражая сомнение.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "049_Eye_00_Doubt01",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Doubt02",
+   "group": "eye",
+   "caption": "Глаза прищурены, выражая сомнение.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "050_Eye_00_Doubt02",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Gentle01",
+   "group": "eye",
+   "caption": "Глаза стали более мягкими и добрыми.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "051_Eye_00_Gentle01",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Gentle02",
+   "group": "eye",
+   "caption": "Глаза стали более мягкими и добрыми.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "052_Eye_00_Gentle02",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Surprise01",
+   "group": "eye",
+   "caption": "Глаза расширены, выражая удивление.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "053_Eye_00_Surprise01",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Surprise02",
+   "group": "eye",
+   "caption": "Глаза расширены, выражая удивление.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.041,
+   "file": "054_Eye_00_Surprise02",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Sweat01",
+   "group": "eye",
+   "caption": "Глаза прищурены.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.455
+   ],
+   "spread_z": 0.039,
+   "file": "055_Eye_00_Sweat01",
+   "dead": false
+  },
+  {
+   "key": "Eye_00_Sweat02",
+   "group": "eye",
+   "caption": "Глаза прищурены.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.455
+   ],
+   "spread_z": 0.038,
+   "file": "056_Eye_00_Sweat02",
+   "dead": false
+  },
+  {
+   "key": "じと目",
+   "group": "eye",
+   "caption": "Глаза стали полуприкрытыми, выражая скептицизм или безразличие.",
+   "max_mm": 10.12,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    0.0,
+    -0.042,
+    1.456
+   ],
+   "spread_z": 0.04,
+   "file": "237_key",
+   "dead": false
+  },
+  {
+   "key": "00_Sweat03_Unique_Permanent_Eye",
+   "group": "eye",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 5.42,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.044,
+    1.455
+   ],
+   "spread_z": 0.038,
+   "file": "018_00_Sweat03_Unique_Permanent_Eye",
+   "dead": false
+  },
+  {
+   "key": "00_Default_Eye",
+   "group": "eye",
+   "caption": "Не меняется.",
+   "max_mm": 4.04,
+   "moved_vertices": 1042,
+   "moved_frac": 0.349,
+   "center": [
+    -0.0,
+    -0.044,
+    1.455
+   ],
+   "spread_z": 0.038,
+   "file": "016_00_Default_Eye",
+   "dead": false
+  },
+  {
+   "key": "ウィンク２",
+   "group": "eye",
+   "caption": "Левый глаз прищурен (подмигивание).",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "230_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "ウィンク",
+   "group": "eye",
+   "caption": "Левый глаз закрыт (подмигивание).",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "233_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "ウィンク右",
+   "group": "eye",
+   "caption": "Правый глаз закрыт (подмигивание).",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "234_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "細目",
+   "group": "eye",
+   "caption": "Глаза стали более узкими.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "238_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "Mouth_00_Tongue02",
+   "group": "mouth",
+   "caption": "Рот: высунут язык.",
+   "max_mm": 19.18,
+   "moved_vertices": 1078,
+   "moved_frac": 0.361,
+   "center": [
+    -0.0,
+    -0.06,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "133_Mouth_00_Tongue02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Tongue01",
+   "group": "mouth",
+   "caption": "Рот: виден язык.",
+   "max_mm": 17.01,
+   "moved_vertices": 1047,
+   "moved_frac": 0.351,
+   "center": [
+    -0.0,
+    -0.06,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "132_Mouth_00_Tongue01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_A",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражение удивления.",
+   "max_mm": 13.42,
+   "moved_vertices": 1190,
+   "moved_frac": 0.399,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.049,
+   "file": "143_Mouth_01_A",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Max",
+   "group": "mouth",
+   "caption": "Рот открыт.",
+   "max_mm": 13.34,
+   "moved_vertices": 1190,
+   "moved_frac": 0.399,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.049,
+   "file": "155_Mouth_01_Max",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Angry04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая гнев.",
+   "max_mm": 13.13,
+   "moved_vertices": 1192,
+   "moved_frac": 0.4,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.049,
+   "file": "147_Mouth_01_Angry04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Max",
+   "group": "mouth",
+   "caption": "Рот открыт.",
+   "max_mm": 12.8,
+   "moved_vertices": 1240,
+   "moved_frac": 0.416,
+   "center": [
+    0.0,
+    -0.043,
+    1.408
+   ],
+   "spread_z": 0.07,
+   "file": "091_Mouth_00_Max",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_ao",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 12.02,
+   "moved_vertices": 1188,
+   "moved_frac": 0.398,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.048,
+   "file": "167_Mouth_01_Phoneme_cn_ao",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Minimum",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.93,
+   "moved_vertices": 1025,
+   "moved_frac": 0.344,
+   "center": [
+    -0.0,
+    -0.053,
+    1.403
+   ],
+   "spread_z": 0.037,
+   "file": "156_Mouth_01_Minimum",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Pain04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 11.85,
+   "moved_vertices": 1244,
+   "moved_frac": 0.417,
+   "center": [
+    0.0,
+    -0.043,
+    1.408
+   ],
+   "spread_z": 0.071,
+   "file": "099_Mouth_00_Pain04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Angry04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая гнев.",
+   "max_mm": 11.68,
+   "moved_vertices": 1240,
+   "moved_frac": 0.416,
+   "center": [
+    0.0,
+    -0.043,
+    1.408
+   ],
+   "spread_z": 0.07,
+   "file": "083_Mouth_00_Angry04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Smile04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в улыбке.",
+   "max_mm": 11.62,
+   "moved_vertices": 1212,
+   "moved_frac": 0.406,
+   "center": [
+    0.0,
+    -0.038,
+    1.401
+   ],
+   "spread_z": 0.057,
+   "file": "195_Mouth_01_Smile04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_O",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая удивление.",
+   "max_mm": 11.33,
+   "moved_vertices": 1186,
+   "moved_frac": 0.398,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.048,
+   "file": "159_Mouth_01_O",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_O",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая удивление.",
+   "max_mm": 11.26,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "095_Mouth_00_O",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_o",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в форме буквы «О».",
+   "max_mm": 11.26,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "115_Mouth_00_Phoneme_cn_o",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_A",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.24,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "079_Mouth_00_A",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_ao",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.2,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "103_Mouth_00_Phoneme_cn_ao",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Pain04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 10.69,
+   "moved_vertices": 1190,
+   "moved_frac": 0.399,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.049,
+   "file": "163_Mouth_01_Pain04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_u",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 10.69,
+   "moved_vertices": 993,
+   "moved_frac": 0.333,
+   "center": [
+    -0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "184_Mouth_01_Phoneme_cn_u",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_U",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 10.69,
+   "moved_vertices": 993,
+   "moved_frac": 0.333,
+   "center": [
+    -0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "198_Mouth_01_U",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_a",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 10.65,
+   "moved_vertices": 1186,
+   "moved_frac": 0.398,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.048,
+   "file": "164_Mouth_01_Phoneme_cn_a",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Worry04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая беспокойство.",
+   "max_mm": 10.29,
+   "moved_vertices": 1188,
+   "moved_frac": 0.398,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.049,
+   "file": "204_Mouth_01_Worry04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Minimum",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 10.22,
+   "moved_vertices": 1106,
+   "moved_frac": 0.371,
+   "center": [
+    -0.0,
+    -0.058,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "092_Mouth_00_Minimum",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Smile04",
+   "group": "mouth",
+   "caption": "Рот улыбается.",
+   "max_mm": 10.22,
+   "moved_vertices": 1242,
+   "moved_frac": 0.416,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "131_Mouth_00_Smile04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Worry04",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая беспокойство.",
+   "max_mm": 10.22,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "142_Mouth_00_Worry04",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_ou",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в форме буквы «О».",
+   "max_mm": 10.21,
+   "moved_vertices": 1186,
+   "moved_frac": 0.398,
+   "center": [
+    0.0,
+    -0.038,
+    1.397
+   ],
+   "spread_z": 0.048,
+   "file": "180_Mouth_01_Phoneme_cn_ou",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Angry03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражение лица выражает гнев.",
+   "max_mm": 10.17,
+   "moved_vertices": 1240,
+   "moved_frac": 0.416,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "082_Mouth_00_Angry03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Smile03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в улыбке.",
+   "max_mm": 9.86,
+   "moved_vertices": 1232,
+   "moved_frac": 0.413,
+   "center": [
+    0.0,
+    -0.045,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "130_Mouth_00_Smile03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_o",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в форме буквы «О».",
+   "max_mm": 9.63,
+   "moved_vertices": 1184,
+   "moved_frac": 0.397,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.048,
+   "file": "179_Mouth_01_Phoneme_cn_o",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_u",
+   "group": "mouth",
+   "caption": "Рот вытянут вперед в форме трубочки.",
+   "max_mm": 9.56,
+   "moved_vertices": 1074,
+   "moved_frac": 0.36,
+   "center": [
+    -0.0,
+    -0.059,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "120_Mouth_00_Phoneme_cn_u",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_U",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 9.56,
+   "moved_vertices": 1074,
+   "moved_frac": 0.36,
+   "center": [
+    -0.0,
+    -0.059,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "136_Mouth_00_U",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_w",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в форме буквы «О».",
+   "max_mm": 9.49,
+   "moved_vertices": 1015,
+   "moved_frac": 0.34,
+   "center": [
+    0.0,
+    -0.053,
+    1.403
+   ],
+   "spread_z": 0.037,
+   "file": "185_Mouth_01_Phoneme_cn_w",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_a",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 9.48,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "100_Mouth_00_Phoneme_cn_a",
+   "dead": false
+  },
+  {
+   "key": "▲",
+   "group": "mouth",
+   "caption": "Подбородок стал более острым.",
+   "max_mm": 9.14,
+   "moved_vertices": 1231,
+   "moved_frac": 0.413,
+   "center": [
+    -0.0,
+    -0.046,
+    1.41
+   ],
+   "spread_z": 0.069,
+   "file": "244_key",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_an",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 8.96,
+   "moved_vertices": 1182,
+   "moved_frac": 0.396,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.048,
+   "file": "166_Mouth_01_Phoneme_cn_an",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_ou",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 8.95,
+   "moved_vertices": 1236,
+   "moved_frac": 0.414,
+   "center": [
+    0.0,
+    -0.044,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "116_Mouth_00_Phoneme_cn_ou",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Smile03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в улыбке.",
+   "max_mm": 8.33,
+   "moved_vertices": 1184,
+   "moved_frac": 0.397,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.047,
+   "file": "194_Mouth_01_Smile03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Proud02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в самодовольной или гордой ухмылке.",
+   "max_mm": 8.3,
+   "moved_vertices": 1086,
+   "moved_frac": 0.364,
+   "center": [
+    -0.0,
+    -0.058,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "127_Mouth_00_Proud02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_w",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 8.08,
+   "moved_vertices": 1095,
+   "moved_frac": 0.367,
+   "center": [
+    -0.0,
+    -0.058,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "121_Mouth_00_Phoneme_cn_w",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Angry03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражение лица выражает гнев.",
+   "max_mm": 8.0,
+   "moved_vertices": 1184,
+   "moved_frac": 0.397,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.047,
+   "file": "146_Mouth_01_Angry03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Pain03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 7.73,
+   "moved_vertices": 1184,
+   "moved_frac": 0.397,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.047,
+   "file": "162_Mouth_01_Pain03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_ai",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 7.56,
+   "moved_vertices": 1156,
+   "moved_frac": 0.388,
+   "center": [
+    0.0,
+    -0.039,
+    1.398
+   ],
+   "spread_z": 0.046,
+   "file": "165_Mouth_01_Phoneme_cn_ai",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Pain03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 7.52,
+   "moved_vertices": 1242,
+   "moved_frac": 0.416,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "098_Mouth_00_Pain03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_ai",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 7.43,
+   "moved_vertices": 1236,
+   "moved_frac": 0.414,
+   "center": [
+    0.0,
+    -0.044,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "101_Mouth_00_Phoneme_cn_ai",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Proud02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в гордой или самоуверенной ухмылке.",
+   "max_mm": 7.39,
+   "moved_vertices": 1180,
+   "moved_frac": 0.396,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.047,
+   "file": "191_Mouth_01_Proud02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Worry03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая беспокойство.",
+   "max_mm": 7.23,
+   "moved_vertices": 1184,
+   "moved_frac": 0.397,
+   "center": [
+    0.0,
+    -0.038,
+    1.398
+   ],
+   "spread_z": 0.047,
+   "file": "203_Mouth_01_Worry03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_an",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 7.15,
+   "moved_vertices": 1236,
+   "moved_frac": 0.414,
+   "center": [
+    0.0,
+    -0.044,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "102_Mouth_00_Phoneme_cn_an",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Worry03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая беспокойство.",
+   "max_mm": 6.89,
+   "moved_vertices": 1230,
+   "moved_frac": 0.412,
+   "center": [
+    0.0,
+    -0.045,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "141_Mouth_00_Worry03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Angry02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражение лица — гнев.",
+   "max_mm": 6.86,
+   "moved_vertices": 1005,
+   "moved_frac": 0.337,
+   "center": [
+    0.0,
+    -0.053,
+    1.403
+   ],
+   "spread_z": 0.037,
+   "file": "145_Mouth_01_Angry02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Proud01",
+   "group": "mouth",
+   "caption": "Рот приподнят в гордой ухмылке.",
+   "max_mm": 6.51,
+   "moved_vertices": 498,
+   "moved_frac": 0.167,
+   "center": [
+    0.001,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.031,
+   "file": "190_Mouth_01_Proud01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Pout",
+   "group": "mouth",
+   "caption": "Рот выпятился, выражая обиду.",
+   "max_mm": 6.48,
+   "moved_vertices": 723,
+   "moved_frac": 0.242,
+   "center": [
+    -0.0,
+    -0.054,
+    1.405
+   ],
+   "spread_z": 0.042,
+   "file": "189_Mouth_01_Pout",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Narrow",
+   "group": "mouth",
+   "caption": "Рот стал уже.",
+   "max_mm": 6.46,
+   "moved_vertices": 1049,
+   "moved_frac": 0.352,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "094_Mouth_00_Narrow",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Worry02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая беспокойство.",
+   "max_mm": 6.46,
+   "moved_vertices": 1106,
+   "moved_frac": 0.371,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "140_Mouth_00_Worry02",
+   "dead": false
+  },
+  {
+   "key": "∧",
+   "group": "mouth",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 6.46,
+   "moved_vertices": 1049,
+   "moved_frac": 0.352,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "245_key",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Pain02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 6.36,
+   "moved_vertices": 744,
+   "moved_frac": 0.249,
+   "center": [
+    0.0,
+    -0.056,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "161_Mouth_01_Pain02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Narrow",
+   "group": "mouth",
+   "caption": "Рот стал уже.",
+   "max_mm": 6.28,
+   "moved_vertices": 603,
+   "moved_frac": 0.202,
+   "center": [
+    0.0,
+    -0.053,
+    1.404
+   ],
+   "spread_z": 0.028,
+   "file": "158_Mouth_01_Narrow",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Pain01",
+   "group": "mouth",
+   "caption": "Рот искривлен, выражая боль.",
+   "max_mm": 6.2,
+   "moved_vertices": 668,
+   "moved_frac": 0.224,
+   "center": [
+    0.0,
+    -0.056,
+    1.406
+   ],
+   "spread_z": 0.03,
+   "file": "160_Mouth_01_Pain01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Pout",
+   "group": "mouth",
+   "caption": "Рот слегка выпячен, выражая недовольство или обиду.",
+   "max_mm": 6.05,
+   "moved_vertices": 1084,
+   "moved_frac": 0.363,
+   "center": [
+    -0.0,
+    -0.055,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "125_Mouth_00_Pout",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Pain02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 6.03,
+   "moved_vertices": 1090,
+   "moved_frac": 0.365,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "097_Mouth_00_Pain02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Delta03",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 6.0,
+   "moved_vertices": 977,
+   "moved_frac": 0.328,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "151_Mouth_01_Delta03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Twisted02",
+   "group": "mouth",
+   "caption": "Рот искривлен, выражая недовольство или скепсис.",
+   "max_mm": 5.91,
+   "moved_vertices": 886,
+   "moved_frac": 0.297,
+   "center": [
+    -0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "197_Mouth_01_Twisted02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Worry02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая беспокойство.",
+   "max_mm": 5.91,
+   "moved_vertices": 886,
+   "moved_frac": 0.297,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "202_Mouth_01_Worry02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Smile02",
+   "group": "mouth",
+   "caption": "Рот улыбается.",
+   "max_mm": 5.79,
+   "moved_vertices": 1085,
+   "moved_frac": 0.364,
+   "center": [
+    -0.0,
+    -0.059,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "129_Mouth_00_Smile02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_ei",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.72,
+   "moved_vertices": 979,
+   "moved_frac": 0.328,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.033,
+   "file": "171_Mouth_01_Phoneme_cn_ei",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_E",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 5.61,
+   "moved_vertices": 967,
+   "moved_frac": 0.324,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "153_Mouth_01_E",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_E",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 5.46,
+   "moved_vertices": 1063,
+   "moved_frac": 0.356,
+   "center": [
+    -0.0,
+    -0.057,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "089_Mouth_00_E",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Delta02",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.35,
+   "moved_vertices": 740,
+   "moved_frac": 0.248,
+   "center": [
+    0.0,
+    -0.056,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "150_Mouth_01_Delta02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_e",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.35,
+   "moved_vertices": 1150,
+   "moved_frac": 0.386,
+   "center": [
+    0.0,
+    -0.042,
+    1.398
+   ],
+   "spread_z": 0.046,
+   "file": "170_Mouth_01_Phoneme_cn_e",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Pain01",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражая боль.",
+   "max_mm": 5.3,
+   "moved_vertices": 1080,
+   "moved_frac": 0.362,
+   "center": [
+    -0.0,
+    -0.057,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "096_Mouth_00_Pain01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Delta01",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.27,
+   "moved_vertices": 1058,
+   "moved_frac": 0.355,
+   "center": [
+    -0.0,
+    -0.059,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "085_Mouth_00_Delta01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Delta01",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.26,
+   "moved_vertices": 667,
+   "moved_frac": 0.224,
+   "center": [
+    -0.0,
+    -0.056,
+    1.406
+   ],
+   "spread_z": 0.031,
+   "file": "149_Mouth_01_Delta01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Angry02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, выражение лица — гнев.",
+   "max_mm": 5.24,
+   "moved_vertices": 1101,
+   "moved_frac": 0.369,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "081_Mouth_00_Angry02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Delta03",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.19,
+   "moved_vertices": 1071,
+   "moved_frac": 0.359,
+   "center": [
+    -0.0,
+    -0.057,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "087_Mouth_00_Delta03",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_en",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.15,
+   "moved_vertices": 1166,
+   "moved_frac": 0.391,
+   "center": [
+    0.0,
+    -0.039,
+    1.398
+   ],
+   "spread_z": 0.046,
+   "file": "172_Mouth_01_Phoneme_cn_en",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_en",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.06,
+   "moved_vertices": 1092,
+   "moved_frac": 0.366,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "108_Mouth_00_Phoneme_cn_en",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_e",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.05,
+   "moved_vertices": 1166,
+   "moved_frac": 0.391,
+   "center": [
+    0.0,
+    -0.057,
+    1.41
+   ],
+   "spread_z": 0.067,
+   "file": "106_Mouth_00_Phoneme_cn_e",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Delta02",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 5.04,
+   "moved_vertices": 1045,
+   "moved_frac": 0.35,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "086_Mouth_00_Delta02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Up",
+   "group": "mouth",
+   "caption": "Рот приподнят, выражение лица стало более радостным.",
+   "max_mm": 4.93,
+   "moved_vertices": 1047,
+   "moved_frac": 0.351,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.052,
+   "file": "137_Mouth_00_Up",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Twisted01",
+   "group": "mouth",
+   "caption": "Рот слегка искривлён в сторону.",
+   "max_mm": 4.91,
+   "moved_vertices": 1058,
+   "moved_frac": 0.355,
+   "center": [
+    -0.0,
+    -0.059,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "134_Mouth_00_Twisted01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_ei",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 4.87,
+   "moved_vertices": 1063,
+   "moved_frac": 0.356,
+   "center": [
+    -0.0,
+    -0.057,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "107_Mouth_00_Phoneme_cn_ei",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Down",
+   "group": "mouth",
+   "caption": "Уголки рта опущены, выражение грусти.",
+   "max_mm": 4.82,
+   "moved_vertices": 1047,
+   "moved_frac": 0.351,
+   "center": [
+    -0.0,
+    -0.059,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "088_Mouth_00_Down",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Twisted01",
+   "group": "mouth",
+   "caption": "Рот слегка искривлён в сторону.",
+   "max_mm": 4.63,
+   "moved_vertices": 666,
+   "moved_frac": 0.223,
+   "center": [
+    -0.0,
+    -0.056,
+    1.406
+   ],
+   "spread_z": 0.03,
+   "file": "196_Mouth_01_Twisted01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Twisted02",
+   "group": "mouth",
+   "caption": "Рот искривлен.",
+   "max_mm": 4.48,
+   "moved_vertices": 1101,
+   "moved_frac": 0.369,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.059,
+   "file": "135_Mouth_00_Twisted02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Angry01",
+   "group": "mouth",
+   "caption": "Рот изменился, выражая гнев.",
+   "max_mm": 4.42,
+   "moved_vertices": 669,
+   "moved_frac": 0.224,
+   "center": [
+    0.0,
+    -0.054,
+    1.405
+   ],
+   "spread_z": 0.03,
+   "file": "144_Mouth_01_Angry01",
+   "dead": false
+  },
+  {
+   "key": "ω",
+   "group": "mouth",
+   "caption": "Подбородок стал более острым.",
+   "max_mm": 4.42,
+   "moved_vertices": 669,
+   "moved_frac": 0.224,
+   "center": [
+    0.0,
+    -0.054,
+    1.405
+   ],
+   "spread_z": 0.031,
+   "file": "246_key",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_g",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 4.32,
+   "moved_vertices": 1094,
+   "moved_frac": 0.367,
+   "center": [
+    -0.0,
+    -0.058,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "110_Mouth_00_Phoneme_cn_g",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_zh",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 4.23,
+   "moved_vertices": 1088,
+   "moved_frac": 0.365,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "124_Mouth_00_Phoneme_cn_zh",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Wide",
+   "group": "mouth",
+   "caption": "Рот стал шире.",
+   "max_mm": 4.21,
+   "moved_vertices": 1047,
+   "moved_frac": 0.351,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "138_Mouth_00_Wide",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_N",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 4.1,
+   "moved_vertices": 835,
+   "moved_frac": 0.28,
+   "center": [
+    0.0,
+    -0.056,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "157_Mouth_01_N",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Proud01",
+   "group": "mouth",
+   "caption": "Рот приподнят в гордой или самоуверенной улыбке.",
+   "max_mm": 4.09,
+   "moved_vertices": 1043,
+   "moved_frac": 0.35,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "126_Mouth_00_Proud01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_z",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 4.02,
+   "moved_vertices": 1062,
+   "moved_frac": 0.356,
+   "center": [
+    -0.0,
+    -0.057,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "123_Mouth_00_Phoneme_cn_z",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Wide",
+   "group": "mouth",
+   "caption": "Рот стал шире.",
+   "max_mm": 4.01,
+   "moved_vertices": 593,
+   "moved_frac": 0.199,
+   "center": [
+    -0.0,
+    -0.053,
+    1.403
+   ],
+   "spread_z": 0.026,
+   "file": "200_Mouth_01_Wide",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Worry01",
+   "group": "mouth",
+   "caption": "Рот изменился, выражая беспокойство.",
+   "max_mm": 4.0,
+   "moved_vertices": 557,
+   "moved_frac": 0.187,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.03,
+   "file": "201_Mouth_01_Worry01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Smile02",
+   "group": "mouth",
+   "caption": "Рот приоткрыт в легкой улыбке.",
+   "max_mm": 3.97,
+   "moved_vertices": 827,
+   "moved_frac": 0.277,
+   "center": [
+    -0.0,
+    -0.056,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "193_Mouth_01_Smile02",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_g",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.96,
+   "moved_vertices": 949,
+   "moved_frac": 0.318,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "174_Mouth_01_Phoneme_cn_g",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_N",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.87,
+   "moved_vertices": 1061,
+   "moved_frac": 0.356,
+   "center": [
+    -0.0,
+    -0.057,
+    1.417
+   ],
+   "spread_z": 0.054,
+   "file": "093_Mouth_00_N",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_n",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.8,
+   "moved_vertices": 996,
+   "moved_frac": 0.334,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "114_Mouth_00_Phoneme_cn_n",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Smile01",
+   "group": "mouth",
+   "caption": "Рот приподнят в улыбке.",
+   "max_mm": 3.8,
+   "moved_vertices": 1058,
+   "moved_frac": 0.355,
+   "center": [
+    -0.0,
+    -0.059,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "128_Mouth_00_Smile01",
+   "dead": false
+  },
+  {
+   "key": "にやり",
+   "group": "mouth",
+   "caption": "Рот приподнят в ухмылке.",
+   "max_mm": 3.8,
+   "moved_vertices": 1058,
+   "moved_frac": 0.355,
+   "center": [
+    -0.0,
+    -0.059,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "247_key",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_l",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.76,
+   "moved_vertices": 1222,
+   "moved_frac": 0.41,
+   "center": [
+    0.0,
+    -0.046,
+    1.41
+   ],
+   "spread_z": 0.068,
+   "file": "113_Mouth_00_Phoneme_cn_l",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_r",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.76,
+   "moved_vertices": 1226,
+   "moved_frac": 0.411,
+   "center": [
+    0.0,
+    -0.045,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "118_Mouth_00_Phoneme_cn_r",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_I",
+   "group": "mouth",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 3.76,
+   "moved_vertices": 813,
+   "moved_frac": 0.273,
+   "center": [
+    0.0,
+    -0.056,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "154_Mouth_01_I",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_d",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.7,
+   "moved_vertices": 1222,
+   "moved_frac": 0.41,
+   "center": [
+    0.0,
+    -0.046,
+    1.41
+   ],
+   "spread_z": 0.068,
+   "file": "105_Mouth_00_Phoneme_cn_d",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Angry01",
+   "group": "mouth",
+   "caption": "Рот изменился, выражая гнев.",
+   "max_mm": 3.69,
+   "moved_vertices": 1078,
+   "moved_frac": 0.361,
+   "center": [
+    -0.0,
+    -0.057,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "080_Mouth_00_Angry01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_f",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.69,
+   "moved_vertices": 1066,
+   "moved_frac": 0.357,
+   "center": [
+    -0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "109_Mouth_00_Phoneme_cn_f",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Worry01",
+   "group": "mouth",
+   "caption": "Рот изменился, выражая беспокойство.",
+   "max_mm": 3.68,
+   "moved_vertices": 1048,
+   "moved_frac": 0.351,
+   "center": [
+    -0.0,
+    -0.059,
+    1.415
+   ],
+   "spread_z": 0.057,
+   "file": "139_Mouth_00_Worry01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Default",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1031,
+   "moved_frac": 0.346,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "084_Mouth_00_Default",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_I",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1001,
+   "moved_frac": 0.336,
+   "center": [
+    -0.0,
+    -0.057,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "090_Mouth_00_I",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_b",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1031,
+   "moved_frac": 0.346,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "104_Mouth_00_Phoneme_cn_b",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_i",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1013,
+   "moved_frac": 0.34,
+   "center": [
+    -0.0,
+    -0.057,
+    1.417
+   ],
+   "spread_z": 0.054,
+   "file": "111_Mouth_00_Phoneme_cn_i",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_j",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1001,
+   "moved_frac": 0.336,
+   "center": [
+    -0.0,
+    -0.057,
+    1.416
+   ],
+   "spread_z": 0.054,
+   "file": "112_Mouth_00_Phoneme_cn_j",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_stop",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1031,
+   "moved_frac": 0.346,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "119_Mouth_00_Phoneme_cn_stop",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_y",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 1013,
+   "moved_frac": 0.34,
+   "center": [
+    -0.0,
+    -0.057,
+    1.417
+   ],
+   "spread_z": 0.054,
+   "file": "122_Mouth_00_Phoneme_cn_y",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_r",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.67,
+   "moved_vertices": 971,
+   "moved_frac": 0.326,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "182_Mouth_01_Phoneme_cn_r",
+   "dead": false
+  },
+  {
+   "key": "Mouth_00_Phoneme_cn_q",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.66,
+   "moved_vertices": 1009,
+   "moved_frac": 0.338,
+   "center": [
+    -0.0,
+    -0.057,
+    1.417
+   ],
+   "spread_z": 0.054,
+   "file": "117_Mouth_00_Phoneme_cn_q",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_l",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.52,
+   "moved_vertices": 955,
+   "moved_frac": 0.32,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "177_Mouth_01_Phoneme_cn_l",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_zh",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.47,
+   "moved_vertices": 971,
+   "moved_frac": 0.326,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "188_Mouth_01_Phoneme_cn_zh",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Smile01",
+   "group": "mouth",
+   "caption": "Рот улыбается.",
+   "max_mm": 3.43,
+   "moved_vertices": 645,
+   "moved_frac": 0.216,
+   "center": [
+    0.0,
+    -0.053,
+    1.404
+   ],
+   "spread_z": 0.028,
+   "file": "192_Mouth_01_Smile01",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_n",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.38,
+   "moved_vertices": 969,
+   "moved_frac": 0.325,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "178_Mouth_01_Phoneme_cn_n",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Up",
+   "group": "mouth",
+   "caption": "Рот приподнят, выражая легкую улыбку.",
+   "max_mm": 3.38,
+   "moved_vertices": 664,
+   "moved_frac": 0.223,
+   "center": [
+    0.0,
+    -0.056,
+    1.406
+   ],
+   "spread_z": 0.031,
+   "file": "199_Mouth_01_Up",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Down",
+   "group": "mouth",
+   "caption": "Уголки рта опущены, выражение грусти.",
+   "max_mm": 3.31,
+   "moved_vertices": 669,
+   "moved_frac": 0.224,
+   "center": [
+    0.0,
+    -0.056,
+    1.403
+   ],
+   "spread_z": 0.036,
+   "file": "152_Mouth_01_Down",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_j",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.22,
+   "moved_vertices": 829,
+   "moved_frac": 0.278,
+   "center": [
+    0.0,
+    -0.056,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "176_Mouth_01_Phoneme_cn_j",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_z",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 2.98,
+   "moved_vertices": 959,
+   "moved_frac": 0.321,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "187_Mouth_01_Phoneme_cn_z",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_f",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 2.73,
+   "moved_vertices": 971,
+   "moved_frac": 0.326,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "173_Mouth_01_Phoneme_cn_f",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_d",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 2.7,
+   "moved_vertices": 953,
+   "moved_frac": 0.319,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "169_Mouth_01_Phoneme_cn_d",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_y",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 2.62,
+   "moved_vertices": 945,
+   "moved_frac": 0.317,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "186_Mouth_01_Phoneme_cn_y",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_q",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 2.58,
+   "moved_vertices": 947,
+   "moved_frac": 0.317,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "181_Mouth_01_Phoneme_cn_q",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_i",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 2.56,
+   "moved_vertices": 945,
+   "moved_frac": 0.317,
+   "center": [
+    0.0,
+    -0.053,
+    1.405
+   ],
+   "spread_z": 0.032,
+   "file": "175_Mouth_01_Phoneme_cn_i",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_b",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 1.0,
+   "moved_vertices": 631,
+   "moved_frac": 0.212,
+   "center": [
+    0.0,
+    -0.054,
+    1.404
+   ],
+   "spread_z": 0.027,
+   "file": "168_Mouth_01_Phoneme_cn_b",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Phoneme_cn_stop",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 1.0,
+   "moved_vertices": 631,
+   "moved_frac": 0.212,
+   "center": [
+    0.0,
+    -0.054,
+    1.404
+   ],
+   "spread_z": 0.027,
+   "file": "183_Mouth_01_Phoneme_cn_stop",
+   "dead": false
+  },
+  {
+   "key": "00_Default_Mouth",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 0.97,
+   "moved_vertices": 822,
+   "moved_frac": 0.276,
+   "center": [
+    0.0,
+    -0.051,
+    1.404
+   ],
+   "spread_z": 0.027,
+   "file": "017_00_Default_Mouth",
+   "dead": false
+  },
+  {
+   "key": "Mouth_01_Default",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт в легкой улыбке.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "148_Mouth_01_Default",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "はんっ！",
+   "group": "mouth",
+   "caption": "Рот слегка приоткрыт, выражая недовольство или возмущение.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "248_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "ぺろっ",
+   "group": "mouth",
+   "caption": "Рот приоткрыт, кончик языка слегка высунут.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "252_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "まばたき",
+   "group": "other",
+   "caption": "Глаза закрыты.",
+   "max_mm": 18.79,
+   "moved_vertices": 1044,
+   "moved_frac": 0.35,
+   "center": [
+    0.0,
+    -0.045,
+    1.453
+   ],
+   "spread_z": 0.041,
+   "file": "229_key",
+   "dead": false
+  },
+  {
+   "key": "にこり",
+   "group": "other",
+   "caption": "Рот слегка приоткрыт в улыбке.",
+   "max_mm": 16.67,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "225_key",
+   "dead": false
+  },
+  {
+   "key": "上",
+   "group": "other",
+   "caption": "Брови подняты выше.",
+   "max_mm": 15.27,
+   "moved_vertices": 226,
+   "moved_frac": 0.076,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.068,
+   "file": "227_key",
+   "dead": false
+  },
+  {
+   "key": "O",
+   "group": "other",
+   "caption": "Рот приоткрыт, выражая удивление.",
+   "max_mm": 11.26,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "206_O",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_ou",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.26,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "217_vrc_v_ou",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_oh",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.25,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "216_vrc_v_oh",
+   "dead": false
+  },
+  {
+   "key": "A",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.24,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "205_A",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_aa",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 11.24,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "208_vrc_v_aa",
+   "dead": false
+  },
+  {
+   "key": "困る",
+   "group": "other",
+   "caption": "Брови приподняты и изогнуты, выражая беспокойство или растерянность.",
+   "max_mm": 9.14,
+   "moved_vertices": 225,
+   "moved_frac": 0.075,
+   "center": [
+    0.0,
+    -0.05,
+    1.488
+   ],
+   "spread_z": 0.069,
+   "file": "224_key",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_Default",
+   "group": "other",
+   "caption": "Не меняется.",
+   "max_mm": 8.38,
+   "moved_vertices": 2033,
+   "moved_frac": 0.682,
+   "center": [
+    0.0,
+    -0.049,
+    1.453
+   ],
+   "spread_z": 0.126,
+   "file": "005_00_Ani_Default",
+   "dead": false
+  },
+  {
+   "key": "00_Ani_Idleshow",
+   "group": "other",
+   "caption": "Не меняется.",
+   "max_mm": 8.38,
+   "moved_vertices": 2033,
+   "moved_frac": 0.682,
+   "center": [
+    0.0,
+    -0.049,
+    1.453
+   ],
+   "spread_z": 0.126,
+   "file": "006_00_Ani_Idleshow",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_kk",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 7.68,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "214_vrc_v_kk",
+   "dead": false
+  },
+  {
+   "key": "下",
+   "group": "other",
+   "caption": "Подбородок стал более острым и вытянутым вниз.",
+   "max_mm": 7.5,
+   "moved_vertices": 224,
+   "moved_frac": 0.075,
+   "center": [
+    0.0,
+    -0.05,
+    1.487
+   ],
+   "spread_z": 0.066,
+   "file": "228_key",
+   "dead": false
+  },
+  {
+   "key": "怒り",
+   "group": "other",
+   "caption": "Брови опущены к переносице, выражая гнев.",
+   "max_mm": 6.63,
+   "moved_vertices": 224,
+   "moved_frac": 0.075,
+   "center": [
+    0.0,
+    -0.05,
+    1.486
+   ],
+   "spread_z": 0.066,
+   "file": "226_key",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_th",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 6.18,
+   "moved_vertices": 1228,
+   "moved_frac": 0.412,
+   "center": [
+    0.0,
+    -0.044,
+    1.408
+   ],
+   "spread_z": 0.066,
+   "file": "222_vrc_v_th",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_ih",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 5.52,
+   "moved_vertices": 1232,
+   "moved_frac": 0.413,
+   "center": [
+    0.0,
+    -0.044,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "213_vrc_v_ih",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_e",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 5.42,
+   "moved_vertices": 1222,
+   "moved_frac": 0.41,
+   "center": [
+    -0.0,
+    -0.046,
+    1.41
+   ],
+   "spread_z": 0.068,
+   "file": "211_vrc_v_e",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_dd",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 5.4,
+   "moved_vertices": 1228,
+   "moved_frac": 0.412,
+   "center": [
+    -0.0,
+    -0.045,
+    1.409
+   ],
+   "spread_z": 0.068,
+   "file": "210_vrc_v_dd",
+   "dead": false
+  },
+  {
+   "key": "CH",
+   "group": "other",
+   "caption": "Подбородок стал более острым.",
+   "max_mm": 5.04,
+   "moved_vertices": 1045,
+   "moved_frac": 0.35,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "207_CH",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_ch",
+   "group": "other",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 5.04,
+   "moved_vertices": 1045,
+   "moved_frac": 0.35,
+   "center": [
+    -0.0,
+    -0.059,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "209_vrc_v_ch",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_nn",
+   "group": "other",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 4.78,
+   "moved_vertices": 1218,
+   "moved_frac": 0.408,
+   "center": [
+    -0.0,
+    -0.046,
+    1.41
+   ],
+   "spread_z": 0.068,
+   "file": "215_vrc_v_nn",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_rr",
+   "group": "other",
+   "caption": "Глаза стали более прищуренными.",
+   "max_mm": 4.41,
+   "moved_vertices": 1218,
+   "moved_frac": 0.408,
+   "center": [
+    0.0,
+    -0.046,
+    1.41
+   ],
+   "spread_z": 0.068,
+   "file": "219_vrc_v_rr",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_ss",
+   "group": "other",
+   "caption": "Нижнее веко приподнято.",
+   "max_mm": 4.03,
+   "moved_vertices": 1021,
+   "moved_frac": 0.342,
+   "center": [
+    -0.0,
+    -0.06,
+    1.417
+   ],
+   "spread_z": 0.053,
+   "file": "221_vrc_v_ss",
+   "dead": false
+  },
+  {
+   "key": "真面目",
+   "group": "other",
+   "caption": "Брови стали более приподнятыми и серьезными.",
+   "max_mm": 3.32,
+   "moved_vertices": 221,
+   "moved_frac": 0.074,
+   "center": [
+    0.0,
+    -0.051,
+    1.485
+   ],
+   "spread_z": 0.063,
+   "file": "223_key",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_ff",
+   "group": "other",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 3.27,
+   "moved_vertices": 1214,
+   "moved_frac": 0.407,
+   "center": [
+    0.0,
+    -0.046,
+    1.408
+   ],
+   "spread_z": 0.065,
+   "file": "212_vrc_v_ff",
+   "dead": false
+  },
+  {
+   "key": "vrc.v_pp",
+   "group": "other",
+   "caption": "Подняты уголки рта, легкая улыбка.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "218_vrc_v_pp",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.009
+  },
+  {
+   "key": "vrc.v_sil",
+   "group": "other",
+   "caption": "Глаза прищурены.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "220_vrc_v_sil",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.002
+  },
+  {
+   "key": "ｳｨﾝｸ２右",
+   "group": "other",
+   "caption": "Правый глаз прищурен (подмигивание).",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "231_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.0
+  },
+  {
+   "key": "お",
+   "group": "viseme",
+   "caption": "Рот приоткрыт, выражая удивление.",
+   "max_mm": 11.26,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "243_key",
+   "dead": false
+  },
+  {
+   "key": "あ",
+   "group": "viseme",
+   "caption": "Рот приоткрыт, выражая удивление.",
+   "max_mm": 11.24,
+   "moved_vertices": 1238,
+   "moved_frac": 0.415,
+   "center": [
+    0.0,
+    -0.043,
+    1.409
+   ],
+   "spread_z": 0.069,
+   "file": "239_key",
+   "dead": false
+  },
+  {
+   "key": "笑い",
+   "group": "viseme",
+   "caption": "Улыбка: уголки рта приподняты, глаза прищурены.",
+   "max_mm": 10.72,
+   "moved_vertices": 1044,
+   "moved_frac": 0.35,
+   "center": [
+    0.0,
+    -0.044,
+    1.453
+   ],
+   "spread_z": 0.041,
+   "file": "232_key",
+   "dead": false
+  },
+  {
+   "key": "う",
+   "group": "viseme",
+   "caption": "Рот приоткрыт в форме буквы «о».",
+   "max_mm": 9.56,
+   "moved_vertices": 1074,
+   "moved_frac": 0.36,
+   "center": [
+    -0.0,
+    -0.059,
+    1.414
+   ],
+   "spread_z": 0.058,
+   "file": "241_key",
+   "dead": false
+  },
+  {
+   "key": "え",
+   "group": "viseme",
+   "caption": "Рот приоткрыт.",
+   "max_mm": 2.73,
+   "moved_vertices": 1037,
+   "moved_frac": 0.348,
+   "center": [
+    0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.049,
+   "file": "242_key",
+   "dead": false
+  },
+  {
+   "key": "い",
+   "group": "viseme",
+   "caption": "Рот слегка приоткрыт.",
+   "max_mm": 1.83,
+   "moved_vertices": 930,
+   "moved_frac": 0.312,
+   "center": [
+    0.0,
+    -0.057,
+    1.414
+   ],
+   "spread_z": 0.049,
+   "file": "240_key",
+   "dead": false
+  }
+ ]
+}

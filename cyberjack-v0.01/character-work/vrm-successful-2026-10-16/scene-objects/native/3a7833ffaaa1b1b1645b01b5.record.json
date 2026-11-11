@@ -1,0 +1,11 @@
+{
+  "id": "3a7833ffaaa1b1b1645b01b5",
+  "name": "nagaisu_00_kind (1)",
+  "kind": "furniture",
+  "source": "map/scene/lighthouse.unity3d",
+  "sourceIdentity": "BuildPlayer-LightHouse:31",
+  "native": "native/3a7833ffaaa1b1b1645b01b5.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

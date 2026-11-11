@@ -1,0 +1,12 @@
+{
+  "id": "044b281e8017b854a3d338a4",
+  "name": "p_ks_r08_chair00 (4)",
+  "kind": "furniture",
+  "source": "map/scene/minsyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuLobby:368",
+  "native": "native/044b281e8017b854a3d338a4.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r08_chair00_4_-044b281e8017b854a3d338a4.glb"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "9b6a270bb288fceb58c5a051",
+  "name": "nagaisu_00_kind (1)",
+  "kind": "furniture",
+  "source": "map/scene/hotelkouisitu.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelKouisitu:70",
+  "native": "native/9b6a270bb288fceb58c5a051.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

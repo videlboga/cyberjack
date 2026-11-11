@@ -1,0 +1,325 @@
+{
+ "format": "koikatsu-mod-map-v1",
+ "generated": "2026-10-16",
+ "note": "GUID folders идентифицированы по container-путям внутри бандлов (UnityPy, assets/...). Количество клипов сверено с catalog.json.",
+ "guids": {
+  "85984cc243471b94": {
+   "label": "khs-animators (KKS H-scene animator controllers, khs_f/khs_m, assets/illusion ... h/animator)",
+   "clips": 22735,
+   "rigs": {
+    "shared": 16131,
+    "male": 6580,
+    "object": 24
+   },
+   "sample_names": [
+    "M_OLoop",
+    "L_OLoop",
+    "S_OLoop",
+    "M_Idle",
+    "M_OUT_A",
+    "M_SLoop1"
+   ],
+   "bundles": 142
+  },
+  "ef63370a391bab37": {
+   "label": "khh_f_94 / khh_m_94 (KKS H position 94 packs)",
+   "clips": 1260,
+   "rigs": {
+    "shared": 840,
+    "male": 420
+   },
+   "sample_names": [
+    "L_Idle",
+    "L_OLoop",
+    "L_OUT_A",
+    "L_SLoop1",
+    "L_SLoop2",
+    "L_WLoop1"
+   ],
+   "bundles": 20
+  },
+  "c969c1f2a32976b0": {
+   "label": "map-mods HPoints: pdhm003 - japanese subur + template (hpoint prefabs)",
+   "clips": 246,
+   "rigs": {
+    "object": 246
+   },
+   "sample_names": [
+    "beacon_idle 1",
+    "beacon_spin 1",
+    "down",
+    "idle",
+    "up",
+    "upidle"
+   ],
+   "bundles": 88
+  },
+  "1e6f0663d211d540": {
+   "label": "khs_f_n97_s controller bundle",
+   "clips": 78,
+   "rigs": {
+    "shared": 52,
+    "male": 26
+   },
+   "sample_names": [
+    "L_Drop",
+    "L_IN_A",
+    "L_Idle",
+    "L_Insert",
+    "L_InsertIdle",
+    "L_M_IN_Loop"
+   ],
+   "bundles": 1
+  },
+  "3a38f76d709e54c2": {
+   "label": "chara/base textures + cf_anmshapebody (overlay bundle)",
+   "clips": 28,
+   "rigs": {
+    "object": 28
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 14
+  },
+  "46422bf864af04b5": {
+   "label": "kkstub/behind (Katarsys kkstub.behind.zipmod)",
+   "clips": 12,
+   "rigs": {
+    "shared": 8,
+    "male": 4
+   },
+   "sample_names": [
+    "L_WLoop1",
+    "L_WLoop2",
+    "M_WLoop1",
+    "M_WLoop2",
+    "S_WLoop1",
+    "S_WLoop2"
+   ],
+   "bundles": 2
+  },
+  "4bdd80c225daef5a": {
+   "label": "kkstub male (Katarsys kkstub.zipmod)",
+   "clips": 12,
+   "rigs": {
+    "shared": 8,
+    "male": 4
+   },
+   "sample_names": [
+    "L_WLoop1",
+    "L_WLoop2",
+    "M_WLoop1",
+    "M_WLoop2",
+    "S_WLoop1",
+    "S_WLoop2"
+   ],
+   "bundles": 2
+  },
+  "10d40642cd5a7759": {
+   "label": "map: Sakura's room (HPoint)",
+   "clips": 9,
+   "rigs": {
+    "object": 9
+   },
+   "sample_names": [
+    "down",
+    "idle",
+    "up",
+    "upidle",
+    "WorldRotate"
+   ],
+   "bundles": 3
+  },
+  "1daaaeb6ad49416a": {
+   "label": "Map Suite (hs2suite.unity)",
+   "clips": 9,
+   "rigs": {
+    "object": 9
+   },
+   "sample_names": [
+    "down",
+    "idle",
+    "up",
+    "upidle",
+    "WorldRotate"
+   ],
+   "bundles": 3
+  },
+  "6bc0b88e542162a8": {
+   "label": "map: BFW Apartment 1",
+   "clips": 8,
+   "rigs": {
+    "object": 8
+   },
+   "sample_names": [
+    "down",
+    "idle",
+    "up",
+    "upidle"
+   ],
+   "bundles": 2
+  },
+  "78252604f85ff139": {
+   "label": "map: bath (HPoint)",
+   "clips": 8,
+   "rigs": {
+    "object": 8
+   },
+   "sample_names": [
+    "down",
+    "idle",
+    "up",
+    "upidle"
+   ],
+   "bundles": 2
+  },
+  "982734a9a46d2563": {
+   "label": "chara/base overlay bundle (cf/cm body textures)",
+   "clips": 6,
+   "rigs": {
+    "object": 6
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 3
+  },
+  "0ea7f2dfc08b16de": {
+   "label": "kkstub/stickbug",
+   "clips": 3,
+   "rigs": {
+    "shared": 2,
+    "male": 1
+   },
+   "sample_names": [
+    "L_WLoop1",
+    "M_WLoop1",
+    "S_WLoop1"
+   ],
+   "bundles": 1
+  },
+  "085f87175a498e00": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "09b2169a2c2f37d6": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "2ca797ceb8a86ac6": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "39b5d949d7e267ab": {
+   "label": "chara/base overlay bundle (cf/cm body textures)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "65ec54a7a135e019": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "8609e6d1525c0408": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "8f42a88b3610c08b": {
+   "label": "chara/base overlay bundle (+mannequin.bytes)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "a10b95613615bdaa": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "eb73297119867707": {
+   "label": "chara/base overlay bundle (cf/cm body textures)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  },
+  "f2a0940bd95fb6c9": {
+   "label": "BetterPenetration-family (additional_fknodes + chara/base)",
+   "clips": 2,
+   "rigs": {
+    "object": 2
+   },
+   "sample_names": [
+    "ptn01",
+    "ptn02"
+   ],
+   "bundles": 1
+  }
+ }
+}

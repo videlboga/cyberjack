@@ -1,0 +1,150 @@
+{
+  "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/vrm-successful-2026-10-16/characters/mira/Mira_outfit_03_toes.vrm",
+  "rig_bones_before": 971,
+  "rig_bones_after": 999,
+  "mesh_objects": [
+    {
+      "name": "Body KamiwataKrista",
+      "vertices": 13942,
+      "materials": [
+        "KK cf_m_face_00",
+        "KK cf_m_mayuge_00",
+        "KK cf_m_noseline_00",
+        "KK cf_m_tooth",
+        "KK cf_m_eyeline_down",
+        "KK cf_m_eyeline_00_up",
+        "KK cf_m_sirome_00",
+        "KK cf_m_hitomi_00_cf_Ohitomi_L02",
+        "KK cf_m_hitomi_00_cf_Ohitomi_R02",
+        "KK cf_m_tang",
+        "KK cf_m_body"
+      ],
+      "morphs": 153
+    },
+    {
+      "name": "Hair Outfit 03 KamiwataKrista",
+      "vertices": 13159,
+      "materials": [
+        "KK cf_m_hair_b_21_00 4133",
+        "KK cf_m_hair_b_21_00 4133 00",
+        "KK cf_m_hair_b_21_00 4133 01",
+        "KK cf_m_hair_b_21_00 4133 02",
+        "KK cf_m_hair_f_305_00 4353"
+      ],
+      "morphs": 0
+    }
+  ],
+  "materials": 16,
+  "body_vertices": 13942,
+  "body_polygons": 25058,
+  "zones": {
+    "counts": {
+      "toe_pad_2_5": 299,
+      "toe_pad_1": 87,
+      "heel": 17,
+      "arch_medial": 12,
+      "arch_lateral": 14,
+      "ankle_ring": 3,
+      "instep": 9,
+      "ball": 34
+    },
+    "areas_cm2": {
+      "heel": 12.6,
+      "arch_medial": 13.09,
+      "arch_lateral": 15.68,
+      "ball": 27.28,
+      "toe_pad_1": 14.2,
+      "toe_pad_2_5": 41.62,
+      "instep": 5.56,
+      "ankle_ring": 3.22
+    }
+  },
+  "toes": [
+    {
+      "side": "L",
+      "vertices": 329,
+      "bones": [
+        "BigToe.L",
+        "BigToe_2.L",
+        "SmallToe1.L",
+        "SmallToe1_2.L",
+        "SmallToe1_3.L",
+        "SmallToe2.L",
+        "SmallToe2_2.L",
+        "SmallToe2_3.L",
+        "SmallToe3.L",
+        "SmallToe3_2.L",
+        "SmallToe3_3.L",
+        "SmallToe4.L",
+        "SmallToe4_2.L",
+        "SmallToe4_3.L"
+      ],
+      "cluster_sizes": [
+        41,
+        70,
+        71,
+        81,
+        66
+      ],
+      "cluster_x": [
+        0.02348,
+        0.01155,
+        -0.00016,
+        -0.01155,
+        -0.02138
+      ],
+      "old_groups": [
+        "Left toe",
+        "k_f_toeL_00",
+        "k_f_toeL_01",
+        "k_f_toeL_02",
+        "k_f_toeL_03"
+      ]
+    },
+    {
+      "side": "R",
+      "vertices": 329,
+      "bones": [
+        "BigToe.R",
+        "BigToe_2.R",
+        "SmallToe1.R",
+        "SmallToe1_2.R",
+        "SmallToe1_3.R",
+        "SmallToe2.R",
+        "SmallToe2_2.R",
+        "SmallToe2_3.R",
+        "SmallToe3.R",
+        "SmallToe3_2.R",
+        "SmallToe3_3.R",
+        "SmallToe4.R",
+        "SmallToe4_2.R",
+        "SmallToe4_3.R"
+      ],
+      "cluster_sizes": [
+        66,
+        81,
+        71,
+        70,
+        41
+      ],
+      "cluster_x": [
+        -0.02142,
+        -0.01159,
+        -0.0002,
+        0.01151,
+        0.02344
+      ],
+      "old_groups": [
+        "Right toe",
+        "k_f_toeR_00",
+        "k_f_toeR_01",
+        "k_f_toeR_02",
+        "k_f_toeR_03"
+      ]
+    }
+  ],
+  "expressions": 18,
+  "shape_keys": 153,
+  "deforming_bones": 999,
+  "weighted_vertices": 13942
+}

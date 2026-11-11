@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readCommandResponse} from '../review/command-stream.mjs';
+const encode=new TextEncoder(),events=[{type:'step',index:0,step:{status:'ready',description:'Сесть'}},{type:'step',index:1,step:{status:'ready',description:'Вытянуть ноги'}},{type:'plan',plan:{status:'ready',steps:[1,2]}}],bytes=encode.encode(events.map(x=>JSON.stringify(x)+'\n').join(''));
+let release;const gate=new Promise(r=>release=r),seen=[];
+const stream=new ReadableStream({async start(controller){const first=encode.encode(JSON.stringify(events[0])+'\n');for(const byte of first)controller.enqueue(new Uint8Array([byte]));await gate;const tail=encode.encode(events.slice(1).map(x=>JSON.stringify(x)+'\n').join(''));for(let i=0;i<tail.length;i+=7)controller.enqueue(tail.slice(i,i+7));controller.close();}});
+const pending=readCommandResponse(new Response(stream,{headers:{'Content-Type':'application/x-ndjson'}}),e=>{seen.push(e.step.description);if(seen.length===1)release();});
+const plan=await pending;assert.deepEqual(seen,['Сесть','Вытянуть ноги']);assert.equal(plan.status,'ready');
+const response=s=>new Response(s,{headers:{'Content-Type':'application/x-ndjson'}});
+await assert.rejects(readCommandResponse(response(JSON.stringify(events[0])+'\n')),/прервал/);
+await assert.rejects(readCommandResponse(response(JSON.stringify({...events[0],index:1})+'\n')),/порядок/);
+await assert.rejects(readCommandResponse(response(JSON.stringify({type:'error',error:'failure'})+'\n')),/failure/);
+assert.deepEqual(await readCommandResponse(new Response('{"status":"ready"}',{headers:{'Content-Type':'application/json'}})),{status:'ready'});
+console.log('PASS first step delivered before final plan; UTF-8 arbitrary chunks; truncation, ordering, error and JSON fallback');

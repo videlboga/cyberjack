@@ -1,0 +1,12 @@
+{
+  "id": "2a5c544e80135e032524b853",
+  "name": "p_ks_r01_sofa00",
+  "kind": "furniture",
+  "source": "map/scene/hotellobby.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelLobby:571",
+  "native": "native/2a5c544e80135e032524b853.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r01_sofa00-2a5c544e80135e032524b853.glb"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "75930ddad353c11061b57e16",
+  "name": "p_item_beach_ball",
+  "kind": "item",
+  "source": "h/common/71.unity3d",
+  "sourceIdentity": "CAB-7d0d7ef6d3a34d95c038c33b2feb87f0:-4190778766543579677",
+  "native": "native/75930ddad353c11061b57e16.json.gz",
+  "nodes": 12,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_item_beach_ball-75930ddad353c11061b57e16.glb"
+}

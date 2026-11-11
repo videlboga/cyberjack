@@ -1,0 +1,63 @@
+{
+  "format": "koikatsu-tag-config-v1",
+  "note": "Конфиг классификации клипов. acts: метки действий по EN-словам сцен (AnimationName/mode/kind) и RU-токенам меток; poses: по categories манифеста и RU-меткам; style: принуждение/бдсм-элементы по EN-словам и токенам.",
+  "scene_en_acts": [
+    {"tag": "орально", "en": ["blowjob", "fellatio", "suck", "sucking", "deepthroat", "oral", "cunni", "eater", "69"]},
+    {"tag": "кунилингус", "en": ["cunnilingus", "pussy"]},
+    {"tag": "анилингус", "en": ["rim", "rimjob"]},
+    {"tag": "фут-джоб", "en": ["footjob", "foot", "feet"]},
+    {"tag": "работа бёдрами", "en": ["thigh", "hump"]},
+    {"tag": "грудинг", "en": ["titjob", "boobs", "breasts", "nip"]},
+    {"tag": "ручник", "en": ["handjob"]},
+    {"tag": "массаж", "en": ["massage"]},
+    {"tag": "секс-вставка", "en": ["fuck", "missionary", "cowgirl", "doggy", "doggystyle", "spooning", "straddle", "riding", "piledriver", "amazon", "bridge", "split", "flexion", "trust", "cuddle", "ghost", "carry", "carrying", "lift", "lifted", "hold", "holding", "lock", "grabbed", "spread", "squat", "squats", "eagle", "princess", "nelson", "shoulders", "behind", "facing", "bending", "leaning", "back"]},
+    {"tag": "пальцами", "en": ["fingering"]},
+    {"tag": "подмышки", "en": ["armpit"]},
+    {"tag": "мастурбация", "en": ["masturbation", "orgasm"]},
+    {"tag": "поцелуй · объятия", "en": ["kiss"]}
+  ],
+  "mode_acts": {"houshi": "услуга · минет/руками", "sonyu": "секс-вставка", "lesbian": "девушки вместе"},
+  "scene_pose_ru": {
+    "LieDown": "лёжа",
+    "Stand": "стоя",
+    "SitChair": "сидя на стуле",
+    "Stool": "табурет",
+    "SofaBench": "диван/скамья",
+    "BacklessBench": "скамья без спинки",
+    "Wall": "у стены",
+    "Desk": "за столом",
+    "SchoolDesk": "за партой",
+    "Desk/SchoolDesk": "за партой"
+  },
+  "label_acts": [
+    {"tag": "вибратор · игрушки", "ru": ["вибратор", "игруш"]},
+    {"tag": "лижет · смазывает", "ru": ["лижет", "водит языком", "смазывает", "вылизывает"]},
+    {"tag": "пальцами", "ru": ["пальц", "трогает пальц"]},
+    {"tag": "гладит · трёт", "ru": ["гладит", "поглажив", "трёт", "скользить"]},
+    {"tag": "мять breasts", "ru": ["мять", "мять грудь"]},
+    {"tag": "целует", "ru": ["целу", "поцелу"]}
+  ],
+  "label_poses": [
+    {"tag": "лёжа", "ru": ["лёжа", "леж", "лёжа на спине", "лёжа на животе"]},
+    {"tag": "стоя", "ru": ["стоя", "стойка"]},
+    {"tag": "сидя", "ru": ["сидя", "сидение", "сидя на корточках"]},
+    {"tag": "на коленях", "ru": ["колен"]},
+    {"tag": "ходьба", "ru": ["ходьб", "ходит"]}
+  ],
+  "label_styles": [
+    {"tag": "принуждение · грубость", "ru": ["принудител", "за волосы", "прижима", "захват", "придуш"]},
+    {"tag": "бдсм-элементы", "ru": [" пытка", "пытка", "связ", "кляп", "ошейник"]},
+    {"tag": "оргазм", "ru": ["оргазм", "на грани"]}
+  ],
+  "en_acts_extra_for_labels": {
+    "forced": "принуждение · грубость",
+    "torture": "бдсм-элементы",
+    "grabbed": "принуждение · грубость",
+    "hair": "принуждение · грубость",
+    "pull": "принуждение · грубость",
+    "anal": "анально",
+    "masturbation": "мастурбация",
+    "orgasm": "оргазм",
+    "69": "орально"
+  }
+}

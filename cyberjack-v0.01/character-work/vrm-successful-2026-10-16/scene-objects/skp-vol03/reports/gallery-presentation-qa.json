@@ -1,0 +1,36 @@
+{
+  "loaded": 3,
+  "models": [
+    {
+      "ready": true,
+      "id": "SexMachineModel-065",
+      "name": "SexMachineModel-065",
+      "meshes": 346
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-074",
+      "name": "SexMachineModel-074",
+      "meshes": 12
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-086",
+      "name": "SexMachineModel-086",
+      "meshes": 14
+    }
+  ],
+  "originalObjects": {
+    "ready": true,
+    "id": "75930ddad353c11061b57e16",
+    "name": "p_item_beach_ball",
+    "meshes": 1
+  },
+  "originalFurniture": {
+    "ready": true,
+    "id": "465c08e024253f0a00ce66ba",
+    "name": "p_ks_m03bench00_00 (1)",
+    "meshes": 1
+  },
+  "errors": []
+}

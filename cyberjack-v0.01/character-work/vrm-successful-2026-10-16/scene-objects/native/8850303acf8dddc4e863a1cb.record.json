@@ -1,0 +1,11 @@
+{
+  "id": "8850303acf8dddc4e863a1cb",
+  "name": "senasi_isu_00_kind",
+  "kind": "furniture",
+  "source": "map/scene/ishigaki.unity3d",
+  "sourceIdentity": "BuildPlayer-Ishigaki:767",
+  "native": "native/8850303acf8dddc4e863a1cb.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

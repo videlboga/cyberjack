@@ -1,0 +1,42 @@
+{
+  "characters/rin/outfits/Rin_outfit_00.vrm": {
+    "morphs": 149,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/rin/outfits/Rin_outfit_01.vrm": {
+    "morphs": 149,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/rin/outfits/Rin_outfit_02.vrm": {
+    "morphs": 149,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/rin/outfits/Rin_outfit_03.vrm": {
+    "morphs": 149,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/mira/Mira_outfit_00.vrm": {
+    "morphs": 151,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/mira/Mira_outfit_01.vrm": {
+    "morphs": 151,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/mira/Mira_outfit_02.vrm": {
+    "morphs": 151,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  },
+  "characters/mira/Mira_outfit_03.vrm": {
+    "morphs": 151,
+    "requiredFaceMorphs": 128,
+    "missing": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "06d2194b425f42ad827a7a6e",
+  "name": "p_ks_r01_sofa00",
+  "kind": "furniture",
+  "source": "map/scene/estheticroom.unity3d",
+  "sourceIdentity": "BuildPlayer-EstheticRoom:74",
+  "native": "native/06d2194b425f42ad827a7a6e.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r01_sofa00-06d2194b425f42ad827a7a6e.glb"
+}

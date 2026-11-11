@@ -1,0 +1,12 @@
+{
+  "id": "a868859b6724bff66f42ecb7",
+  "name": "p_ks_r06_chair00 (1)",
+  "kind": "furniture",
+  "source": "map/scene/hotelkouisitu.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelKouisitu:100",
+  "native": "native/a868859b6724bff66f42ecb7.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r06_chair00_1_-a868859b6724bff66f42ecb7.glb"
+}

@@ -1,0 +1,1410 @@
+{
+  "disabled_physics": [
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_siri01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_d_siri01_L",
+        "cf_j_siri_L"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_siri01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_d_siri01_R",
+        "cf_j_siri_R"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_bust01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_j_bust01_L",
+        "cf_j_bust02_L",
+        "cf_j_bust03_L"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_bust01_R",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_j_bust01_R",
+        "cf_j_bust02_R",
+        "cf_j_bust03_R"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    }
+  ],
+  "materials": [
+    {
+      "name": "KK cf_m_bot_pants03 8410",
+      "base": "cf_m_bot_pants03 8410_light.png",
+      "shade": "cf_m_bot_pants03 8410_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_socks_knee02 8372",
+      "base": "cf_m_socks_knee02 8372_light.png",
+      "shade": "cf_m_socks_knee02 8372_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_05_00 4273",
+      "base": "cf_m_hair_f_05_00 4273_light.png",
+      "shade": "cf_m_hair_f_05_00 4273_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cm_m_dankon 7883",
+      "base": "cm_m_dankon 7883_light.png",
+      "shade": "cm_m_dankon 7883_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_sirome_00",
+      "base": "cf_m_sirome_00_light.png",
+      "shade": "cf_m_sirome_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK c_m_silhouette 7973",
+      "base": "c_m_silhouette 7973_light.png",
+      "shade": "c_m_silhouette 7973_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_05_00 4272",
+      "base": "cf_m_hair_f_05_00 4272_light.png",
+      "shade": "cf_m_hair_f_05_00 4272_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cm_m_dankon 7882",
+      "base": "cm_m_dankon 7882_light.png",
+      "shade": "cm_m_dankon 7882_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_shoes_uwabaki01 8570",
+      "base": "cf_m_shoes_uwabaki01 8570_light.png",
+      "shade": "cf_m_shoes_uwabaki01 8570_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK c_m_silhouette 7972",
+      "base": "c_m_silhouette 7972_light.png",
+      "shade": "c_m_silhouette 7972_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_05_00 4271",
+      "base": "cf_m_hair_f_05_00 4271_light.png",
+      "shade": "cf_m_hair_f_05_00 4271_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cm_m_dan_f 7883",
+      "base": "cm_m_dan_f 7883_light.png",
+      "shade": "cm_m_dan_f 7883_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_shoes_uwabaki01 8432",
+      "base": "cf_m_shoes_uwabaki01 8432_light.png",
+      "shade": "cf_m_shoes_uwabaki01 8432_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK c_m_silhouette 7971",
+      "base": "c_m_silhouette 7971_light.png",
+      "shade": "c_m_silhouette 7971_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_05_00 4270",
+      "base": "cf_m_hair_f_05_00 4270_light.png",
+      "shade": "cf_m_hair_f_05_00 4270_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cm_m_dan_f 7882",
+      "base": "cm_m_dan_f 7882_light.png",
+      "shade": "cm_m_dan_f 7882_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK Gag01 HoujouRoy",
+      "base": "cf_m_gageye_01_cf_t_gageye_03_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK c_m_silhouette 7970",
+      "base": "c_m_silhouette 7970_light.png",
+      "shade": "c_m_silhouette 7970_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_shoes_cheershort 8630",
+      "base": "cf_m_shoes_cheershort 8630_light.png",
+      "shade": "cf_m_shoes_cheershort 8630_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Tears HoujouRoy",
+      "base": "cf_m_namida_00_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cm_m_body",
+      "base": "cm_m_body_light_alpha.png",
+      "shade": "cm_m_body_dark_alpha.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_13_00 4113",
+      "base": "cf_m_hair_b_13_00 4113_light.png",
+      "shade": "cf_m_hair_b_13_00 4113_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_noseline_00",
+      "base": "cf_m_noseline_00_light.png",
+      "shade": "cf_m_noseline_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK c_m_shadowcast 7923",
+      "base": "c_m_shadowcast 7923_light.png",
+      "shade": "c_m_shadowcast 7923_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_13_00 4112",
+      "base": "cf_m_hair_b_13_00 4112_light.png",
+      "shade": "cf_m_hair_b_13_00 4112_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_shorts_ysho_m 8361",
+      "base": "cf_shorts_ysho_m 8361_light.png",
+      "shade": "cf_shorts_ysho_m 8361_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_s_03_00 4300",
+      "base": "cf_m_hair_s_03_00 4300_light.png",
+      "shade": "cf_m_hair_s_03_00 4300_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_mayuge_00",
+      "base": "cf_m_mayuge_00_light.png",
+      "shade": "cf_m_mayuge_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK c_m_shadowcast 7922",
+      "base": "c_m_shadowcast 7922_light.png",
+      "shade": "c_m_shadowcast 7922_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_13_00 4111",
+      "base": "cf_m_hair_b_13_00 4111_light.png",
+      "shade": "cf_m_hair_b_13_00 4111_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_shorts_ysho_m 8341",
+      "base": "cf_shorts_ysho_m 8341_light.png",
+      "shade": "cf_shorts_ysho_m 8341_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hitomi_00_cf_Ohitomi_R02",
+      "base": "cf_m_hitomi_00_cf_Ohitomi_R02_light.png",
+      "shade": "cf_m_hitomi_00_cf_Ohitomi_R02_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK c_m_shadowcast 7921",
+      "base": "c_m_shadowcast 7921_light.png",
+      "shade": "c_m_shadowcast 7921_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_13_00 4110",
+      "base": "cf_m_hair_b_13_00 4110_light.png",
+      "shade": "cf_m_hair_b_13_00 4110_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_top_tuxedo_n 8340",
+      "base": "cf_m_top_tuxedo_n 8340_light.png",
+      "shade": "cf_m_top_tuxedo_n 8340_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hitomi_00_cf_Ohitomi_L02",
+      "base": "cf_m_hitomi_00_cf_Ohitomi_L02_light.png",
+      "shade": "cf_m_hitomi_00_cf_Ohitomi_L02_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK c_m_shadowcast 7920",
+      "base": "c_m_shadowcast 7920_light.png",
+      "shade": "c_m_shadowcast 7920_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_face_00",
+      "base": "cf_m_face_00_light.png",
+      "shade": "cf_m_face_00_dark.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_top_tuxedo_d 8320",
+      "base": "cf_m_top_tuxedo_d 8320_light.png",
+      "shade": "cf_m_top_tuxedo_d 8320_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_s_03_00 4303",
+      "base": "cf_m_hair_s_03_00 4303_light.png",
+      "shade": "cf_m_hair_s_03_00 4303_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_tooth",
+      "base": "cf_m_tooth_light.png",
+      "shade": "cf_m_tooth_dark.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_eyeline_kage",
+      "base": "cf_m_eyeline_kage_light.png",
+      "shade": "cf_m_eyeline_kage_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "BLEND"
+    },
+    {
+      "name": "KK Gag00 HoujouRoy",
+      "base": "cf_m_gageye_00_cf_t_gageye_00_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_s_03_00 4302",
+      "base": "cf_m_hair_s_03_00 4302_light.png",
+      "shade": "cf_m_hair_s_03_00 4302_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_eyeline_down",
+      "base": "cf_m_eyeline_down_light.png",
+      "shade": "cf_m_eyeline_down_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag02 HoujouRoy",
+      "base": "cf_m_gageye_02_cf_t_gageye_07_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_tang.001",
+      "base": "cf_m_tang_light.png",
+      "shade": "cf_m_tang_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_s_03_00 4301",
+      "base": "cf_m_hair_s_03_00 4301_light.png",
+      "shade": "cf_m_hair_s_03_00 4301_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_tang",
+      "base": "cf_m_tang_light.png",
+      "shade": "cf_m_tang_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_eyeline_00_up",
+      "base": "cf_m_eyeline_00_up_light.png",
+      "shade": "cf_m_eyeline_00_up_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK m_cf_socks_kyonc00 8510",
+      "base": "m_cf_socks_kyonc00 8510_light.png",
+      "shade": "m_cf_socks_kyonc00 8510_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    }
+  ],
+  "physics": [
+    {
+      "name": "cf_J_hairB_00",
+      "source_particles": [
+        "cf_J_hairB_00",
+        "cf_J_hairB_01",
+        "cf_J_hairB_02",
+        "cf_J_hairB_03",
+        "cf_J_hairB_04",
+        "cf_J_hairB_05",
+        "cf_J_hairB_06"
+      ],
+      "joints": [
+        "cf_J_hairB_00",
+        "cf_J_hairB_01",
+        "cf_J_hairB_02",
+        "cf_J_hairB_03",
+        "cf_J_hairB_04",
+        "cf_J_hairB_05",
+        "cf_J_hairB_06"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairBL_00",
+      "source_particles": [
+        "cf_J_hairBL_00",
+        "cf_J_hairBL_01",
+        "cf_J_hairBL_02",
+        "cf_J_hairBL_03",
+        "cf_J_hairBL_04",
+        "cf_J_hairBL_05",
+        "cf_J_hairBL_06"
+      ],
+      "joints": [
+        "cf_J_hairBL_00",
+        "cf_J_hairBL_01",
+        "cf_J_hairBL_02",
+        "cf_J_hairBL_03",
+        "cf_J_hairBL_04",
+        "cf_J_hairBL_05",
+        "cf_J_hairBL_06"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairBR_00",
+      "source_particles": [
+        "cf_J_hairBR_00",
+        "cf_J_hairBR_01",
+        "cf_J_hairBR_02",
+        "cf_J_hairBR_03",
+        "cf_J_hairBR_04",
+        "cf_J_hairBR_05",
+        "cf_J_hairBR_06"
+      ],
+      "joints": [
+        "cf_J_hairBR_00",
+        "cf_J_hairBR_01",
+        "cf_J_hairBR_02",
+        "cf_J_hairBR_03",
+        "cf_J_hairBR_04",
+        "cf_J_hairBR_05",
+        "cf_J_hairBR_06"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFR_01_00",
+      "source_particles": [
+        "cf_J_hairFR_01_00",
+        "cf_J_hairFR_01_01",
+        "cf_J_hairFR_01_02"
+      ],
+      "joints": [
+        "cf_J_hairFR_01_00",
+        "cf_J_hairFR_01_01",
+        "cf_J_hairFR_01_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFL_01_00",
+      "source_particles": [
+        "cf_J_hairFL_01_00",
+        "cf_J_hairFL_01_01",
+        "cf_J_hairFL_01_02"
+      ],
+      "joints": [
+        "cf_J_hairFL_01_00",
+        "cf_J_hairFL_01_01",
+        "cf_J_hairFL_01_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairF_00",
+      "source_particles": [
+        "cf_J_hairF_00",
+        "cf_J_hairF_01",
+        "cf_J_hairF_02"
+      ],
+      "joints": [
+        "cf_J_hairF_00",
+        "cf_J_hairF_01",
+        "cf_J_hairF_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cm_J_dan_Pivot_f_L",
+      "source_particles": [
+        "cm_J_dan_Pivot_f_L",
+        "cm_J_dan_Dynamic_f_L"
+      ],
+      "joints": [
+        "cm_J_dan_Pivot_f_L",
+        "cm_J_dan_Dynamic_f_L"
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "cm_J_dan_Pivot_f_R",
+      "source_particles": [
+        "cm_J_dan_Pivot_f_R",
+        "cm_J_dan_Dynamic_f_R"
+      ],
+      "joints": [
+        "cm_J_dan_Pivot_f_R",
+        "cm_J_dan_Dynamic_f_R"
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "cf_j_sk_07_00",
+      "source_particles": [
+        "cf_j_sk_07_00",
+        "cf_j_sk_07_01",
+        "cf_j_sk_07_02",
+        "cf_j_sk_07_03",
+        "cf_j_sk_07_04",
+        "cf_j_sk_07_05",
+        "cf_j_sk_07_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_07_02",
+        "cf_j_sk_07_03",
+        "cf_j_sk_07_04",
+        "cf_j_sk_07_05",
+        "cf_j_sk_07_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_06_00",
+      "source_particles": [
+        "cf_j_sk_06_00",
+        "cf_j_sk_06_01",
+        "cf_j_sk_06_02",
+        "cf_j_sk_06_03",
+        "cf_j_sk_06_04",
+        "cf_j_sk_06_05",
+        "cf_j_sk_06_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_06_02",
+        "cf_j_sk_06_03",
+        "cf_j_sk_06_04",
+        "cf_j_sk_06_05",
+        "cf_j_sk_06_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_05_00",
+      "source_particles": [
+        "cf_j_sk_05_00",
+        "cf_j_sk_05_01",
+        "cf_j_sk_05_02",
+        "cf_j_sk_05_03",
+        "cf_j_sk_05_04",
+        "cf_j_sk_05_05",
+        "cf_j_sk_05_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_05_00",
+        "cf_j_sk_05_01",
+        "cf_j_sk_05_02",
+        "cf_j_sk_05_03",
+        "cf_j_sk_05_04",
+        "cf_j_sk_05_05",
+        "cf_j_sk_05_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_04_00",
+      "source_particles": [
+        "cf_j_sk_04_00",
+        "cf_j_sk_04_01",
+        "cf_j_sk_04_02",
+        "cf_j_sk_04_03",
+        "cf_j_sk_04_04",
+        "cf_j_sk_04_05",
+        "cf_j_sk_04_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_04_02",
+        "cf_j_sk_04_03",
+        "cf_j_sk_04_04",
+        "cf_j_sk_04_05",
+        "cf_j_sk_04_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_03_00",
+      "source_particles": [
+        "cf_j_sk_03_00",
+        "cf_j_sk_03_01",
+        "cf_j_sk_03_02",
+        "cf_j_sk_03_03",
+        "cf_j_sk_03_04",
+        "cf_j_sk_03_05",
+        "cf_j_sk_03_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_03_02",
+        "cf_j_sk_03_03",
+        "cf_j_sk_03_04",
+        "cf_j_sk_03_05",
+        "cf_j_sk_03_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_02_00",
+      "source_particles": [
+        "cf_j_sk_02_00",
+        "cf_j_sk_02_01",
+        "cf_j_sk_02_02",
+        "cf_j_sk_02_03",
+        "cf_j_sk_02_04",
+        "cf_j_sk_02_05",
+        "cf_j_sk_02_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_02_02",
+        "cf_j_sk_02_03",
+        "cf_j_sk_02_04",
+        "cf_j_sk_02_05",
+        "cf_j_sk_02_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_01_00",
+      "source_particles": [
+        "cf_j_sk_01_00",
+        "cf_j_sk_01_01",
+        "cf_j_sk_01_02",
+        "cf_j_sk_01_03",
+        "cf_j_sk_01_04",
+        "cf_j_sk_01_05",
+        "cf_j_sk_01_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_01_02",
+        "cf_j_sk_01_03",
+        "cf_j_sk_01_04",
+        "cf_j_sk_01_05",
+        "cf_j_sk_01_05_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_00_00",
+      "source_particles": [
+        "cf_j_sk_00_00",
+        "cf_j_sk_00_01",
+        "cf_j_sk_00_02",
+        "cf_j_sk_00_03",
+        "cf_j_sk_00_04",
+        "cf_j_sk_00_05",
+        "cf_j_sk_00_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_00_02",
+        "cf_j_sk_00_03",
+        "cf_j_sk_00_04",
+        "cf_j_sk_00_05",
+        "cf_j_sk_00_05_vrm_end"
+      ],
+      "colliders": 37
+    }
+  ],
+  "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/Export_PMX/20261016152636_HoujouRoy",
+  "blend_source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/kai_four_outfits/Kai_KKBP_source.blend",
+  "expressions": {
+    "blink": [
+      "Eye 両目閉じ"
+    ],
+    "blink_left": [
+      "Eye 左目ぎゅっと閉じ"
+    ],
+    "blink_right": [
+      "Eye 右目ぎゅっと閉じ"
+    ],
+    "aa": [
+      "Mouth あ　大"
+    ],
+    "ih": [
+      "Mouth い　大"
+    ],
+    "ou": [
+      "Mouth う　大"
+    ],
+    "ee": [
+      "Mouth え　大"
+    ],
+    "oh": [
+      "Mouth お　大"
+    ],
+    "happy": [
+      "Eye 笑顔",
+      "Mouth 笑顔, Closed"
+    ],
+    "angry": [
+      "Eye 怒り",
+      "Eyebrow 怒り",
+      "Mouth 怒り, Closed"
+    ],
+    "sad": [
+      "Eye 悲しい",
+      "Eyebrow 困り",
+      "Mouth 寂しい, Closed"
+    ],
+    "relaxed": [
+      "Eye 微笑"
+    ],
+    "surprised": [
+      "Eyebrow 驚き",
+      "Mouth 驚き"
+    ]
+  },
+  "neutral_pose": {
+    "method": "inverse weighted affine skinning from exported current pose to prefab posture, retaining per-character local stretch and offsets",
+    "posture_bones": 137,
+    "meshes": [
+      {
+        "name": "Body HoujouRoy",
+        "verts": 10485,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.737717209301864,
+            -0.09951993460457928,
+            0.014413853840213727
+          ],
+          [
+            0.7377170169136537,
+            0.12938267982260365,
+            1.6814621686935425
+          ]
+        ]
+      },
+      {
+        "name": "Gag Eyes HoujouRoy",
+        "verts": 720,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.06393585904751412,
+            -0.02773317546525189,
+            1.5449411337881118
+          ],
+          [
+            0.06391340803714185,
+            0.0028013366798068148,
+            1.595939649751348
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 00 HoujouRoy",
+        "verts": 12185,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.16133665473529818,
+            -0.10000646337903986,
+            1.161209443110688
+          ],
+          [
+            0.175893957564457,
+            0.2101457741068948,
+            1.7328110774046825
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 01 HoujouRoy",
+        "verts": 12185,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.16133665473529818,
+            -0.10000646337903986,
+            1.161209443110688
+          ],
+          [
+            0.175893957564457,
+            0.2101457741068948,
+            1.7328110774046825
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 02 HoujouRoy",
+        "verts": 12185,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.16133665473529818,
+            -0.10000646337903986,
+            1.161209443110688
+          ],
+          [
+            0.175893957564457,
+            0.2101457741068948,
+            1.7328110774046825
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 03 HoujouRoy",
+        "verts": 12185,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.16133665473529818,
+            -0.10000646337903986,
+            1.161209443110688
+          ],
+          [
+            0.175893957564457,
+            0.2101457741068948,
+            1.7328110774046825
+          ]
+        ]
+      },
+      {
+        "name": "Indoor shoes 00 HoujouRoy",
+        "verts": 1486,
+        "roundtrip_error_m": 2.7755575615628914e-17,
+        "bounds": [
+          [
+            -0.11913033312658823,
+            -0.1116325595233112,
+            0.0006186032705804532
+          ],
+          [
+            0.11913031724814202,
+            0.08603097163711253,
+            0.07230281641778065
+          ]
+        ]
+      },
+      {
+        "name": "Indoor shoes 02 HoujouRoy",
+        "verts": 1486,
+        "roundtrip_error_m": 2.7755575615628914e-17,
+        "bounds": [
+          [
+            -0.11913033312658823,
+            -0.1116325595233112,
+            0.0006186032705804532
+          ],
+          [
+            0.11913031724814202,
+            0.08603097163711253,
+            0.07230281641778065
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 00 HoujouRoy",
+        "verts": 14429,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.7377172093018673,
+            -0.10691866496811057,
+            0.008462121592738731
+          ],
+          [
+            0.7377171361228995,
+            0.15651596679370947,
+            1.6941365003585815
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 01 HoujouRoy",
+        "verts": 5722,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.7377172093018673,
+            -0.094849404050808,
+            0.01722731227094385
+          ],
+          [
+            0.7377171361228995,
+            0.12730706024267346,
+            1.6941365003585815
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 02 HoujouRoy",
+        "verts": 10810,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.7377172093018673,
+            -0.2405916830329886,
+            0.01363684769084232
+          ],
+          [
+            0.7377171361228995,
+            0.12730706024267346,
+            1.6941365003585815
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 03 HoujouRoy",
+        "verts": 9430,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.7377172093018673,
+            -0.2405916830329886,
+            0.01722731227094385
+          ],
+          [
+            0.7377171361228995,
+            0.12730706024267346,
+            1.6941365003585815
+          ]
+        ]
+      },
+      {
+        "name": "Tears HoujouRoy",
+        "verts": 1162,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.05524890334425267,
+            -0.00809407634335119,
+            1.5503807061685813
+          ],
+          [
+            0.05522334198531215,
+            0.0017975212957129848,
+            1.557565672640731
+          ]
+        ]
+      },
+      {
+        "name": "Tongue (rigged) HoujouRoy",
+        "verts": 246,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.012243833702543507,
+            -0.04664450466413833,
+            1.4914077520370483
+          ],
+          [
+            0.012243820664025953,
+            0.011662292759865522,
+            1.508733781005765
+          ]
+        ]
+      },
+      {
+        "name": "Top shift 00 HoujouRoy",
+        "verts": 4251,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.5884346387622421,
+            -0.07912526188518379,
+            1.0285663270363135
+          ],
+          [
+            0.5884344161218975,
+            0.12999876186203027,
+            1.483024191023508
+          ]
+        ]
+      },
+      {
+        "name": "Underwear shift 01 HoujouRoy",
+        "verts": 698,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.12311479950446698,
+            -0.06336070793931495,
+            0.8877588800550562
+          ],
+          [
+            0.12311475166673563,
+            0.12661975153649696,
+            1.0754846992050038
+          ]
+        ]
+      }
+    ],
+    "core_positions": {
+      "Hips": [
+        5.968804561717889e-09,
+        0.0,
+        1.1333930492401123
+      ],
+      "Head": [
+        5.968802341271839e-09,
+        0.01661408506333828,
+        1.5020231008529663
+      ],
+      "Left arm": [
+        0.10867790877819061,
+        0.023552216589450836,
+        1.4007093906402588
+      ],
+      "Left elbow": [
+        0.3591962158679962,
+        0.03462764993309975,
+        1.4007093906402588
+      ],
+      "Left wrist": [
+        0.6069865226745605,
+        0.03463505208492279,
+        1.4007093906402588
+      ],
+      "Left leg": [
+        0.08230826258659363,
+        0.01644718647003174,
+        0.9695911407470703
+      ],
+      "Left knee": [
+        0.08230836689472198,
+        0.014404257759451866,
+        0.5137262940406799
+      ],
+      "Left ankle": [
+        0.08230846375226974,
+        0.05112108960747719,
+        0.033666107803583145
+      ],
+      "Right wrist": [
+        -0.606972336769104,
+        0.0342075377702713,
+        1.4007099866867065
+      ]
+    }
+  },
+  "outfits": [
+    {
+      "id": 0,
+      "visible_meshes": [
+        "Body HoujouRoy",
+        "Hair Outfit 00 HoujouRoy",
+        "Outfit 00 HoujouRoy"
+      ],
+      "mask": "cf_m_body_AM_00.png"
+    },
+    {
+      "id": 1,
+      "visible_meshes": [
+        "Body HoujouRoy",
+        "Hair Outfit 01 HoujouRoy",
+        "Outfit 01 HoujouRoy"
+      ],
+      "mask": "cf_m_body_AM_01.png"
+    },
+    {
+      "id": 2,
+      "visible_meshes": [
+        "Body HoujouRoy",
+        "Hair Outfit 02 HoujouRoy",
+        "Outfit 02 HoujouRoy"
+      ],
+      "mask": "cf_m_body_AM_02.png"
+    },
+    {
+      "id": 3,
+      "visible_meshes": [
+        "Body HoujouRoy",
+        "Hair Outfit 03 HoujouRoy",
+        "Outfit 03 HoujouRoy"
+      ],
+      "mask": "cf_m_body_AM_03.png"
+    }
+  ]
+}

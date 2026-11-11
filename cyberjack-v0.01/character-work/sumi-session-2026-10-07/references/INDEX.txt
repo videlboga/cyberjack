@@ -1,0 +1,10 @@
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/bodyparts/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/intimacy/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/portraits/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-core/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-v4/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/rendered/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/legacy/interactions-expanded/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-core/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-v4/sumi
+/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/rendered/sumi

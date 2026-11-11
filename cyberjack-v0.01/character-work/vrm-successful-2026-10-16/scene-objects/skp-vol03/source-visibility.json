@@ -1,0 +1,137 @@
+{
+  "models": {
+    "SexMachineModel-065": {
+      "hiddenSourcePaths": [
+        "0/3/0",
+        "0/3/1",
+        "0/8"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-066": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-067": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-068": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-069": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-070": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-071": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-072": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-073": {
+      "hiddenSourcePaths": [
+        "0/8",
+        "0/13"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-074": {
+      "hiddenSourcePaths": [
+        "0/2/6/2",
+        "0/3/6/2",
+        "0/4/6/2",
+        "0/5/6/2",
+        "0/6/6/2",
+        "0/7/6/2",
+        "0/8/6/2"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-075": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-076": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-077": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-078": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-079": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-080": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-081": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-082": {
+      "hiddenSourcePaths": [
+        "0/0/0",
+        "0/1/0",
+        "0/2/0",
+        "0/10/0"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-083": {
+      "hiddenSourcePaths": [
+        "0/0/0",
+        "0/1/0",
+        "0/2/0"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-084": {
+      "hiddenSourcePaths": [],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-085": {
+      "hiddenSourcePaths": [
+        "0/2/0",
+        "0/2/1"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-086": {
+      "hiddenSourcePaths": [
+        "0/2/0",
+        "0/2/1"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-087": {
+      "hiddenSourcePaths": [
+        "0/2/0",
+        "0/2/1"
+      ],
+      "hiddenLayers": []
+    },
+    "SexMachineModel-088": {
+      "hiddenSourcePaths": [
+        "0/2/0",
+        "0/2/1"
+      ],
+      "hiddenLayers": []
+    }
+  },
+  "complete": true
+}

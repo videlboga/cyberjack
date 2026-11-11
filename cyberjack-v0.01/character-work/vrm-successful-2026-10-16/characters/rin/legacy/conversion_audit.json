@@ -1,0 +1,741 @@
+{
+  "materials": [
+    {
+      "name": "KK cf_m_eyeline_kage",
+      "base": "cf_m_eyeline_kage_light.png",
+      "shade": "cf_m_eyeline_kage_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "BLEND"
+    },
+    {
+      "name": "KK cf_m_hair_b_106_01 4100",
+      "base": "cf_m_hair_b_106_01 4100_light.png",
+      "shade": "cf_m_hair_b_106_01 4100_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_shorts_05_2 8360",
+      "base": "cf_m_shorts_05_2 8360_light.png",
+      "shade": "cf_m_shorts_05_2 8360_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_tang",
+      "base": "cf_m_tang_light.png",
+      "shade": "cf_m_tang_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_s_03_00 4150",
+      "base": "cf_m_hair_s_03_00 4150_light.png",
+      "shade": "cf_m_hair_s_03_00 4150_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_mayuge_00",
+      "base": "cf_m_mayuge_00_light.png",
+      "shade": "cf_m_mayuge_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cm_m_top_inner02 8080",
+      "base": "cm_m_top_inner02 8080_light.png",
+      "shade": "cm_m_top_inner02 8080_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_body",
+      "base": "cf_m_body_light_alpha.png",
+      "shade": "cf_m_body_dark_alpha.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag00 春野千佳",
+      "base": "cf_m_gageye_00_cf_t_gageye_00_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_eyeline_down",
+      "base": "cf_m_eyeline_down_light.png",
+      "shade": "cf_m_eyeline_down_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag01 春野千佳",
+      "base": "cf_m_gageye_01_cf_t_gageye_03_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_106_00 4100",
+      "base": "cf_m_hair_b_106_00 4100_light.png",
+      "shade": "cf_m_hair_b_106_00 4100_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_shoes_pumps01 8600",
+      "base": "cf_m_shoes_pumps01 8600_light.png",
+      "shade": "cf_m_shoes_pumps01 8600_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_07_00_i 4050",
+      "base": "cf_m_hair_f_07_00_i 4050_light.png",
+      "shade": "cf_m_hair_f_07_00_i 4050_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_socks_crewori 8480",
+      "base": "cf_m_socks_crewori 8480_light.png",
+      "shade": "cf_m_socks_crewori 8480_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_tooth",
+      "base": "cf_m_tooth_light.png",
+      "shade": "cf_m_tooth_dark.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hitomi_00_cf_Ohitomi_R02",
+      "base": "cf_m_hitomi_00_cf_Ohitomi_R02_light.png",
+      "shade": "cf_m_hitomi_00_cf_Ohitomi_R02_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag02 春野千佳",
+      "base": "cf_m_gageye_02_cf_t_gageye_07_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK acs_m_megane04 4280",
+      "base": "acs_m_megane04 4280_light.png",
+      "shade": "acs_m_megane04 4280_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_eyeline_00_up",
+      "base": "cf_m_eyeline_00_up_light.png",
+      "shade": "cf_m_eyeline_00_up_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_face_00",
+      "base": "cf_m_face_00_light.png",
+      "shade": "cf_m_face_00_dark.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_noseline_00",
+      "base": "cf_m_noseline_00_light.png",
+      "shade": "cf_m_noseline_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Tears 春野千佳",
+      "base": "cf_m_namida_00_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_sirome_00",
+      "base": "cf_m_sirome_00_light.png",
+      "shade": "cf_m_sirome_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_106_01 4100 00",
+      "base": "cf_m_hair_b_106_01 4100 00_light.png",
+      "shade": "cf_m_hair_b_106_01 4100 00_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hitomi_00_cf_Ohitomi_L02",
+      "base": "cf_m_hitomi_00_cf_Ohitomi_L02_light.png",
+      "shade": "cf_m_hitomi_00_cf_Ohitomi_L02_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK acs_m_lens 4290",
+      "base": "acs_m_lens 4290_light.png",
+      "shade": "acs_m_lens 4290_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "BLEND"
+    },
+    {
+      "name": "KK cf_m_tang.001",
+      "base": "cf_m_tang_light.png",
+      "shade": "cf_m_tang_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_bot_skirt06 8150",
+      "base": "cf_m_bot_skirt06 8150_light.png",
+      "shade": "cf_m_bot_skirt06 8150_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    }
+  ],
+  "physics": [
+    {
+      "name": "cf_J_hairFL_02_00",
+      "source_particles": [
+        "cf_J_hairFL_02_00",
+        "cf_J_hairFL_02_01",
+        "cf_J_hairFL_02_02"
+      ],
+      "joints": [
+        "cf_J_hairFL_02_00",
+        "cf_J_hairFL_02_01",
+        "cf_J_hairFL_02_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFL_00",
+      "source_particles": [
+        "cf_J_hairFL_00",
+        "cf_J_hairFL_01",
+        "cf_J_hairFL_02"
+      ],
+      "joints": [
+        "cf_J_hairFL_00",
+        "cf_J_hairFL_01",
+        "cf_J_hairFL_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFR_02_00",
+      "source_particles": [
+        "cf_J_hairFR_02_00",
+        "cf_J_hairFR_02_01",
+        "cf_J_hairFR_02_02"
+      ],
+      "joints": [
+        "cf_J_hairFR_02_00",
+        "cf_J_hairFR_02_01",
+        "cf_J_hairFR_02_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFR_00",
+      "source_particles": [
+        "cf_J_hairFR_00",
+        "cf_J_hairFR_01",
+        "cf_J_hairFR_02"
+      ],
+      "joints": [
+        "cf_J_hairFR_00",
+        "cf_J_hairFR_01",
+        "cf_J_hairFR_02"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_j_sk_07_00",
+      "source_particles": [
+        "cf_j_sk_07_00",
+        "cf_j_sk_07_01",
+        "cf_j_sk_07_02",
+        "cf_j_sk_07_03",
+        "cf_j_sk_07_04",
+        "cf_j_sk_07_05",
+        "cf_j_sk_07_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_07_03",
+        "cf_j_sk_07_04",
+        "cf_j_sk_07_05",
+        "cf_j_sk_07_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_06_00",
+      "source_particles": [
+        "cf_j_sk_06_00",
+        "cf_j_sk_06_01",
+        "cf_j_sk_06_02",
+        "cf_j_sk_06_03",
+        "cf_j_sk_06_04",
+        "cf_j_sk_06_05",
+        "cf_j_sk_06_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_06_03",
+        "cf_j_sk_06_04",
+        "cf_j_sk_06_05",
+        "cf_j_sk_06_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_05_00",
+      "source_particles": [
+        "cf_j_sk_05_00",
+        "cf_j_sk_05_01",
+        "cf_j_sk_05_02",
+        "cf_j_sk_05_03",
+        "cf_j_sk_05_04",
+        "cf_j_sk_05_05",
+        "cf_j_sk_05_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_05_03",
+        "cf_j_sk_05_04",
+        "cf_j_sk_05_05",
+        "cf_j_sk_05_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_04_00",
+      "source_particles": [
+        "cf_j_sk_04_00",
+        "cf_j_sk_04_01",
+        "cf_j_sk_04_02",
+        "cf_j_sk_04_03",
+        "cf_j_sk_04_04",
+        "cf_j_sk_04_05",
+        "cf_j_sk_04_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_04_03",
+        "cf_j_sk_04_04",
+        "cf_j_sk_04_05",
+        "cf_j_sk_04_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_03_00",
+      "source_particles": [
+        "cf_j_sk_03_00",
+        "cf_j_sk_03_01",
+        "cf_j_sk_03_02",
+        "cf_j_sk_03_03",
+        "cf_j_sk_03_04",
+        "cf_j_sk_03_05",
+        "cf_j_sk_03_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_03_03",
+        "cf_j_sk_03_04",
+        "cf_j_sk_03_05",
+        "cf_j_sk_03_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_02_00",
+      "source_particles": [
+        "cf_j_sk_02_00",
+        "cf_j_sk_02_01",
+        "cf_j_sk_02_02",
+        "cf_j_sk_02_03",
+        "cf_j_sk_02_04",
+        "cf_j_sk_02_05",
+        "cf_j_sk_02_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_02_03",
+        "cf_j_sk_02_04",
+        "cf_j_sk_02_05",
+        "cf_j_sk_02_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_01_00",
+      "source_particles": [
+        "cf_j_sk_01_00",
+        "cf_j_sk_01_01",
+        "cf_j_sk_01_02",
+        "cf_j_sk_01_03",
+        "cf_j_sk_01_04",
+        "cf_j_sk_01_05",
+        "cf_j_sk_01_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_01_03",
+        "cf_j_sk_01_04",
+        "cf_j_sk_01_05",
+        "cf_j_sk_01_05_vrm_end"
+      ],
+      "colliders": 31
+    },
+    {
+      "name": "cf_j_sk_00_00",
+      "source_particles": [
+        "cf_j_sk_00_00",
+        "cf_j_sk_00_01",
+        "cf_j_sk_00_02",
+        "cf_j_sk_00_03",
+        "cf_j_sk_00_04",
+        "cf_j_sk_00_05",
+        "cf_j_sk_00_05_vrm_end"
+      ],
+      "joints": [
+        "cf_j_sk_00_03",
+        "cf_j_sk_00_04",
+        "cf_j_sk_00_05",
+        "cf_j_sk_00_05_vrm_end"
+      ],
+      "colliders": 31
+    }
+  ],
+  "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/Export_PMX/20261014190816_春野千佳",
+  "blend_source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/rin-kkbp-session-2026-10-14/Rin_KKBP_v1.blend",
+  "disabled_physics": [
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_siri01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_d_siri01_L",
+        "cf_j_siri_L"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_siri01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_d_siri01_R",
+        "cf_j_siri_R"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_bust01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_j_bust01_L",
+        "cf_j_bust02_L",
+        "cf_j_bust03_L"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_bust01_R",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_j_bust01_R",
+        "cf_j_bust02_R",
+        "cf_j_bust03_R"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    }
+  ],
+  "expressions": {
+    "blink": [
+      "Eye 両目閉じ"
+    ],
+    "blink_left": [
+      "Eye 左目ぎゅっと閉じ"
+    ],
+    "blink_right": [
+      "Eye 右目ぎゅっと閉じ"
+    ],
+    "aa": [
+      "Mouth あ　大"
+    ],
+    "ih": [
+      "Mouth い　大"
+    ],
+    "ou": [
+      "Mouth う　大"
+    ],
+    "ee": [
+      "Mouth え　大"
+    ],
+    "oh": [
+      "Mouth お　大"
+    ],
+    "happy": [
+      "Eye 笑顔",
+      "Mouth 笑顔, Closed"
+    ],
+    "angry": [
+      "Eye 怒り",
+      "Eyebrow 怒り",
+      "Mouth 怒り, Closed"
+    ],
+    "sad": [
+      "Eye 悲しい",
+      "Eyebrow 困り",
+      "Mouth 寂しい, Closed"
+    ],
+    "relaxed": [
+      "Eye 微笑"
+    ],
+    "surprised": [
+      "Eyebrow 驚き",
+      "Mouth 驚き"
+    ]
+  }
+}

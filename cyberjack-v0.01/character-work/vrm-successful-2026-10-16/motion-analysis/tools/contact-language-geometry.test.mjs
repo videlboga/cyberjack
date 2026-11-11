@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {validateRequestGeometry} from './command-language.mjs';
+const central={stages:[{constraints:[{feature:'rightHandAt_groinDistance',max:.06}]}]};
+for(const text of ['Раздвинь ноги и положи руку между ними','Разведи бёдра, положи кисть между них','Положи руку между ног'])assert.doesNotThrow(()=>validateRequestGeometry(central,text,{}));
+const wrong={stages:[{constraints:[{feature:'rightHandButtockDistance',max:.07}]}]};
+assert.throws(()=>validateRequestGeometry(wrong,'Раздвинь ноги и положи руку между ними',{}),/центральная цель/);
+for(const text of ['Раздвинь ноги и держи их руками','Удерживай ноги руками','Возьми ноги руками'])assert.throws(()=>validateRequestGeometry(wrong,text,{}),/HandKneeDistance/);
+assert.doesNotThrow(()=>validateRequestGeometry({stages:[{constraints:[{feature:'rightHandKneeDistance',max:.07}]}]},'Раздвинь ноги и держи их руками',{}));
+assert.doesNotThrow(()=>validateRequestGeometry(wrong,'Раздвинь ноги и положи руку на ягодицу',{}));
+console.log('PASS leg spreading with hand contact is distinct from holding legs; pronouns resolve without weakening knee/buttock checks');

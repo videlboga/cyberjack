@@ -1,0 +1,12 @@
+[
+  {
+    "image": "light",
+    "alpha_mask": "R outer mask × G inner mask × original texture alpha",
+    "file": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/mira_four_outfits/textures/mira_body_outfit02_light_outermask.png"
+  },
+  {
+    "image": "dark",
+    "alpha_mask": "R outer mask × G inner mask × original texture alpha",
+    "file": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/mira_four_outfits/textures/mira_body_outfit02_dark_outermask.png"
+  }
+]

@@ -1,0 +1,7 @@
+import fs from'node:fs';import assert from'node:assert/strict';import{warmCommandPlanner,planCharacterCommand}from'./command-planner.mjs';import{compileSemanticIntent}from'./semantic-intent.mjs';import{validateIntent}from'./command-language.mjs';import{poseTools}from'../review/command-pose.mjs';
+const request=JSON.parse(fs.readFileSync('artifacts/right-leg-raised-regression/request.json'));
+const intent=validateIntent(compileSemanticIntent({summary:'Поднять правую ногу',stages:[{description:'Поднять правую ногу',query:'raise right leg',parts:[{part:'right leg',intent:'raised'}]}]},request.state,request.text));
+warmCommandPlanner();const plan=await planCharacterCommand(request,{interpret:async()=>intent});assert.equal(plan.status,'ready');
+const t=poseTools(JSON.parse(fs.readFileSync('data/mix-bank.json'))),root=t.m.index.get('cf_j_thigh00_R'),free=new Set();for(let i=0;i<t.m.rig.length;i++)for(let j=i;j>=0;j=t.m.rig[j].parentIndex)if(j===root)free.add(i);
+for(const step of plan.steps)for(const frame of [...step.motion.frames,...step.idleMotion.frames])for(let j=0;j<frame.length;j++)if(!free.has(j))for(const k of ['p','q','s'])for(let n=0;n<frame[j][k].length;n++)assert(Math.abs(frame[j][k][n]-request.state.pose[j][k][n])<1e-10,'unrequested bone '+t.m.rig[j].name);
+fs.writeFileSync('artifacts/semantic-parser-v1/right-leg-plan.json',JSON.stringify(plan));console.log('PASS semantic intent through complete planner: right leg moves, all other bones retained in transition and idle');

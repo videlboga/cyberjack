@@ -1,0 +1,22 @@
+{
+  "operator_started": true,
+  "contact_injected": true,
+  "screenshot": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/vrm-successful-2026-10-16/tickle-fullbody/preview/gui_smoke.png",
+  "state": {
+    "stimulus": 0.624,
+    "family": "SOLE",
+    "character": "oversensitive",
+    "face": 0.0,
+    "breath": 0.0,
+    "mouth": 0.0
+  },
+  "screenshot_bytes": 113904,
+  "runtime": {
+    "ticks": 5,
+    "button": true,
+    "hit": true,
+    "absolute_t": 1.3172795219987163,
+    "finished": false,
+    "timer_registered": true
+  }
+}

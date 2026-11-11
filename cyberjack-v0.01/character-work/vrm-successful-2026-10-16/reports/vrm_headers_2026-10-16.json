@@ -1,0 +1,82 @@
+[
+  {
+    "file": "characters/kai/outfits/Kai_outfit_00.vrm",
+    "bytes": 63080188,
+    "embedded_images": 46
+  },
+  {
+    "file": "characters/kai/outfits/Kai_outfit_01.vrm",
+    "bytes": 59789652,
+    "embedded_images": 37
+  },
+  {
+    "file": "characters/kai/outfits/Kai_outfit_02.vrm",
+    "bytes": 58510216,
+    "embedded_images": 43
+  },
+  {
+    "file": "characters/kai/outfits/Kai_outfit_03.vrm",
+    "bytes": 58147812,
+    "embedded_images": 40
+  },
+  {
+    "file": "characters/mira/Mira_outfit_00.vrm",
+    "bytes": 82748564,
+    "embedded_images": 55
+  },
+  {
+    "file": "characters/mira/Mira_outfit_01.vrm",
+    "bytes": 74689400,
+    "embedded_images": 46
+  },
+  {
+    "file": "characters/mira/Mira_outfit_02.vrm",
+    "bytes": 85187528,
+    "embedded_images": 40
+  },
+  {
+    "file": "characters/mira/Mira_outfit_03.vrm",
+    "bytes": 71350376,
+    "embedded_images": 34
+  },
+  {
+    "file": "characters/rin/legacy/Rin_nocollider.vrm",
+    "bytes": 74972464,
+    "embedded_images": 53
+  },
+  {
+    "file": "characters/rin/legacy/Rin_restored.vrm",
+    "bytes": 74971512,
+    "embedded_images": 53
+  },
+  {
+    "file": "characters/rin/legacy/Rin_restored2.vrm",
+    "bytes": 74981912,
+    "embedded_images": 53
+  },
+  {
+    "file": "characters/rin/legacy/Rin_restored_v2.vrm",
+    "bytes": 74984848,
+    "embedded_images": 53
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_00.vrm",
+    "bytes": 75031532,
+    "embedded_images": 53
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_01.vrm",
+    "bytes": 78924108,
+    "embedded_images": 41
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_02.vrm",
+    "bytes": 71626596,
+    "embedded_images": 44
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_03.vrm",
+    "bytes": 69060616,
+    "embedded_images": 35
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "id": "92214cbbac91326f52bea13d",
+  "name": "p_item_ukiwa",
+  "kind": "item",
+  "source": "h/common/71.unity3d",
+  "sourceIdentity": "CAB-7d0d7ef6d3a34d95c038c33b2feb87f0:-7892151699754006778",
+  "native": "native/92214cbbac91326f52bea13d.json.gz",
+  "nodes": 10,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_item_ukiwa-92214cbbac91326f52bea13d.glb"
+}

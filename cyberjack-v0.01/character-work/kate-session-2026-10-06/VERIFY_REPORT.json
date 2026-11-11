@@ -1,0 +1,192 @@
+{
+  "relocated": {
+    "outputs": {
+      "files": 29631,
+      "bytes": 74935510748,
+      "same_inode_verified": true,
+      "compatibility_symlink": "/home/cyberkitty/Documents/Codex/2026-09-07/new-chat/outputs",
+      "target": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/session/outputs"
+    },
+    "work": {
+      "files": 6607,
+      "bytes": 3402577103,
+      "same_inode_verified": true,
+      "compatibility_symlink": "/home/cyberkitty/Documents/Codex/2026-09-07/new-chat/work",
+      "target": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/session/work"
+    }
+  },
+  "copied": [
+    {
+      "source": "/home/cyberkitty/Загрузки/Evanescia_More_Foot__Tights.blend",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/Evanescia_More_Foot__Tights.blend",
+      "files": 1,
+      "bytes": 170862169,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/7d3018ab-d961-41b8-8fca-b5a3148b26c2.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/7d3018ab-d961-41b8-8fca-b5a3148b26c2.glb",
+      "files": 1,
+      "bytes": 58518348,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime style character 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime style character 3d model.glb",
+      "files": 1,
+      "bytes": 56477872,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/5c7d2685-98c9-430a-9005-16312dc82158.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/5c7d2685-98c9-430a-9005-16312dc82158.glb",
+      "files": 1,
+      "bytes": 2969536,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime girl 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime girl 3d model.glb",
+      "files": 1,
+      "bytes": 4583584,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/kate-T.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/kate-T.glb",
+      "files": 1,
+      "bytes": 5595352,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/orange-haired girl 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/orange-haired girl 3d model.glb",
+      "files": 1,
+      "bytes": 4690744,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/keit-A.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/keit-A.glb",
+      "files": 1,
+      "bytes": 4987444,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime+girl+3d+model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime+girl+3d+model.glb",
+      "files": 1,
+      "bytes": 69481420,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/bald head 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/bald head 3d model.glb",
+      "files": 1,
+      "bytes": 58903636,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime girl head 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime girl head 3d model.glb",
+      "files": 1,
+      "bytes": 59749644,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime girl 3d model (2).glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime girl 3d model (2).glb",
+      "files": 1,
+      "bytes": 62584444,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/bald head 3d model (1).glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/bald head 3d model (1).glb",
+      "files": 1,
+      "bytes": 59586412,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/bodyparts/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/bodyparts/kate",
+      "files": 20,
+      "bytes": 12783189,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-core/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/calibration-core/kate",
+      "files": 224,
+      "bytes": 145673302,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-v4/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/calibration-v4/kate",
+      "files": 128,
+      "bytes": 81887029,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-core/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/cutout/calibration-core/kate",
+      "files": 224,
+      "bytes": 149854605,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-v4/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/cutout/calibration-v4/kate",
+      "files": 128,
+      "bytes": 82578674,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/rendered/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/cutout/rendered/kate",
+      "files": 56,
+      "bytes": 36458691,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/intimacy/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/intimacy/kate",
+      "files": 176,
+      "bytes": 156033476,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/portraits/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/portraits/kate",
+      "files": 32,
+      "bytes": 24811430,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/rendered/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/rendered/kate",
+      "files": 58,
+      "bytes": 35616453,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/hermes/agent-instruction-ai-character-metahuman.md",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/external-notes/agent-instruction-ai-character-metahuman.md",
+      "files": 1,
+      "bytes": 14654,
+      "sha256_verified": true
+    },
+    {
+      "source": "/home/cyberkitty/Documents/Codex/2026-09-10/sumi/ПРОЦЕСС_СБОРКИ_СУМИ.md",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/external-notes/ПРОЦЕСС_СБОРКИ_СУМИ.md",
+      "files": 1,
+      "bytes": 14502,
+      "sha256_verified": true
+    }
+  ],
+  "stage": "passed",
+  "total_data_files": 37299,
+  "total_data_bytes": 79682804461,
+  "ue_project_exists": true
+}

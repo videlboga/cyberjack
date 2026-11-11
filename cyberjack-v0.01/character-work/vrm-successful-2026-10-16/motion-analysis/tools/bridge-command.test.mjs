@@ -1,0 +1,11 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {validateRequestGeometry} from './command-language.mjs';
+import {commandBootstrap,planCharacterCommand} from './command-planner.mjs';
+const text='Встать на мостик (прогнуться назад, опираясь на руки и ноги)',constraints=[{feature:'hipHeight',min:.20,max:.65},{feature:'chestUp',min:.4,max:1},{feature:'torsoInclination',min:70,max:150},{feature:'headHeight',min:0,max:.30},...['left','right'].flatMap(side=>[{feature:side+'Arm',min:20,max:90},{feature:side+'HandHeight',min:0,max:.07},{feature:side+'FootHeight',min:0,max:.07}])],stage={description:text,constraints,translation:[0,0],yaw:0,duration:3,semantics:{query:'gymnastic bridge backbend chest facing upwards hands and feet on floor',requiresTrajectory:false,motionTerms:[]}};
+const wrong={...stage,constraints:constraints.map(c=>c.feature==='chestUp'?{feature:'chestUp',min:-1,max:-.35}:c)};
+assert.throws(()=>validateRequestGeometry({stages:[wrong]},text,{}),/Мостик требует chestUp/);
+assert.equal(validateRequestGeometry({stages:[stage]},text,{}).stages.length,1);
+const state=commandBootstrap(),plan=await planCharacterCommand({text,state},{interpret:async()=>({summary:'Мостик',stages:[stage]})});
+fs.mkdirSync('artifacts/bridge',{recursive:true});fs.writeFileSync('artifacts/bridge/command.json',JSON.stringify({initial:state,plan}));
+console.log(plan.status,plan.steps.map(s=>({reason:s.reason,source:s.source?.name,features:s.features,nearest:s.nearestFeatures})));
+if(plan.status==='ready'){const f=plan.steps.at(-1).features;assert(f.chestUp>=.36,'forward all-fours is not a bridge');assert(f.leftArm>15&&f.rightArm>15,'tabletop support behind pelvis is not an overhead bridge');}else assert.equal(plan.steps[0].status,'unresolved');

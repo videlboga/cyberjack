@@ -1,0 +1,749 @@
+{
+ "summary": {
+  "total": 46,
+  "dead": 2,
+  "groups": {
+   "belly": 1,
+   "breast": 12,
+   "butt": 2,
+   "feet": 5,
+   "genital": 12,
+   "hips": 1,
+   "nails": 1,
+   "neck": 1,
+   "other": 5,
+   "shin": 1,
+   "thigh": 2,
+   "whole_body": 3
+  },
+  "max_delta_mm": 137.92
+ },
+ "keys": [
+  {
+   "key": "Abs",
+   "group": "belly",
+   "caption": "Пресс стал более рельефным и выраженным.",
+   "max_mm": 4.71,
+   "moved_vertices": 3753,
+   "moved_frac": 0.045,
+   "center": [
+    0.0,
+    -0.023,
+    0.899
+   ],
+   "spread_z": 0.468,
+   "file": "41_Abs",
+   "dead": false
+  },
+  {
+   "key": "BreastsCleavage",
+   "group": "breast",
+   "caption": "Грудь стала более сближенной.",
+   "max_mm": 35.31,
+   "moved_vertices": 11356,
+   "moved_frac": 0.136,
+   "center": [
+    0.0,
+    -0.064,
+    1.205
+   ],
+   "spread_z": 0.21,
+   "file": "11_BreastsCleavage",
+   "dead": false
+  },
+  {
+   "key": "BreastsSize",
+   "group": "breast",
+   "caption": "Грудь стала больше.",
+   "max_mm": 34.81,
+   "moved_vertices": 11510,
+   "moved_frac": 0.138,
+   "center": [
+    -0.0,
+    -0.074,
+    1.204
+   ],
+   "spread_z": 0.218,
+   "file": "19_BreastsSize",
+   "dead": false
+  },
+  {
+   "key": "BreastsImplants",
+   "group": "breast",
+   "caption": "Грудь стала больше и более выпуклой.",
+   "max_mm": 26.7,
+   "moved_vertices": 11013,
+   "moved_frac": 0.132,
+   "center": [
+    -0.0,
+    -0.057,
+    1.214
+   ],
+   "spread_z": 0.219,
+   "file": "09_BreastsImplants",
+   "dead": false
+  },
+  {
+   "key": "BreastShape08",
+   "group": "breast",
+   "caption": "Грудь стала более округлой и приподнятой.",
+   "max_mm": 19.93,
+   "moved_vertices": 10297,
+   "moved_frac": 0.124,
+   "center": [
+    -0.0,
+    -0.052,
+    1.213
+   ],
+   "spread_z": 0.184,
+   "file": "12_BreastShape08",
+   "dead": false
+  },
+  {
+   "key": "BreastShape04",
+   "group": "breast",
+   "caption": "Грудь стала более округлой и приподнятой.",
+   "max_mm": 10.94,
+   "moved_vertices": 9884,
+   "moved_frac": 0.119,
+   "center": [
+    0.0,
+    -0.063,
+    1.213
+   ],
+   "spread_z": 0.175,
+   "file": "13_BreastShape04",
+   "dead": false
+  },
+  {
+   "key": "BreastsDiameter",
+   "group": "breast",
+   "caption": "Грудь стала шире.",
+   "max_mm": 8.22,
+   "moved_vertices": 9629,
+   "moved_frac": 0.116,
+   "center": [
+    0.0,
+    -0.067,
+    1.209
+   ],
+   "spread_z": 0.159,
+   "file": "10_BreastsDiameter",
+   "dead": false
+  },
+  {
+   "key": "Rufang_kuoda",
+   "group": "breast",
+   "caption": "Бедра стали шире.",
+   "max_mm": 5.28,
+   "moved_vertices": 3646,
+   "moved_frac": 0.044,
+   "center": [
+    0.0,
+    -0.077,
+    1.2
+   ],
+   "spread_z": 0.138,
+   "file": "17_Rufang_kuoda",
+   "dead": false
+  },
+  {
+   "key": "Breast fix",
+   "group": "breast",
+   "caption": "Грудь стала более приподнятой и округлой.",
+   "max_mm": 4.89,
+   "moved_vertices": 9036,
+   "moved_frac": 0.109,
+   "center": [
+    0.0,
+    -0.076,
+    1.198
+   ],
+   "spread_z": 0.167,
+   "file": "06_Breast_fix",
+   "dead": false
+  },
+  {
+   "key": "Rutou_tu02",
+   "group": "breast",
+   "caption": "Грудь стала больше и более выпуклой.",
+   "max_mm": 2.99,
+   "moved_vertices": 5764,
+   "moved_frac": 0.069,
+   "center": [
+    0.0,
+    -0.113,
+    1.2
+   ],
+   "spread_z": 0.035,
+   "file": "15_Rutou_tu02",
+   "dead": false
+  },
+  {
+   "key": "Rutou_tu01",
+   "group": "breast",
+   "caption": "Соски стали более выраженными и выступающими.",
+   "max_mm": 2.52,
+   "moved_vertices": 6058,
+   "moved_frac": 0.073,
+   "center": [
+    -0.0,
+    -0.11,
+    1.199
+   ],
+   "spread_z": 0.051,
+   "file": "14_Rutou_tu01",
+   "dead": false
+  },
+  {
+   "key": "Rutou_fangda",
+   "group": "breast",
+   "caption": "Соски стали больше.",
+   "max_mm": 2.42,
+   "moved_vertices": 6046,
+   "moved_frac": 0.073,
+   "center": [
+    -0.0,
+    -0.109,
+    1.2
+   ],
+   "spread_z": 0.048,
+   "file": "18_Rutou_fangda",
+   "dead": false
+  },
+  {
+   "key": "Rutou_zhuandong",
+   "group": "breast",
+   "caption": "Соски развернуты в сторону.",
+   "max_mm": 1.45,
+   "moved_vertices": 5712,
+   "moved_frac": 0.069,
+   "center": [
+    -0.0,
+    -0.112,
+    1.199
+   ],
+   "spread_z": 0.032,
+   "file": "16_Rutou_zhuandong",
+   "dead": false
+  },
+  {
+   "key": "GlutesSize",
+   "group": "butt",
+   "caption": "Ягодицы стали больше и более выпуклыми.",
+   "max_mm": 21.13,
+   "moved_vertices": 14285,
+   "moved_frac": 0.172,
+   "center": [
+    0.0,
+    0.027,
+    0.866
+   ],
+   "spread_z": 0.396,
+   "file": "23_GlutesSize",
+   "dead": false
+  },
+  {
+   "key": "Butt fix",
+   "group": "butt",
+   "caption": "Ягодицы стали более выпуклыми и скругленными.",
+   "max_mm": 11.96,
+   "moved_vertices": 7662,
+   "moved_frac": 0.092,
+   "center": [
+    0.08,
+    -0.011,
+    0.57
+   ],
+   "spread_z": 1.119,
+   "file": "07_Butt_fix",
+   "dead": false
+  },
+  {
+   "key": "雕刻足底2",
+   "group": "feet",
+   "caption": "Ступни стали более плоскими.",
+   "max_mm": 15.94,
+   "moved_vertices": 16850,
+   "moved_frac": 0.202,
+   "center": [
+    0.0,
+    -0.027,
+    0.043
+   ],
+   "spread_z": 0.07,
+   "file": "43_2",
+   "dead": false
+  },
+  {
+   "key": "雕刻足底5",
+   "group": "feet",
+   "caption": "Ступни стали более плоскими.",
+   "max_mm": 15.0,
+   "moved_vertices": 17328,
+   "moved_frac": 0.208,
+   "center": [
+    0.0,
+    -0.027,
+    0.053
+   ],
+   "spread_z": 0.097,
+   "file": "46_5",
+   "dead": false
+  },
+  {
+   "key": "雕刻足底3",
+   "group": "feet",
+   "caption": "Ступни стали более плоскими.",
+   "max_mm": 13.99,
+   "moved_vertices": 17574,
+   "moved_frac": 0.211,
+   "center": [
+    0.0,
+    -0.024,
+    0.584
+   ],
+   "spread_z": 1.154,
+   "file": "44_3",
+   "dead": false
+  },
+  {
+   "key": "雕刻足底1",
+   "group": "feet",
+   "caption": "Ступни стали более плоскими.",
+   "max_mm": 12.18,
+   "moved_vertices": 17436,
+   "moved_frac": 0.21,
+   "center": [
+    0.0,
+    -0.025,
+    0.584
+   ],
+   "spread_z": 1.154,
+   "file": "42_1",
+   "dead": false
+  },
+  {
+   "key": "雕刻足底4",
+   "group": "feet",
+   "caption": "Ступни стали более плоскими.",
+   "max_mm": 9.05,
+   "moved_vertices": 17856,
+   "moved_frac": 0.215,
+   "center": [
+    0.0,
+    -0.027,
+    0.058
+   ],
+   "spread_z": 0.105,
+   "file": "45_4",
+   "dead": false
+  },
+  {
+   "key": "Vagina fix",
+   "group": "genital",
+   "caption": "Область промежности стала более сглаженной и плоской.",
+   "max_mm": 9.96,
+   "moved_vertices": 7580,
+   "moved_frac": 0.091,
+   "center": [
+    -0.0,
+    -0.042,
+    0.878
+   ],
+   "spread_z": 0.133,
+   "file": "08_Vagina_fix",
+   "dead": false
+  },
+  {
+   "key": "Vagina09",
+   "group": "genital",
+   "caption": "Область вульвы стала более выраженной и выпуклой.",
+   "max_mm": 9.25,
+   "moved_vertices": 7598,
+   "moved_frac": 0.091,
+   "center": [
+    0.0,
+    -0.042,
+    0.878
+   ],
+   "spread_z": 0.133,
+   "file": "37_Vagina09",
+   "dead": false
+  },
+  {
+   "key": "Vagina07",
+   "group": "genital",
+   "caption": "Область вульвы стала более выраженной и выпуклой.",
+   "max_mm": 8.85,
+   "moved_vertices": 7579,
+   "moved_frac": 0.091,
+   "center": [
+    0.0,
+    -0.042,
+    0.878
+   ],
+   "spread_z": 0.133,
+   "file": "35_Vagina07",
+   "dead": false
+  },
+  {
+   "key": "Vagina03",
+   "group": "genital",
+   "caption": "Область вульвы стала более выраженной и объемной.",
+   "max_mm": 8.23,
+   "moved_vertices": 7336,
+   "moved_frac": 0.088,
+   "center": [
+    -0.0,
+    -0.044,
+    0.879
+   ],
+   "spread_z": 0.076,
+   "file": "31_Vagina03",
+   "dead": false
+  },
+  {
+   "key": "Vagina04",
+   "group": "genital",
+   "caption": "Область вульвы стала более выраженной и выпуклой.",
+   "max_mm": 7.05,
+   "moved_vertices": 7343,
+   "moved_frac": 0.088,
+   "center": [
+    -0.0,
+    -0.042,
+    0.879
+   ],
+   "spread_z": 0.077,
+   "file": "32_Vagina04",
+   "dead": false
+  },
+  {
+   "key": "Vagina05",
+   "group": "genital",
+   "caption": "Область вульвы стала более выраженной и объемной.",
+   "max_mm": 6.27,
+   "moved_vertices": 7284,
+   "moved_frac": 0.088,
+   "center": [
+    0.0,
+    -0.043,
+    0.876
+   ],
+   "spread_z": 0.068,
+   "file": "33_Vagina05",
+   "dead": false
+  },
+  {
+   "key": "Vagina06",
+   "group": "genital",
+   "caption": "Область промежности стала более выраженной и выпуклой.",
+   "max_mm": 6.16,
+   "moved_vertices": 3363,
+   "moved_frac": 0.04,
+   "center": [
+    -0.0,
+    -0.049,
+    0.88
+   ],
+   "spread_z": 0.061,
+   "file": "34_Vagina06",
+   "dead": false
+  },
+  {
+   "key": "Vagina02",
+   "group": "genital",
+   "caption": "Область промежности стала более выраженной и рельефной.",
+   "max_mm": 6.1,
+   "moved_vertices": 7326,
+   "moved_frac": 0.088,
+   "center": [
+    -0.0,
+    -0.044,
+    0.879
+   ],
+   "spread_z": 0.076,
+   "file": "30_Vagina02",
+   "dead": false
+  },
+  {
+   "key": "Vagina01",
+   "group": "genital",
+   "caption": "Область промежности стала более выраженной и рельефной.",
+   "max_mm": 3.12,
+   "moved_vertices": 1135,
+   "moved_frac": 0.014,
+   "center": [
+    0.0,
+    -0.049,
+    0.882
+   ],
+   "spread_z": 0.068,
+   "file": "29_Vagina01",
+   "dead": false
+  },
+  {
+   "key": "Vagina08",
+   "group": "genital",
+   "caption": "Область промежности стала более выраженной и выпуклой.",
+   "max_mm": 3.01,
+   "moved_vertices": 3345,
+   "moved_frac": 0.04,
+   "center": [
+    0.0,
+    -0.049,
+    0.88
+   ],
+   "spread_z": 0.061,
+   "file": "36_Vagina08",
+   "dead": false
+  },
+  {
+   "key": "VaginaOpen",
+   "group": "genital",
+   "caption": "Область промежности стала более открытой и углубленной.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "04_VaginaOpen",
+   "dead": false,
+   "dead_reason": "работает, управляется костью VaginaOpen на rig_E (scale.x 1→2)",
+   "data_mm": 24.577
+  },
+  {
+   "key": "AnusOpen",
+   "group": "genital",
+   "caption": "Форма не меняется.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "05_AnusOpen",
+   "dead": false,
+   "dead_reason": "работает, управляется костью AnusOpen на rig_E (scale.x 1→2)",
+   "data_mm": 18.802
+  },
+  {
+   "key": "HipSize",
+   "group": "hips",
+   "caption": "Бедра стали шире.",
+   "max_mm": 20.23,
+   "moved_vertices": 19521,
+   "moved_frac": 0.235,
+   "center": [
+    0.0,
+    -0.0,
+    0.818
+   ],
+   "spread_z": 0.545,
+   "file": "22_HipSize",
+   "dead": false
+  },
+  {
+   "key": "指甲",
+   "group": "nails",
+   "caption": "Ногти стали длиннее.",
+   "max_mm": 2.28,
+   "moved_vertices": 295,
+   "moved_frac": 0.004,
+   "center": [
+    0.395,
+    0.055,
+    0.833
+   ],
+   "spread_z": 0.021,
+   "file": "38_key",
+   "dead": false
+  },
+  {
+   "key": "Neck Fix",
+   "group": "neck",
+   "caption": "Шея стала короче.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "40_Neck_Fix",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.026
+  },
+  {
+   "key": "B",
+   "group": "other",
+   "caption": "Бедра стали шире.",
+   "max_mm": 137.92,
+   "moved_vertices": 82532,
+   "moved_frac": 0.992,
+   "center": [
+    0.025,
+    -0.002,
+    0.707
+   ],
+   "spread_z": 1.415,
+   "file": "02_B",
+   "dead": false
+  },
+  {
+   "key": "0000000",
+   "group": "other",
+   "caption": "Форма не меняется.",
+   "max_mm": 7.47,
+   "moved_vertices": 3048,
+   "moved_frac": 0.037,
+   "center": [
+    -0.0,
+    -0.061,
+    0.881
+   ],
+   "spread_z": 0.059,
+   "file": "28_0000000",
+   "dead": false
+  },
+  {
+   "key": "键 37",
+   "group": "other",
+   "caption": "Ягодицы стали более выпуклыми.",
+   "max_mm": 6.86,
+   "moved_vertices": 8700,
+   "moved_frac": 0.105,
+   "center": [
+    0.0,
+    0.003,
+    1.187
+   ],
+   "spread_z": 0.422,
+   "file": "39_37",
+   "dead": false
+  },
+  {
+   "key": "B+",
+   "group": "other",
+   "caption": "Грудь стала больше и объемнее.",
+   "max_mm": 2.03,
+   "moved_vertices": 3574,
+   "moved_frac": 0.043,
+   "center": [
+    -0.0,
+    0.022,
+    0.89
+   ],
+   "spread_z": 1.05,
+   "file": "03_B+",
+   "dead": false
+  },
+  {
+   "key": "_______",
+   "group": "other",
+   "caption": "Бедра стали шире.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "27_key",
+   "dead": true,
+   "dead_reason": "пусто: геометрия совпадает с базой",
+   "data_mm": 0.022
+  },
+  {
+   "key": "ShinsSize",
+   "group": "shin",
+   "caption": "Голени стали шире.",
+   "max_mm": 10.01,
+   "moved_vertices": 11762,
+   "moved_frac": 0.141,
+   "center": [
+    -0.0,
+    0.007,
+    0.334
+   ],
+   "spread_z": 0.602,
+   "file": "21_ShinsSize",
+   "dead": false
+  },
+  {
+   "key": "Thigh Choke",
+   "group": "thigh",
+   "caption": "Верхняя часть бёдер стала уже.",
+   "max_mm": 16.38,
+   "moved_vertices": 1354,
+   "moved_frac": 0.016,
+   "center": [
+    0.089,
+    -0.018,
+    0.779
+   ],
+   "spread_z": 0.179,
+   "file": "01_Thigh_Choke",
+   "dead": false
+  },
+  {
+   "key": "ThighsSize",
+   "group": "thigh",
+   "caption": "Бедра стали шире.",
+   "max_mm": 11.32,
+   "moved_vertices": 26799,
+   "moved_frac": 0.322,
+   "center": [
+    0.0,
+    -0.004,
+    0.708
+   ],
+   "spread_z": 0.674,
+   "file": "20_ThighsSize",
+   "dead": false
+  },
+  {
+   "key": "维纳斯的酒窝0",
+   "group": "whole_body",
+   "caption": "Ягодицы стали более выраженными и скругленными.",
+   "max_mm": 16.17,
+   "moved_vertices": 464,
+   "moved_frac": 0.006,
+   "center": [
+    -0.0,
+    0.033,
+    1.021
+   ],
+   "spread_z": 0.06,
+   "file": "26_0",
+   "dead": false
+  },
+  {
+   "key": "维纳斯的酒窝",
+   "group": "whole_body",
+   "caption": "Ягодицы стали более выраженными и скругленными.",
+   "max_mm": 10.2,
+   "moved_vertices": 4137,
+   "moved_frac": 0.05,
+   "center": [
+    0.08,
+    -0.033,
+    0.57
+   ],
+   "spread_z": 1.119,
+   "file": "25_key",
+   "dead": false
+  },
+  {
+   "key": "Voluptuous",
+   "group": "whole_body",
+   "caption": "Бедра и ягодицы стали шире и более скругленными.",
+   "max_mm": 0.0,
+   "moved_vertices": 0,
+   "moved_frac": 0,
+   "center": null,
+   "spread_z": null,
+   "file": "24_Voluptuous",
+   "dead": false,
+   "dead_reason": "работает после mute=False (40.4 мм)",
+   "data_mm": 40.36
+  }
+ ]
+}

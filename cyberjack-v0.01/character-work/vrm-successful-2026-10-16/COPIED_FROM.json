@@ -1,0 +1,325 @@
+[
+  {
+    "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/rin-kkbp-session-2026-10-14/Rin_restored_2026-10-15",
+    "destination": "characters/rin/legacy",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/Rin_restored2.blend",
+    "destination": "characters/rin/legacy/Rin_restored2.blend"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/Rin_restored2.vrm",
+    "destination": "characters/rin/legacy/Rin_restored2.vrm"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/Rin_nocollider.vrm",
+    "destination": "characters/rin/legacy/Rin_nocollider.vrm"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/audit2.json",
+    "destination": "characters/rin/legacy/audit2.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/audit_nocollider.json",
+    "destination": "characters/rin/legacy/audit_nocollider.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/rin_four_outfits",
+    "destination": "characters/rin/outfits",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/mira_four_outfits",
+    "destination": "characters/mira",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/rin-kkbp-session-2026-10-14/Rin_KKBP_v1.blend",
+    "destination": "inputs/blender/Rin_KKBP_v1.blend"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/rin-kkbp-session-2026-10-14/Rin_alloutfits.blend",
+    "destination": "inputs/blender/Rin_alloutfits.blend"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/Export_PMX/20261014190816_春野千佳",
+    "destination": "inputs/exports/rin-original",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/Export_PMX/20261015221708_春野千佳",
+    "destination": "inputs/exports/rin-four-outfits",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/Export_PMX/20261016013030_KamiwataKrista",
+    "destination": "inputs/exports/mira",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/vrm_view.html",
+    "destination": "viewer/vrm_view.html"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/vrm_studio.js",
+    "destination": "viewer/vrm_studio.js"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/vrm_studio.css",
+    "destination": "viewer/vrm_studio.css"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/vrm_studio_assets",
+    "destination": "viewer/vrm_studio_assets",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/node_modules/three",
+    "destination": "viewer/node_modules/three",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/node_modules/@pixiv/three-vrm",
+    "destination": "viewer/node_modules/@pixiv/three-vrm",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/.config/blender/5.2/extensions/user_default/kkbp",
+    "destination": "tools/blender-addons/kkbp",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/.config/blender/5.2/extensions/user_default/vrm",
+    "destination": "tools/blender-addons/vrm",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/.config/blender/5.2/extensions/user_default/mmd_tools",
+    "destination": "tools/blender-addons/mmd_tools",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/koikatsu-idles",
+    "destination": "tools/animation",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/vrm_studio_source/ANIMATION_PROVENANCE.md",
+    "destination": "tools/animation/ANIMATION_PROVENANCE.md"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/vrm_studio_source/vrm_view.original.html",
+    "destination": "reports/reference/vrm_view.original.html"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/chara/oo_base.unity3d",
+    "destination": "inputs/animation/abdata/chara/oo_base.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/adv/motion/controller/adv/00.unity3d",
+    "destination": "inputs/animation/abdata/adv/motion/controller/adv/00.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/h/anim/female/01_01_00.unity3d",
+    "destination": "inputs/animation/abdata/h/anim/female/01_01_00.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/h/anim/female/01_71_00.unity3d",
+    "destination": "inputs/animation/abdata/h/anim/female/01_71_00.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/h/anim/female/03_01_00.unity3d",
+    "destination": "inputs/animation/abdata/h/anim/female/03_01_00.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/h/anim/female/06_01_00.unity3d",
+    "destination": "inputs/animation/abdata/h/anim/female/06_01_00.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata/h/anim/female/07_01_00.unity3d",
+    "destination": "inputs/animation/abdata/h/anim/female/07_01_00.unity3d"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/alloutfits_diagnosis",
+    "destination": "reports/diagnostics/alloutfits",
+    "directory": true
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/skirt_v2_runtime.json",
+    "destination": "reports/session/skirt_v2_runtime.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_smoke_qa.json",
+    "destination": "reports/session/studio_smoke_qa.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/gltf_validation.json",
+    "destination": "reports/session/gltf_validation.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_qa.json",
+    "destination": "reports/session/studio_qa.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/preview_blink.png",
+    "destination": "reports/session/preview_blink.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/preview_aa.png",
+    "destination": "reports/session/preview_aa.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/audit2.json",
+    "destination": "reports/session/audit2.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_initial.png",
+    "destination": "reports/session/studio_initial.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/previous_exports_audit.json",
+    "destination": "reports/session/previous_exports_audit.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/README_RU.md",
+    "destination": "reports/session/README_RU.md"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/README_STUDIO_RU.md",
+    "destination": "reports/session/README_STUDIO_RU.md"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/skirt_v2_gltf_validation.json",
+    "destination": "reports/session/skirt_v2_gltf_validation.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_pose_contact.png",
+    "destination": "reports/session/studio_pose_contact.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_colliders.png",
+    "destination": "reports/session/studio_colliders.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/preview_full.png",
+    "destination": "reports/session/preview_full.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_mobile.png",
+    "destination": "reports/session/studio_mobile.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/skirt_before_diagnosis.json",
+    "destination": "reports/session/skirt_before_diagnosis.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/runtime_physics.json",
+    "destination": "reports/session/runtime_physics.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/preview_face.png",
+    "destination": "reports/session/preview_face.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/source_manifest.json",
+    "destination": "reports/session/source_manifest.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/preview_threequarter.png",
+    "destination": "reports/session/preview_threequarter.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/runtime_expressions.json",
+    "destination": "reports/session/runtime_expressions.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/audit_nocollider.json",
+    "destination": "reports/session/audit_nocollider.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/studio_preview.png",
+    "destination": "reports/session/studio_preview.png"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/skirt_fix_audit.json",
+    "destination": "reports/session/skirt_fix_audit.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/file_checks.json",
+    "destination": "reports/session/file_checks.json"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/test_studio.cjs",
+    "destination": "tools/qa/historical/test_studio.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/studio_smoke.cjs",
+    "destination": "tools/qa/historical/studio_smoke.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/test_four_outfits.cjs",
+    "destination": "tools/qa/historical/test_four_outfits.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/validate_four_outfits.cjs",
+    "destination": "tools/qa/historical/validate_four_outfits.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/skirt_physics.mjs",
+    "destination": "tools/qa/historical/skirt_physics.mjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/check_collisions.py",
+    "destination": "tools/qa/historical/check_collisions.py"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/fit_leg_colliders.py",
+    "destination": "tools/qa/historical/fit_leg_colliders.py"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/sync_final_physics_blend.py",
+    "destination": "tools/qa/historical/sync_final_physics_blend.py"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/krista/test_mira_final.cjs",
+    "destination": "tools/qa/historical/mira/test_mira_final.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/krista/validate_mira.cjs",
+    "destination": "tools/qa/historical/mira/validate_mira.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/krista/pose_qa.cjs",
+    "destination": "tools/qa/historical/mira/pose_qa.cjs"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/krista/check_pose_source.py",
+    "destination": "tools/qa/historical/mira/check_pose_source.py"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/krista/check_basis.py",
+    "destination": "tools/qa/historical/mira/check_basis.py"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/krista/import_krista.py",
+    "destination": "tools/qa/historical/mira/import_krista.py"
+  },
+  {
+    "source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/work/validation/node_modules/gltf-validator",
+    "destination": "tools/gltf-validator",
+    "directory": true
+  },
+  {
+    "source": "Koikatsu Sunshine EX BetterRepack R6: abdata, mods zip/zipmod, PlayerData and VR PlayerData",
+    "destination": "animations",
+    "directory": true,
+    "note": "Only AnimationClip-bearing source assets copied; exact archives/entries in animations/supplemental_provenance.json; all scan coverage in tools/animation-library/inventory"
+  },
+  {
+    "source": "abdata/chara/bo_head_00.unity3d + Assembly-CSharp.dll FaceBlendShape/FBS classes + Rin/Mira KK_BlendShapeInfo.json",
+    "destination": "facial-control",
+    "directory": true,
+    "note": "Original serialized controllers, source bundle, card patterns, native-code references and working viewer control; provenance in facial-control/provenance.json"
+  }
+]

@@ -1,0 +1,326 @@
+import bpy
+from bpy.types import PropertyGroup
+from bpy.props import (
+    FloatProperty,
+    EnumProperty,
+    BoolProperty,
+    StringProperty
+)
+
+from .interface.dictionary_en import t
+from .exporting.material_combiner import globs
+
+class PlaceholderProperties(PropertyGroup):
+    #this will let the plugin know where to look for texture / json data
+    import_dir: StringProperty(default='')
+
+    game_name: StringProperty(default='KK')
+
+    #This will let the plugin track what objects belong to what character
+    character_name: StringProperty(default='')
+
+    #this lets the plugin time various actions
+    total_timer : FloatProperty(default=0)
+    timer : FloatProperty(default=0)
+
+    shader_dropdown : EnumProperty(
+        items=(
+            ("A", t('shader_A'), ''),
+            ("C", t('shader_C'), t('shader_C_tt')),
+            ("B", t('shader_B'), ''),
+            ("D", t('shader_D'), ''),
+            ("E", t('shader_E'), t('shader_E_tt')),
+        ), name="", default='A', description="Shader")
+
+    use_rigify : BoolProperty(
+        description=t('use_rigify_tt'),
+        default = True)
+
+    sfw_mode : BoolProperty(
+        description=t('sfw_mode_tt'),
+        default = False)
+
+    fix_seams : BoolProperty(
+        description=t('seams_tt'),
+        default = True)
+    
+    use_outline : BoolProperty(
+        description= t('outline_tt'),
+        default = True)
+    
+    separate_clothes : BoolProperty(
+        description=t('separate_clothes'),
+        default=False)
+    
+    prep_dropdown : EnumProperty(
+    items=(
+        ("VRM", t('prep_drop_A'), t('prep_drop_A_tt')),
+        #("C", "MikuMikuDance - PMX compatible", " "),
+        ("VRC", t('prep_drop_D'), t('prep_drop_D_tt')),
+        ("Unreal", t('prep_drop_E'), t('prep_drop_E_tt')),
+        ("Koikatsu", t('prep_drop_F'), t('prep_drop_F_tt')),
+        ("no_change", t('prep_drop_B'), t('prep_drop_B_tt')),
+    ), name="", default='VRM', description=t('prep_drop'))
+
+    simp_dropdown : EnumProperty(
+        items=(
+            ("A", t('simp_drop_A'), t('simp_drop_A_tt')),
+            ("B", t('simp_drop_B'), t('simp_drop_B_tt')),
+            ("C", t('simp_drop_C'), t('simp_drop_C_tt')),
+        ), name="", default='A', description=t('simp_drop'))
+
+    atlas_dropdown : EnumProperty(
+        items=(
+            ("Atlas", t('use_atlas'), ""),
+            ("skip_eyes", t('atlas_no_eyes'), ""),
+            ("all_textures", t('atlas_all'), ""),
+            ("None", t('dont_use_atlas'), ""),
+        ), name="", default='Atlas', description=t('use_atlas_tt'))
+    
+    animation_import_type : BoolProperty(
+        name="Enable or Disable",
+        description=t('animation_type_tt'),
+        default = False)
+    
+    animation_library_scale : BoolProperty(
+        description=t('animation_library_scale_tt'),
+        default = True)
+    
+    unify_bone_orientation : BoolProperty(
+        description=t('unify_bone_orientation_tt'),
+        default = False)
+
+#The main panel
+class IMPORTINGHEADER_PT_panel(bpy.types.Panel):
+    bl_label = t('import_export')
+    bl_category = "KKBP"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    def draw(self,context):
+        layout = self.layout
+
+class IMPORTING_PT_panel(bpy.types.Panel):
+    bl_parent_id = "IMPORTINGHEADER_PT_panel"
+    bl_label = t('import_export')
+    bl_category = "KKBP"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_options = {'HIDE_HEADER'}
+
+    def draw(self,context):
+        scene = context.scene.kkbp
+        layout = self.layout
+        splitfac = 0.5
+        box = layout.box()
+        col = box.column(align=True)
+        
+        row = col.row(align=True)
+        row.operator('kkbp.kkbpimport', text = t('import_model'), icon='FILE_FOLDER')
+        row.enabled = context.scene.kkbp.import_dir == ''
+        
+        row = col.row(align = True)
+        box = row.box()
+        col = box.column(align=True)
+        
+        row = col.row(align=True)
+        split = row.split(align = True, factor=splitfac)
+        split.prop(context.scene.kkbp, "use_rigify", toggle=True, text = t('use_rigify') if context.scene.kkbp.use_rigify else t('no_rigify'))
+        split.prop(context.scene.kkbp, "shader_dropdown")
+        row.enabled = context.scene.kkbp.import_dir == ''
+
+        row = col.row(align=True)
+        split = row.split(align = True, factor=splitfac)
+        split.prop(context.scene.kkbp, "use_outline", toggle=True, text = t('outline') if context.scene.kkbp.use_outline else t('no_outline'))
+        split.prop(context.scene.kkbp, "separate_clothes", toggle=True, text = t('separate') if context.scene.kkbp.separate_clothes else t('no_separate'))
+        row.enabled = context.scene.kkbp.import_dir == ''
+        
+        row = col.row(align=True)
+        split = row.split(align = True, factor=splitfac)
+        split.prop(context.scene.kkbp, "fix_seams", toggle=True, text = t('seams'))
+        split.prop(context.scene.kkbp, "sfw_mode", toggle=True, text = t('sfw_mode'))
+        row.enabled = context.scene.kkbp.import_dir == ''
+
+        row = col.row(align=True)
+        row.prop(context.scene.kkbp, "unify_bone_orientation", toggle=True, text = t('unify_bone_orientation'))
+        row.enabled = context.scene.kkbp.import_dir == ''
+
+        
+class EXPORTING_PT_panel(bpy.types.Panel):
+    bl_parent_id = "IMPORTING_PT_panel"
+    bl_label = 'Exporting'
+    bl_options = {'HIDE_HEADER'}
+    bl_category = "KKBP"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    
+    def draw(self,context):
+        scene = context.scene.kkbp
+        layout = self.layout
+        splitfac = 0.5
+        
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        row.operator('kkbp.exportprep', 
+                     text = t('prep') if not context.scene.kkbp.use_rigify else t('bad_prep'), 
+                    icon = 'MODIFIER' if not context.scene.kkbp.use_rigify or bpy.app.version[0:2] == (4,2) else 'WARNING_LARGE')
+        row.enabled = context.scene.kkbp.import_dir != '' and not context.scene.kkbp.use_rigify and globs.pil_exist != 'restart'
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.prop(context.scene.kkbp, "simp_dropdown")
+        split.prop(context.scene.kkbp, "prep_dropdown")
+        row.enabled = context.scene.kkbp.import_dir != '' and not context.scene.kkbp.use_rigify and globs.pil_exist != 'restart'
+        row = col.row(align=True)
+        if globs.pil_exist == 'no':
+            row.operator('kkbp.get_pillow', text = t('pillow'), icon='FILE_REFRESH')
+        elif globs.pil_exist == 'restart':
+            col = col.box().column()
+            col.label(text='Installation complete')
+            col.label(text='Please restart Blender')
+        else:
+            row.prop(context.scene.kkbp, "atlas_dropdown")
+        row.enabled = context.scene.kkbp.import_dir != '' and not context.scene.kkbp.use_rigify
+
+class EXTRAS_PT_panel(bpy.types.Panel):
+    bl_label = t('extras')
+    bl_category = "KKBP"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self,context):
+        layout = self.layout
+        scene = context.scene.kkbp
+        splitfac = 0.6
+        
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text = t('single_animation'))
+        split.operator('kkbp.importanimation', text = '', icon = 'ARMATURE_DATA')
+        row.enabled = context.scene.kkbp.use_rigify and context.scene.kkbp.import_dir != ''
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text="")
+        split.prop(context.scene.kkbp, "animation_import_type", toggle=True, text = t('animation_mix') if scene.animation_import_type else t('animation_koi'))
+        row.enabled = context.scene.kkbp.use_rigify and context.scene.kkbp.import_dir != ''
+
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text=t('animation_library'))
+        split.operator('kkbp.createanimassetlib', text = '', icon = 'ARMATURE_DATA')
+        row.enabled = context.scene.kkbp.use_rigify and context.scene.kkbp.import_dir != ''
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text="")
+        split.prop(context.scene.kkbp, "animation_library_scale", toggle=True, text = t('animation_library_scale'))
+        row.enabled = context.scene.kkbp.use_rigify and context.scene.kkbp.import_dir != ''
+
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text='IK -> FK all limbs')
+        split.operator('kkbp.iksnap', text = '', icon = 'LINKED')
+        row.enabled = context.scene.kkbp.use_rigify and context.scene.kkbp.import_dir != ''
+
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text=t('sep_eye'))
+        split.operator('kkbp.linkshapekeys', text = '', icon='HIDE_OFF')
+        row.enabled = context.scene.kkbp.import_dir != ''
+
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text=t('rigify_convert'))
+        split.operator('kkbp.rigifyconvert', text = '', icon='MOD_ARMATURE')
+        row.enabled = not context.scene.kkbp.use_rigify and context.scene.kkbp.import_dir != ''
+
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text=t('matcomb'))
+        split.operator('kkbp.matcombsetup', text = '', icon='NODETREE')
+        row.enabled = context.scene.kkbp.import_dir != ''
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text=t('mat_comb_switch'))
+        split.operator('kkbp.matcombswitch', text = '', icon='FILE_REFRESH')
+        row.enabled = context.scene.kkbp.import_dir != ''
+
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        split = row.split(align=True, factor=splitfac)
+        split.label(text=t('bulk_launch'))
+        split.operator('kkbp.bulklaunch', text = '', icon='WINDOW')
+        row.enabled = context.scene.kkbp.import_dir == ''
+        
+        #check https://ui.blender.org/icons/ for all icon names
+
+#Add a button to the materials tab that lets you update all hair material settings at once
+class HAIR_PT_panel(bpy.types.Panel):
+    #bl_parent_id = "EEVEE_MATERIAL_PT_surface"
+    bl_label = "kkbp_hair"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "material"
+    bl_options = {'HIDE_HEADER'}
+    COMPAT_ENGINES = {'BLENDER_EEVEE'}
+
+    def draw(self, context):
+        layout = self.layout
+        mat = context.material
+        if mat:
+            if mat.get('hair') and mat.get('edit'):
+                layout.operator('kkbp.linkhair', text = t('link_hair'), icon='NODETREE')
+
+#Add a button to the materials tab that lets you edit a material, like in KKBP 8.0
+class EDIT_PT_panel(bpy.types.Panel):
+    #bl_parent_id = "EEVEE_MATERIAL_PT_surface"
+    bl_label = "kkbp_edit"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "material"
+    bl_options = {'HIDE_HEADER'}
+    COMPAT_ENGINES = {'BLENDER_EEVEE'}
+
+    def draw(self, context):
+        layout = self.layout
+        mat = context.material
+        if mat:
+            if mat.get('edit'):
+                split = layout.split(align=True, factor=0.33)
+                split.operator('kkbp.resetmaterial', text = 'Reset', icon='NODETREE')
+                split.operator('kkbp.cancelmaterial',text = 'Cancel', icon='NODETREE')
+                split.operator('kkbp.savematerial',  text = 'Save', icon='NODETREE')
+            elif mat.get('hair') or mat.get('outfit') or mat.get('body'):
+                layout.operator('kkbp.editmaterial', text = 'Edit material', icon='NODETREE')
+
+def register():
+    bpy.utils.register_class(PlaceholderProperties)
+    bpy.utils.register_class(IMPORTINGHEADER_PT_panel)
+    bpy.utils.register_class(IMPORTING_PT_panel)
+    bpy.utils.register_class(EXPORTING_PT_panel)
+    bpy.utils.register_class(EXTRAS_PT_panel)
+    bpy.utils.register_class(HAIR_PT_panel)
+    bpy.utils.register_class(EDIT_PT_panel)
+
+def unregister():
+    bpy.utils.unregister_class(EDIT_PT_panel)
+    bpy.utils.unregister_class(HAIR_PT_panel)
+    bpy.utils.unregister_class(EXTRAS_PT_panel)
+    bpy.utils.unregister_class(EXPORTING_PT_panel)
+    bpy.utils.unregister_class(IMPORTING_PT_panel)
+    bpy.utils.unregister_class(IMPORTINGHEADER_PT_panel)
+    bpy.utils.unregister_class(PlaceholderProperties)
+
+if __name__ == "__main__":
+    #unregister()
+    register()

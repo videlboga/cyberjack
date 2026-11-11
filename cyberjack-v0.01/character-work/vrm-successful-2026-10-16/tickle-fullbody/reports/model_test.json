@@ -1,0 +1,133 @@
+{
+  "pass": true,
+  "checks": {
+    "local_fast": true,
+    "body_separate": true,
+    "face_measured_range": true,
+    "voice_after_face": true,
+    "release_decays": true,
+    "channels_not_synchronized": true
+  },
+  "first_activation_s": {
+    "local": 0.033,
+    "body": 0.1,
+    "breath": 0.3,
+    "face": 0.333,
+    "voice": 0.467
+  },
+  "initial_onsets_ms": {
+    "local": 35.2,
+    "body": 79.2,
+    "face": 340.9,
+    "breath": 280.3,
+    "voice": 454.9
+  },
+  "after_release": {
+    "mouth": 4.967562368139743e-06,
+    "breath": 0.0010791981708357433,
+    "local": 0.004677234994310739,
+    "body": 0.004677234994310739,
+    "face": 0.004677234994310739
+  },
+  "sample": [
+    {
+      "stimulus": 0.141,
+      "delivered": 0.141,
+      "perceived": 0.141,
+      "expectedness": 0.0,
+      "channels_ms": {
+        "motor": 35.2,
+        "face": 340.9,
+        "breath": 280.3,
+        "voice": 454.9
+      },
+      "load": 0.0,
+      "clip": "arch_medial_oversensitive",
+      "character": "oversensitive",
+      "family": "SOLE",
+      "adaptation": 0.001,
+      "tier": 0.7,
+      "t_contact": 0.0333,
+      "local": 0.0,
+      "body": 0.0,
+      "face": 0.0,
+      "breath": 0.0,
+      "voice": 0.0,
+      "mouth": 0.0,
+      "flinch": 0.0,
+      "onsets_ms": {
+        "local": 35.2,
+        "body": 79.2,
+        "face": 340.9,
+        "breath": 280.3,
+        "voice": 454.9
+      }
+    },
+    {
+      "stimulus": 0.57,
+      "delivered": 0.632,
+      "perceived": 0.563,
+      "expectedness": 0.0,
+      "channels_ms": {
+        "motor": 35.2,
+        "face": 340.9,
+        "breath": 280.3,
+        "voice": 454.9
+      },
+      "load": 0.037,
+      "clip": "arch_medial_fresh",
+      "character": "fresh",
+      "family": "SOLE",
+      "adaptation": 0.163,
+      "tier": 1.0,
+      "t_contact": 1.0333,
+      "local": 0.4675946773690886,
+      "body": 0.4675946773690886,
+      "face": 0.4675946773690886,
+      "breath": 0.24314632093193184,
+      "voice": 0.4675946773690886,
+      "mouth": 0.17127832855957448,
+      "flinch": 0.00026062593737078473,
+      "onsets_ms": {
+        "local": 35.2,
+        "body": 79.2,
+        "face": 340.9,
+        "breath": 280.3,
+        "voice": 454.9
+      }
+    },
+    {
+      "stimulus": 0.51,
+      "delivered": 0.632,
+      "perceived": 0.497,
+      "expectedness": 0.0,
+      "channels_ms": {
+        "motor": 35.2,
+        "face": 340.9,
+        "breath": 280.3,
+        "voice": 454.9
+      },
+      "load": 0.077,
+      "clip": "arch_medial_adapted",
+      "character": "adapted",
+      "family": "SOLE",
+      "adaptation": 0.311,
+      "tier": 1.0,
+      "t_contact": 2.0333,
+      "local": 0.5191425450987741,
+      "body": 0.5191425450987741,
+      "face": 0.5191425450987741,
+      "breath": 0.30174391985466525,
+      "voice": 0.5191425450987741,
+      "mouth": 0.4124553449891984,
+      "flinch": 1.0498780219149177e-07,
+      "onsets_ms": {
+        "local": 35.2,
+        "body": 79.2,
+        "face": 340.9,
+        "breath": 280.3,
+        "voice": 454.9
+      }
+    }
+  ]
+}

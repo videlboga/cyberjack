@@ -1,0 +1,11 @@
+{
+  "id": "3fe0b7bb871941acef71eb5e",
+  "name": "senasi_nagaisu_00 (1)",
+  "kind": "furniture",
+  "source": "map/scene/showerroom.unity3d",
+  "sourceIdentity": "BuildPlayer-ShowerRoom:28",
+  "native": "native/3fe0b7bb871941acef71eb5e.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

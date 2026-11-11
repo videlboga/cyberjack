@@ -1,0 +1,12 @@
+{
+  "id": "f42cc58710ac64e33eb1ecfd",
+  "name": "o_ks_r10_chair00",
+  "kind": "furniture",
+  "source": "map/scene/gasyukumyroom.unity3d",
+  "sourceIdentity": "BuildPlayer-GasyukuMyroom:81",
+  "native": "native/f42cc58710ac64e33eb1ecfd.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/o_ks_r10_chair00-f42cc58710ac64e33eb1ecfd.glb"
+}

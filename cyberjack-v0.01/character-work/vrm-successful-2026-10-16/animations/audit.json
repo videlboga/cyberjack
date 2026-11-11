@@ -1,0 +1,29 @@
+{
+  "cachedPayloadChecks": 56971,
+  "freshPayloadChecks": 7,
+  "inventoryErrors": [],
+  "sourceIssues": [],
+  "complete": true,
+  "inventoryClips": 56978,
+  "importedClips": 56978,
+  "missing": [],
+  "unexpected": [],
+  "duplicateIds": 0,
+  "payloadIssues": [],
+  "importErrors": [],
+  "categories": {
+    "action": 1015,
+    "adv": 216,
+    "chara": 7,
+    "custom": 74,
+    "esthetic": 12,
+    "h": 23279,
+    "map": 96,
+    "mods": 26822,
+    "playerdata": 19,
+    "studio": 5434,
+    "vr": 4
+  },
+  "playable": 55166,
+  "payloadBytes": 5066246322
+}

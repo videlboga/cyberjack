@@ -1,0 +1,317 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Волосы · тест физики</title>
+<style>
+  :root{--fg:#e8ecf3;--bg:#14161c;--line:#2a2f3a;--acc:#5aa9ff}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:13px/1.35 system-ui,sans-serif}
+  #app{display:flex;height:100%}
+  #stage{flex:1;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%}
+  #panel{width:300px;border-left:1px solid var(--line);padding:10px;overflow:auto}
+  h1{font-size:13px;margin:0 0 2px}
+  .sub{color:#8f9bb0;font-size:11px;margin-bottom:10px}
+  .row{margin:9px 0}
+  .row .top{display:flex;justify-content:space-between;font-size:11.5px;color:#c7d1e2}
+  .row .val{color:#7fb2ff;font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--acc)}
+  button{background:#1b2029;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;margin:3px 3px 0 0}
+  button.on{border-color:var(--acc);color:var(--acc)}
+  #hint{position:absolute;left:10px;bottom:8px;color:#6f7a8d;font-size:11px}
+  #err{position:absolute;inset:0;display:none;place-items:center;color:#ff8b8b;padding:20px;text-align:center}
+</style>
+<div id="app">
+  <div id="stage"><canvas id="c"></canvas><div id="hint">ЛКМ — вращение · колесо — масштаб</div><div id="err"></div></div>
+  <div id="panel">
+    <h1>Волосы — физика</h1>
+    <div class="sub" id="stat">загрузка…</div>
+    <div class="row"><div class="top"><span>Тряска головы, °</span><span class="val" id="v_amp">18</span></div>
+      <input type="range" id="amp" min="0" max="45" step="1" value="18"></div>
+    <div class="row"><div class="top"><span>Скорость, Гц</span><span class="val" id="v_spd">1.1</span></div>
+      <input type="range" id="spd" min="0.2" max="3" step="0.1" value="1.1"></div>
+    <div class="row"><div class="top"><span>Гравитация</span><span class="val" id="v_grav">1.0</span></div>
+      <input type="range" id="grav" min="0" max="3" step="0.1" value="1.0"></div>
+    <div class="row"><div class="top"><span>Сопротивление</span><span class="val" id="v_damp">0.12</span></div>
+      <input type="range" id="damp" min="0" max="0.9" step="0.01" value="0.12"></div>
+    <div class="row"><div class="top"><span>Жёсткость</span><span class="val" id="v_bend">0.20</span></div>
+      <input type="range" id="bend" min="0" max="1" step="0.01" value="0.20"></div>
+    <button id="phys" class="on">Физика: вкл</button>
+    <button id="coll">Коллайдеры</button>
+    <button id="shake">Тряхнуть</button>
+    <button id="reset">Сброс позы</button>
+  </div>
+</div>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from './vendor/three/controls/OrbitControls.js';
+import {GLTFLoader} from './vendor/three/loaders/GLTFLoader.js';
+
+const err = document.getElementById('err');
+window.addEventListener('error', e => { err.style.display='grid'; err.textContent = 'Ошибка: ' + e.message; });
+
+const cvs = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas: cvs, antialias: true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14161c);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 30);
+camera.position.set(0.75, 1.30, 1.75);
+const controls = new OrbitControls(camera, cvs);
+controls.target.set(0, 1.00, 0);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x2a3040, 1.25));
+const dl = new THREE.DirectionalLight(0xffffff, 1.5); dl.position.set(1.2, 2.2, 1.4); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x99bbff, 0.5); dl2.position.set(-1.5, 0.8, -1.2); scene.add(dl2);
+
+const P = {amp:18, spd:1.1, grav:1.0, damp:0.12, bend:0.20, physics:true};
+const SIDES = 6;
+const hairMat = new THREE.MeshStandardMaterial({color: 0xaab2c2, roughness: 0.55, metalness: 0.06, side: THREE.DoubleSide});
+const collGroup = new THREE.Group(); scene.add(collGroup);
+const capCenter = new THREE.Vector3(0, 1.425, -0.03);   // центр черепа (three-координаты, Y вверх)
+let scalpCap = null;
+
+let ready = false, chains = [], colliders = [], hairRoot = null, bodyHead = null, bodyNeck = null;
+const loader = new GLTFLoader();
+
+loader.load('./hair-test.glb', gltf => {
+  const root = gltf.scene;
+  root.traverse(o => {
+    if (o.isMesh || o.isSkinnedMesh) {
+      if (/hair/i.test(o.name)) { o.visible = false; return; }     // пряди рисуем сами
+      o.material = new THREE.MeshStandardMaterial({color: 0xc9ccd4, roughness: 0.8, metalness: 0.0});
+      o.frustumCulled = false;
+    }
+    if (o.isBone) {
+      if (o.name === 'hair_root') hairRoot = o;
+      if (o.name === 'head') bodyHead = o;
+      if (o.name === 'neck') bodyNeck = o;
+    }
+  });
+  scene.add(root);
+  root.updateMatrixWorld(true);
+
+  // собрать цепочки по костям
+  const byChain = new Map();
+  root.traverse(o => {
+    if (!o.isBone) return;
+    const m = o.name.match(/^(.+?)_(\d{2})$/);
+    if (!m) return;
+    if (!byChain.has(m[1])) byChain.set(m[1], []);
+    byChain.get(m[1]).push({bone: o, idx: +m[2]});
+  });
+
+  for (const [name, list] of byChain) {
+    list.sort((a, b) => a.idx - b.idx);
+    const pts = list.map(x => x.bone.getWorldPosition(new THREE.Vector3()));
+    const lens = pts.slice(1).map((p, i) => p.distanceTo(pts[i]));
+    const restDir = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      const b = i + 1 < pts.length ? pts[i + 1] : a.clone().add(pts[i].clone().sub(pts[i - 1]).normalize().multiplyScalar(lens[lens.length - 1]));
+      restDir.push(b.clone().sub(a).normalize());
+    }
+    const W = name.startsWith('back') ? 0.040 : name.startsWith('crown') ? 0.034
+      : name.startsWith('side') ? 0.024 : name.startsWith('temple') ? 0.019 : 0.016;
+    const T = W * 0.38;                       // толщина «клинка»
+    const SEG = 8;
+    const posArr = new Float32Array(pts.length * SEG * 3);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+    const idx = [];
+    for (let i = 0; i < pts.length - 1; i++) for (let s = 0; s < SEG; s++) {
+      const a = i * SEG + s, b = i * SEG + (s + 1) % SEG;
+      const c = (i + 1) * SEG + s, d = (i + 1) * SEG + (s + 1) % SEG;
+      idx.push(a, b, d, a, d, c);
+    }
+    geo.setIndex(idx);
+    const mesh = new THREE.Mesh(geo, hairMat);
+    mesh.frustumCulled = false;
+    scene.add(mesh);
+
+    chains.push({
+      name, pts, lens, restDir, r0: W, r1: T, mesh, posArr, geo,
+      rootLocal: hairRoot.worldToLocal(pts[0].clone()),
+      pos: pts.map(p => p.clone()),
+      prev: pts.map(p => p.clone()),
+      rest: pts.map(p => p.clone()),
+    });
+  }
+
+  // коллайдеры: капсулы по телу
+  const gp = b => b ? b.getWorldPosition(new THREE.Vector3()) : null;
+  const head = gp(bodyHead), neck = gp(bodyNeck);
+  const cap = (a, b, r) => ({a, b, r});
+  if (head) colliders.push(cap(head.clone().add(new THREE.Vector3(0, 0.02, 0)), head.clone().add(new THREE.Vector3(0, 0.11, 0)), 0.098));
+  if (head && neck) colliders.push(cap(neck, head, 0.060));
+  colliders.push(cap(new THREE.Vector3(0, 0.92, 0.02), new THREE.Vector3(0, 1.33, 0.02), 0.105));
+  colliders.push(cap(new THREE.Vector3(0, 0.70, 0.02), new THREE.Vector3(0, 0.95, 0.02), 0.125));
+
+  for (const c of colliders) {
+    const len = c.a.distanceTo(c.b);
+    const g = new THREE.Mesh(new THREE.CylinderGeometry(c.r, c.r, len, 12, 1, true),
+      new THREE.MeshBasicMaterial({color: 0x33ff88, wireframe: true, transparent: true, opacity: 0.35}));
+    g.position.copy(c.a.clone().add(c.b).multiplyScalar(0.5));
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), c.b.clone().sub(c.a).normalize());
+    collGroup.add(g);
+    const s = new THREE.Mesh(new THREE.SphereGeometry(c.r, 10, 8),
+      new THREE.MeshBasicMaterial({color: 0x33ff88, wireframe: true, transparent: true, opacity: 0.2}));
+    s.position.copy(c.a); collGroup.add(s);
+  }
+  collGroup.visible = false;
+
+  // колпак: полусфера по черепу, чтобы макушка не была срезана
+  {
+    const capMat = hairMat;
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.0940, 32, 22, 0, Math.PI * 2, 0, Math.PI * 0.66), capMat);
+    cap.position.copy(capCenter);
+    cap.frustumCulled = false;
+    scene.add(cap);
+    scalpCap = cap;
+  }
+
+  document.getElementById('stat').textContent = chains.length + ' прядей · ' +
+    chains.reduce((s, c) => s + c.pos.length, 0) + ' узлов · ' + colliders.length + ' коллайдеров';
+  ready = true;
+}, undefined, e => { err.style.display='grid'; err.textContent = 'GLB не загрузился: ' + e; });
+
+const V1 = new THREE.Vector3(), V2 = new THREE.Vector3(), V3 = new THREE.Vector3();
+const YUP = new THREE.Vector3(0, 1, 0);
+
+function pushOut(p, c) {
+  const ab = V1.copy(c.b).sub(c.a);
+  const t = Math.max(0, Math.min(1, V2.copy(p).sub(c.a).dot(ab) / ab.lengthSq()));
+  const closest = V3.copy(c.a).addScaledVector(ab, t);
+  const d = p.clone().sub(closest);
+  const L = d.length();
+  if (L < c.r) {
+    if (L < 1e-6) p.add(new THREE.Vector3(0, 0, c.r));
+    else p.copy(closest.addScaledVector(d, c.r / L));
+  }
+}
+
+function simulate(dt) {
+  const t = performance.now() / 1000;
+  const amp = P.amp * Math.PI / 180;
+  const ry = Math.sin(t * P.spd * Math.PI * 2) * amp;
+  const rx = Math.sin(t * P.spd * Math.PI * 2 * 0.63) * amp * 0.45;
+
+  if (hairRoot) { hairRoot.rotation.set(rx, ry, 0); hairRoot.updateMatrixWorld(true); }
+  if (bodyHead) {
+    if (!bodyHead._restQ) bodyHead._restQ = bodyHead.quaternion.clone();
+    bodyHead.quaternion.copy(bodyHead._restQ).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(rx * 0.8, ry * 0.8, 0)));
+    bodyHead.updateMatrixWorld(true);
+  }
+  const rootM = hairRoot ? hairRoot.matrixWorld : new THREE.Matrix4();
+
+  for (const c of chains) {
+    const root = c.rootLocal.clone().applyMatrix4(rootM);
+    c.pos[0].copy(root); c.prev[0].copy(root);
+
+    if (!P.physics) {
+      for (let i = 1; i < c.pos.length; i++) {
+        const dir = c.restDir[i - 1].clone().transformDirection(rootM);
+        c.pos[i].copy(c.pos[i - 1]).addScaledVector(dir, c.lens[i - 1]);
+        c.prev[i].copy(c.pos[i]);
+      }
+    } else {
+      const step = 1 / 120;
+      const subs = Math.min(3, Math.max(1, Math.round(dt / step)));
+      const h = dt / subs;
+      for (let s = 0; s < subs; s++) {
+        for (let i = 1; i < c.pos.length; i++) {
+          const v = c.pos[i].clone().sub(c.prev[i]).multiplyScalar(1 - P.damp);
+          if (v.length() > 0.08) v.setLength(0.08);
+          c.prev[i].copy(c.pos[i]);
+          c.pos[i].add(v);
+          c.pos[i].y -= 9.81 * P.grav * h * h;
+        }
+        for (let it = 0; it < 3; it++) {
+          for (let i = 1; i < c.pos.length; i++) {
+            const a = c.pos[i - 1], b = c.pos[i];
+            const d = b.clone().sub(a);
+            const L = c.lens[i - 1];
+            const len = d.length() || 1e-6;
+            b.copy(a).addScaledVector(d, L / len);
+          }
+        }
+        // мягкая тяга к исходной форме
+        if (P.bend > 0) {
+          for (let i = 1; i < c.pos.length; i++) {
+            const restW = c.restDir[i - 1].clone().transformDirection(rootM);
+            const cur = c.pos[i].clone().sub(c.pos[i - 1]).normalize();
+            const target = cur.clone().lerp(restW, Math.min(1, P.bend * 0.5)).normalize();
+            c.pos[i].copy(c.pos[i - 1]).addScaledVector(target, c.lens[i - 1]);
+          }
+        }
+        for (const col of colliders) for (let i = 1; i < c.pos.length; i++) pushOut(c.pos[i], col);
+      }
+    }
+    // геометрия-трубка
+    const pa = c.posArr;
+    const n = c.pos.length;
+    const SEG = 8;
+    for (let i = 0; i < n; i++) {
+      const p = c.pos[i];
+      const dir = (i + 1 < n ? c.pos[i + 1].clone().sub(p) : p.clone().sub(c.pos[i - 1])).normalize();
+      const radial = new THREE.Vector3(p.x - capCenter.x, p.y - capCenter.y, 0);
+      if (radial.lengthSq() < 1e-8) radial.set(0, 0, 1);
+      radial.normalize();
+      let wv = new THREE.Vector3().crossVectors(dir, radial);
+      if (wv.lengthSq() < 1e-8) wv.set(1, 0, 0);
+      wv.normalize();
+      const t = i / (n - 1);
+      const taper = Math.max(0.12, 1 - Math.pow(t, 1.5));
+      const hw = c.r0 * taper, ht = c.r1 * taper;
+      for (let s = 0; s < SEG; s++) {
+        const ang = 2 * Math.PI * s / SEG;
+        const o = (i * SEG + s) * 3;
+        const cx = Math.cos(ang) * hw, sy = Math.sin(ang) * ht;
+        pa[o]     = p.x + wv.x * cx + radial.x * sy;
+        pa[o + 1] = p.y + wv.y * cx + radial.y * sy;
+        pa[o + 2] = p.z + wv.z * cx + radial.z * sy;
+      }
+    }
+    c.geo.attributes.position.needsUpdate = true;
+    c.geo.computeVertexNormals();
+    c.geo.computeBoundingSphere();
+  }
+}
+
+let last = performance.now();
+function loop() {
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 1 / 30);
+  last = now;
+  if (ready) simulate(dt);
+  controls.update();
+  const w = cvs.clientWidth, h = cvs.clientHeight;
+  if (cvs.width !== w || cvs.height !== h) {
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+
+const bind = (id, key, out) => {
+  const el = document.getElementById(id), lab = document.getElementById(out);
+  el.addEventListener('input', () => { P[key] = parseFloat(el.value); lab.textContent = el.value; });
+};
+bind('amp','amp','v_amp'); bind('spd','spd','v_spd'); bind('grav','grav','v_grav');
+bind('damp','damp','v_damp'); bind('bend','bend','v_bend');
+document.getElementById('phys').onclick = e => { P.physics = !P.physics; e.target.classList.toggle('on', P.physics); e.target.textContent='Физика: ' + (P.physics?'вкл':'выкл'); };
+document.getElementById('coll').onclick = e => { collGroup.visible = !collGroup.visible; e.target.classList.toggle('on', collGroup.visible); };
+document.getElementById('shake').onclick = () => { for (const c of chains) for (let i = 1; i < c.pos.length; i++) c.pos[i].x += 0.05; };
+document.getElementById('reset').onclick = () => { for (const c of chains) { c.pos = c.rest.map(p=>p.clone()); c.prev = c.rest.map(p=>p.clone()); } };
+
+if (location.hash.length > 1) {
+  location.hash.slice(1).split('&').forEach(pair => {
+    const [k, v] = pair.split('=');
+    if (k in P && typeof P[k] === 'number') { P[k] = parseFloat(v); const el = document.getElementById(k); if (el) el.value = v; }
+    if (k === 'phys') P.physics = v !== '0';
+  });
+}
+loop();
+</script>

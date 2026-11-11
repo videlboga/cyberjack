@@ -1,0 +1,11 @@
+{
+  "id": "cdb9242e8e5b3a29f3183d58",
+  "name": "nagaisu_00_kind (10)",
+  "kind": "furniture",
+  "source": "map/scene/aquariumoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-AquariumOutside:124",
+  "native": "native/cdb9242e8e5b3a29f3183d58.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

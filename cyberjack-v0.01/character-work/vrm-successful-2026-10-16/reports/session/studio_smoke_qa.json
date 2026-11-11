@@ -1,0 +1,11 @@
+{
+  "errors": [],
+  "report": [],
+  "state": {
+    "clipTime": 0,
+    "playing": true,
+    "physicsEnabled": false,
+    "collisionsEnabled": false,
+    "bindings": 138
+  }
+}

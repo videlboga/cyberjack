@@ -1,0 +1,438 @@
+{
+ "format": "cyberjack-wardrobe-v1",
+ "character": "mira",
+ "boneset": {
+  "joints": 971,
+  "hash": "b2b558f23c23"
+ },
+ "items": [
+  {
+   "id": "mira-00-kk-pufferlong-8400",
+   "character": "mira",
+   "slot": "top",
+   "y": [
+    1.107,
+    1.413
+   ],
+   "group": "kk-pufferlong",
+   "material": "KK pufferlong 8400",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-pufferlong-8400.glb",
+   "bytes": 1707400,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-cf-m-bot-spants-8480",
+   "character": "mira",
+   "slot": "bottom",
+   "y": [
+    0.84,
+    1.072
+   ],
+   "group": "kk-cf-m-bot-spants",
+   "material": "KK cf_m_bot_spants 8480",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-cf-m-bot-spants-8480.glb",
+   "bytes": 715284,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-bra-lace-mat-8560",
+   "character": "mira",
+   "slot": "underwear_top",
+   "y": [
+    1.104,
+    1.406
+   ],
+   "group": "kk-bra-lace-mat",
+   "material": "KK bra_lace_mat 8560",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-bra-lace-mat-8560.glb",
+   "bytes": 579196,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-panties-highleg-mat-8660",
+   "character": "mira",
+   "slot": "underwear_bottom",
+   "y": [
+    0.827,
+    1.121
+   ],
+   "group": "kk-panties-highleg-mat",
+   "material": "KK panties_highleg_mat 8660",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-panties-highleg-mat-8660.glb",
+   "bytes": 503836,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-ztoki-socks-02-00-ma-8780",
+   "character": "mira",
+   "slot": "socks",
+   "y": [
+    0.013,
+    1.072
+   ],
+   "group": "kk-ztoki-socks-02-00-ma",
+   "material": "KK ztoki_socks_02_00_ma 8780",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-ztoki-socks-02-00-ma-8780.glb",
+   "bytes": 2822160,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-m-cf-shoes-steampunk00-8900",
+   "character": "mira",
+   "slot": "shoes",
+   "y": [
+    -0.0,
+    0.149
+   ],
+   "group": "kk-m-cf-shoes-steampunk00",
+   "material": "KK m_cf_shoes_steampunk00 8900",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-m-cf-shoes-steampunk00-8900.glb",
+   "bytes": 1765920,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-acs-chocker-belt-4760",
+   "character": "mira",
+   "slot": "accessory",
+   "y": [
+    1.382,
+    1.42
+   ],
+   "group": "kk-acs-chocker-belt",
+   "material": "KK acs_chocker_belt 4760",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-acs-chocker-belt-4760.glb",
+   "bytes": 198732,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-00-kk-acs-m-chocker-bell-4770",
+   "character": "mira",
+   "slot": "accessory",
+   "y": [
+    1.38,
+    1.394
+   ],
+   "group": "kk-acs-m-chocker-bell",
+   "material": "KK acs_m_chocker_bell 4770",
+   "source": "Mira_outfit_00.vrm",
+   "outfit": "00",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-00-kk-acs-m-chocker-bell-4770.glb",
+   "bytes": 174524,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-01-kk-bra-lace-mat-8491",
+   "character": "mira",
+   "slot": "underwear_top",
+   "y": [
+    1.104,
+    1.406
+   ],
+   "group": "kk-bra-lace-mat",
+   "material": "KK bra_lace_mat 8491",
+   "source": "Mira_outfit_01.vrm",
+   "outfit": "01",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-01-kk-bra-lace-mat-8491.glb",
+   "bytes": 914228,
+   "part": 1,
+   "parts": 1
+  },
+  {
+   "id": "mira-01-kk-cf-m-shorts-03-8591",
+   "character": "mira",
+   "slot": "bottom",
+   "y": [
+    0.827,
+    1.121
+   ],
+   "group": "kk-cf-m-shorts-03",
+   "material": "KK cf_m_shorts_03 8591",
+   "source": "Mira_outfit_01.vrm",
+   "outfit": "01",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-01-kk-cf-m-shorts-03-8591.glb",
+   "bytes": 696868,
+   "part": 1,
+   "parts": 1,
+   "id_note": "на самом деле это трусики (1002 вершины, как panties), а не шорты"
+  },
+  {
+   "id": "mira-01-kk-acs-m-haibisukasu-3251",
+   "character": "mira",
+   "slot": "accessory",
+   "y": [
+    1.523,
+    1.624
+   ],
+   "group": "kk-acs-m-haibisukasu",
+   "material": "KK acs_m_haibisukasu 3251",
+   "source": "Mira_outfit_01.vrm",
+   "outfit": "01",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-01-kk-acs-m-haibisukasu-3251.glb",
+   "bytes": 555084,
+   "part": 1,
+   "parts": 2
+  },
+  {
+   "id": "mira-01-kk-acs-m-haibisukasu-3291",
+   "character": "mira",
+   "slot": "accessory",
+   "y": [
+    1.489,
+    1.559
+   ],
+   "group": "kk-acs-m-haibisukasu",
+   "material": "KK acs_m_haibisukasu 3291",
+   "source": "Mira_outfit_01.vrm",
+   "outfit": "01",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-01-kk-acs-m-haibisukasu-3291.glb",
+   "bytes": 539908,
+   "part": 2,
+   "parts": 2
+  },
+  {
+   "id": "mira-02-kk-cf-top-aonep-m-8372",
+   "character": "mira",
+   "slot": "dress",
+   "y": [
+    0.713,
+    1.107
+   ],
+   "group": "kk-cf-top-aonep-m",
+   "material": "KK cf_top_aonep_m 8372",
+   "source": "Mira_outfit_02.vrm",
+   "outfit": "02",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-02-kk-cf-top-aonep-m-8372.glb",
+   "bytes": 4272752,
+   "part": 1,
+   "parts": 2
+  },
+  {
+   "id": "mira-02-kk-cf-top-aonep-m-8412",
+   "character": "mira",
+   "slot": "dress",
+   "y": [
+    1.082,
+    1.375
+   ],
+   "group": "kk-cf-top-aonep-m",
+   "material": "KK cf_top_aonep_m 8412",
+   "source": "Mira_outfit_02.vrm",
+   "outfit": "02",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "file": "items/mira/mira-02-kk-cf-top-aonep-m-8412.glb",
+   "bytes": 4328052,
+   "part": 2,
+   "parts": 2
+  },
+  {
+   "id": "kk-tops-ofcard-a",
+   "character": "mira",
+   "slot": "top",
+   "group": "kk-tops-ofcard-a",
+   "part": 1,
+   "parts": 1,
+   "material": "cf_m_top_ofcard",
+   "source": "[mat]Tops v1.1.zipmod",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    0.0,
+    0.0
+   ],
+   "file": "items/kk/kk-tops-ofcard-a.glb",
+   "bytes": 296412
+  },
+  {
+   "id": "kk-tops-ofcard-b",
+   "character": "mira",
+   "slot": "top",
+   "group": "kk-tops-ofcard-b",
+   "part": 1,
+   "parts": 1,
+   "material": "cf_m_top_ofcard",
+   "source": "[mat]Tops v1.1.zipmod",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    1.03,
+    1.39
+   ],
+   "file": "items/kk/kk-tops-ofcard-b.glb",
+   "bytes": 253884
+  },
+  {
+   "id": "kk-hotpants",
+   "character": "mira",
+   "slot": "bottom",
+   "group": "kk-hotpants",
+   "part": 1,
+   "parts": 1,
+   "material": "cf_m_bot_pantshot",
+   "source": "[koikatuman]Hot Pants.zipmod",
+   "mesh": "o_bot_pantshot_a",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    0.89,
+    1.05
+   ],
+   "file": "items/kk/kk-hotpants.glb",
+   "bytes": 159016
+  },
+  {
+   "id": "kk-strappy-heels",
+   "character": "mira",
+   "slot": "shoes",
+   "group": "kk-strappy-heels",
+   "part": 1,
+   "parts": 1,
+   "material": "strappy",
+   "source": "[Augh] Strappy Heels v1.0.3.zipmod",
+   "mesh": "strappys",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    -0.06,
+    0.05
+   ],
+   "file": "items/kk/kk-strappy-heels.glb",
+   "bytes": 537648
+  },
+  {
+   "id": "kk-pantyhose",
+   "character": "mira",
+   "slot": "socks",
+   "group": "kk-pantyhose",
+   "part": 1,
+   "parts": 1,
+   "material": "cf_m_panst_00",
+   "source": "[anse] anse_pantyhose v1.0.zipmod",
+   "mesh": "o_panst_00_a",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    0.01,
+    1.19
+   ],
+   "file": "items/kk/kk-pantyhose.glb",
+   "bytes": 270764
+  },
+  {
+   "id": "kk-line-socks",
+   "character": "mira",
+   "slot": "socks",
+   "group": "kk-line-socks",
+   "part": 1,
+   "parts": 1,
+   "material": "cf_m_socks_knee",
+   "source": "[dam]Line Socks.zipmod",
+   "mesh": "o_socks_knee01",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    0.01,
+    0.71
+   ],
+   "file": "items/kk/kk-line-socks.glb",
+   "bytes": 185580
+  },
+  {
+   "id": "kk-tophat",
+   "character": "mira",
+   "slot": "head",
+   "group": "kk-tophat",
+   "part": 1,
+   "parts": 1,
+   "material": "hatto",
+   "source": "[Augh] Top Hat v1.0.0.zipmod",
+   "mesh": "hatto",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    1.42,
+    1.67
+   ],
+   "file": "items/kk/kk-tophat.glb",
+   "bytes": 510120
+  },
+  {
+   "id": "kk-collar",
+   "character": "mira",
+   "slot": "neck",
+   "group": "kk-collar",
+   "part": 1,
+   "parts": 1,
+   "material": "cf_m_top_maid_01",
+   "source": "[DeathWeasel]Collars v1.0.zipmod",
+   "mesh": "o_top_maid_01_a",
+   "outfit": "kk",
+   "boneset": "b2b558f23c23",
+   "joints": 971,
+   "y": [
+    1.39,
+    1.52
+   ],
+   "file": "items/kk/kk-collar.glb",
+   "bytes": 137340
+  }
+ ],
+ "characters": [
+  "mira"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "bdca62137b87e55023365430",
+  "name": "p_ks_r01_chair00 (10)",
+  "kind": "furniture",
+  "source": "map/scene/hotellobby.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelLobby:588",
+  "native": "native/bdca62137b87e55023365430.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r01_chair00_10_-bdca62137b87e55023365430.glb"
+}

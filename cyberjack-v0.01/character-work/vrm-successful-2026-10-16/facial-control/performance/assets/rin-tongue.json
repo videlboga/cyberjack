@@ -1,0 +1,42 @@
+{
+  "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/vrm-successful-2026-10-16/characters/rin/outfits/Rin_outfit_00.blend",
+  "vertices": 246,
+  "usedBones": [
+    "cf_j_tang_01",
+    "cf_j_tang_02",
+    "cf_j_tang_L_03",
+    "cf_j_tang_L_04",
+    "cf_j_tang_L_05",
+    "cf_j_tang_R_03",
+    "cf_j_tang_R_04",
+    "cf_j_tang_R_05",
+    "mmd_edge_scale",
+    "mmd_vertex_order"
+  ],
+  "skeleton": [
+    "Center",
+    "Chest",
+    "Head",
+    "Hips",
+    "Neck",
+    "Spine",
+    "Upper Chest",
+    "cf_j_tang_01",
+    "cf_j_tang_02",
+    "cf_j_tang_03",
+    "cf_j_tang_04",
+    "cf_j_tang_05",
+    "cf_j_tang_L_03",
+    "cf_j_tang_L_04",
+    "cf_j_tang_L_05",
+    "cf_j_tang_R_03",
+    "cf_j_tang_R_04",
+    "cf_j_tang_R_05",
+    "cf_s_head",
+    "mmd_edge_scale",
+    "mmd_vertex_order"
+  ],
+  "materials": [
+    "KK cf_m_tang.001"
+  ]
+}

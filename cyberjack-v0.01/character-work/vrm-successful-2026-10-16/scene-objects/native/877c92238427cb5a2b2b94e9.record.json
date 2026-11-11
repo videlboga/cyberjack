@@ -1,0 +1,12 @@
+{
+  "id": "877c92238427cb5a2b2b94e9",
+  "name": "p_ks_m36_table00_00 (1)",
+  "kind": "furniture",
+  "source": "map/scene/hotelsuite.unity3d",
+  "sourceIdentity": "BuildPlayer-Hotel_suite:1167",
+  "native": "native/877c92238427cb5a2b2b94e9.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m36_table00_00_1_-877c92238427cb5a2b2b94e9.glb"
+}

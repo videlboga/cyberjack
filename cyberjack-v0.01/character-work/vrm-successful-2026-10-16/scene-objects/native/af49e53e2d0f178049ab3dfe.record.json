@@ -1,0 +1,12 @@
+{
+  "id": "af49e53e2d0f178049ab3dfe",
+  "name": "p_aibu_book10",
+  "kind": "item",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:-2241864932513778331",
+  "native": "native/af49e53e2d0f178049ab3dfe.json.gz",
+  "nodes": 2,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_aibu_book10-af49e53e2d0f178049ab3dfe.glb"
+}

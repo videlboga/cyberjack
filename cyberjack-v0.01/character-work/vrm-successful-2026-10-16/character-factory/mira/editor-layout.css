@@ -1,0 +1,34 @@
+/* One viewport, one settings scroll area, persistent transport controls. */
+html,body{height:100%;overflow:hidden}
+body{display:grid;grid-template-rows:minmax(0,1fr) auto;height:100dvh}
+#app{height:100%!important;min-height:0;overflow:hidden}
+#stage{min-height:0;overflow:hidden}
+#panel{width:clamp(330px,30vw,440px);min-height:0;overflow:hidden;background:#171b23}
+.editor-brand{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);flex:none}
+.editor-brand strong{font-size:14px}.editor-brand button{font-size:11px}
+.editor-navigation{flex:none;padding:10px 12px;border-bottom:1px solid var(--line)}
+.editor-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 12px}
+.editor-navigation>.editor-tabs{display:grid;grid-template-columns:repeat(3,1fr);margin:0}
+.editor-tabs button{padding:8px 9px;border-color:transparent;background:transparent;color:#93a0b5;text-align:center}
+.editor-tabs button[aria-selected=true]{color:#edf5ff;background:#28384c;border-color:#49688f}
+.editor-tabs button:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.editor-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:4px 16px 24px;scrollbar-gutter:stable}
+.editor-scroll h2{font-size:16px;margin:16px 0}.editor-scroll #head{padding:0 0 12px;border:0}
+.editor-scroll #list{padding:0;overflow:visible;flex:none}.editor-scroll #count{font-size:11px;color:#8f9bb0}
+#head-panel,#hair-panel,#reference-panel{max-height:none!important;overflow:visible!important;padding:0!important;flex:none!important;border:0!important}
+.editor-flat>summary,#editor-character-slot>details>summary{display:none}
+#editor-character-slot>details{padding:0!important;border:0!important;max-height:none}
+#editor-character-slot select{width:100%;margin-bottom:8px}#editor-character-slot img{margin-top:12px;max-height:240px!important;border-radius:8px}
+.editor-scroll details{padding:10px 0}.editor-scroll details details{border:0}
+.editor-scroll .editor-flat{padding:0;border:0}.editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.editor-scroll select{max-width:100%;margin:4px 0}.editor-scroll input[type=file]{max-width:100%}
+.hair-studio .editor-tabs{position:sticky;top:-4px;z-index:2;padding:8px 0;background:#171b23}
+.hair-studio .editor-flat>summary{display:none}.hair-studio-toolbar{gap:6px}
+#hair-collision-status{padding:8px 10px;margin:4px 0 12px;background:#202733;border-radius:6px}
+#foot.animation-dock{flex:none;display:grid;grid-template-columns:auto auto auto 88px minmax(180px,1fr);gap:10px;align-items:center;padding:10px 16px;border-top:1px solid #394354;background:#1b212c;z-index:5;width:100%;margin:0}
+#foot .dock-title{font-size:11px;color:#93a0b5}#foot button{white-space:nowrap}#foot input[type=number]{width:88px}
+#foot .dock-timeline{width:auto!important;font-size:11px!important;color:#acb8ca!important;margin:0}
+#foot #timeline{display:block;width:100%}
+#hint{font-size:10px;pointer-events:none}
+@media(max-width:720px){#app{flex-direction:column}#stage{height:45%;flex:none}#panel{height:55%;width:100%;border-left:0;border-top:1px solid var(--line)}.editor-brand{padding:7px 12px}.editor-navigation{padding:5px 8px}.editor-navigation>.editor-tabs{grid-template-columns:repeat(6,1fr)}.editor-tabs button{padding:6px 4px;font-size:11px}#foot.animation-dock{grid-template-columns:auto auto 88px;gap:6px;padding:8px 12px}#foot .dock-title{display:none}#foot .dock-timeline{grid-column:1/-1}.editor-scroll{padding:0 12px 20px}}
+[hidden]{display:none!important}

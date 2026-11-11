@@ -1,0 +1,15 @@
+{
+  "game": "Koikatsu Sunshine EX BetterRepack R6",
+  "controllerSource": "abdata/chara/bo_head_00.unity3d",
+  "sourceSha256": "f2b2c8f76adbc9fe779be26ef45a526ee581684385389e700c86ba38814b71e8",
+  "runtimeCode": "Assembly-CSharp.dll FaceBlendShape, FBSBase, FBSBlinkControl, FBSCtrlEyes/Eyebrow/Mouth, FBSAssist.TimeProgressCtrl; extracted locally with ilspycmd10.1.0",
+  "profiles": {
+    "rin": "inputs/exports/rin-four-outfits/KK_BlendShapeInfo.json",
+    "mira": "inputs/exports/mira/KK_BlendShapeInfo.json"
+  },
+  "nativeControllerCount": 3,
+  "sourcePatternsPerCharacter": 99,
+  "previewPatternsPerCharacter": 87,
+  "materialEffectsPerCharacter": 12,
+  "vrmFilesChanged": false
+}

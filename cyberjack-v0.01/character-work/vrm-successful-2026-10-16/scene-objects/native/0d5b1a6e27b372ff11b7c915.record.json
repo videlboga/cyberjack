@@ -1,0 +1,11 @@
+{
+  "id": "0d5b1a6e27b372ff11b7c915",
+  "name": "chair00_kind",
+  "kind": "furniture",
+  "source": "map/scene/publictoilet.unity3d",
+  "sourceIdentity": "BuildPlayer-PublicToilet:196",
+  "native": "native/0d5b1a6e27b372ff11b7c915.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

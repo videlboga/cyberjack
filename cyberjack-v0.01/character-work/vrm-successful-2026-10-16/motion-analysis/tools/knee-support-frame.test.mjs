@@ -1,0 +1,4 @@
+import assert from'node:assert/strict';import{changesSupportFrame}from'./command-planner.mjs';
+const seated={hipHeight:.135,torsoInclination:21,chestUp:.27,leftKnee:24,rightKnee:16,leftKneeHeight:.087,rightKneeHeight:.072};
+const goals=[{feature:'hipHeight',min:.15,max:.65},...['left','right'].map(s=>({feature:s+'KneeHeight',min:0,max:.07}))];
+assert(changesSupportFrame(seated,goals));assert(!changesSupportFrame({...seated,hipHeight:.2,leftKnee:130,rightKnee:130,leftKneeHeight:.01,rightKneeHeight:.01},goals));assert(!changesSupportFrame(seated,[{feature:'rightHandAt_bellyDistance',max:.06}]));assert(changesSupportFrame({...seated,leftKneeHeight:.01,rightKneeHeight:.01},goals));console.log('PASS knee support releases seated/prone pelvis despite overlapping hip ranges; existing kneeling and hand-only contacts remain stable');

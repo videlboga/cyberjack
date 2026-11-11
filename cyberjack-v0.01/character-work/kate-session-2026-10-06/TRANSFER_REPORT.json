@@ -1,0 +1,175 @@
+{
+  "stage": "completed",
+  "started": 1791296998.3210013,
+  "mappings": [
+    {
+      "source": "/home/cyberkitty/Documents/Codex/2026-09-07/new-chat",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/session",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/Evanescia_More_Foot__Tights.blend",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/Evanescia_More_Foot__Tights.blend",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/7d3018ab-d961-41b8-8fca-b5a3148b26c2.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/7d3018ab-d961-41b8-8fca-b5a3148b26c2.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime style character 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime style character 3d model.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/5c7d2685-98c9-430a-9005-16312dc82158.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/5c7d2685-98c9-430a-9005-16312dc82158.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime girl 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime girl 3d model.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/kate-T.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/kate-T.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/orange-haired girl 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/orange-haired girl 3d model.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/keit-A.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/keit-A.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime+girl+3d+model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime+girl+3d+model.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/bald head 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/bald head 3d model.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime girl head 3d model.glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime girl head 3d model.glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/anime girl 3d model (2).glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/anime girl 3d model (2).glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Загрузки/bald head 3d model (1).glb",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/source-models/bald head 3d model (1).glb",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/bodyparts/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/bodyparts/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-core/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/calibration-core/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-v4/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/calibration-v4/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-core/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/cutout/calibration-core/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-v4/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/cutout/calibration-v4/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/rendered/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/cutout/rendered/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/intimacy/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/intimacy/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/portraits/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/portraits/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/rendered/kate",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/references/character-images/rendered/kate",
+      "is_directory": true
+    },
+    {
+      "source": "/home/cyberkitty/Projects/hermes/agent-instruction-ai-character-metahuman.md",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/external-notes/agent-instruction-ai-character-metahuman.md",
+      "is_directory": false
+    },
+    {
+      "source": "/home/cyberkitty/Documents/Codex/2026-09-10/sumi/ПРОЦЕСС_СБОРКИ_СУМИ.md",
+      "destination": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/external-notes/ПРОЦЕСС_СБОРКИ_СУМИ.md",
+      "is_directory": false
+    }
+  ],
+  "completed": [
+    "/home/cyberkitty/Загрузки/Evanescia_More_Foot__Tights.blend",
+    "/home/cyberkitty/Загрузки/7d3018ab-d961-41b8-8fca-b5a3148b26c2.glb",
+    "/home/cyberkitty/Загрузки/anime style character 3d model.glb",
+    "/home/cyberkitty/Загрузки/5c7d2685-98c9-430a-9005-16312dc82158.glb",
+    "/home/cyberkitty/Загрузки/anime girl 3d model.glb",
+    "/home/cyberkitty/Загрузки/kate-T.glb",
+    "/home/cyberkitty/Загрузки/orange-haired girl 3d model.glb",
+    "/home/cyberkitty/Загрузки/keit-A.glb",
+    "/home/cyberkitty/Загрузки/anime+girl+3d+model.glb",
+    "/home/cyberkitty/Загрузки/bald head 3d model.glb",
+    "/home/cyberkitty/Загрузки/anime girl head 3d model.glb",
+    "/home/cyberkitty/Загрузки/anime girl 3d model (2).glb",
+    "/home/cyberkitty/Загрузки/bald head 3d model (1).glb",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/bodyparts/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-core/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/calibration-v4/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-core/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/calibration-v4/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/cutout/rendered/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/intimacy/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/portraits/kate",
+    "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/character-images/rendered/kate",
+    "/home/cyberkitty/Projects/hermes/agent-instruction-ai-character-metahuman.md",
+    "/home/cyberkitty/Documents/Codex/2026-09-10/sumi/ПРОЦЕСС_СБОРКИ_СУМИ.md"
+  ],
+  "method": "same-filesystem directory relocation + compatibility symlinks; external inputs copied",
+  "completed_at": 1791297169.9968352,
+  "relocated_directories": {
+    "outputs": {
+      "files": 29631,
+      "bytes": 74935510748,
+      "same_inode_verified": true,
+      "compatibility_symlink": "/home/cyberkitty/Documents/Codex/2026-09-07/new-chat/outputs",
+      "target": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/session/outputs"
+    },
+    "work": {
+      "files": 6607,
+      "bytes": 3402577103,
+      "same_inode_verified": true,
+      "compatibility_symlink": "/home/cyberkitty/Documents/Codex/2026-09-07/new-chat/work",
+      "target": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/kate-session-2026-10-06/session/work"
+    }
+  }
+}

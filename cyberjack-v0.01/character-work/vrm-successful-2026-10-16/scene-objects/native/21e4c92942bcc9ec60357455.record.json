@@ -1,0 +1,12 @@
+{
+  "id": "21e4c92942bcc9ec60357455",
+  "name": "o_ks_r10_desk00",
+  "kind": "furniture",
+  "source": "map/scene/gasyukumyroom.unity3d",
+  "sourceIdentity": "BuildPlayer-GasyukuMyroom:67",
+  "native": "native/21e4c92942bcc9ec60357455.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/o_ks_r10_desk00-21e4c92942bcc9ec60357455.glb"
+}

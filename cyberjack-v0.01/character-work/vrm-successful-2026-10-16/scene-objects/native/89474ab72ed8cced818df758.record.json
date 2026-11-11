@@ -1,0 +1,12 @@
+{
+  "id": "89474ab72ed8cced818df758",
+  "name": "p_ks_m05_marutaisu00_00",
+  "kind": "furniture",
+  "source": "map/scene/forest.unity3d",
+  "sourceIdentity": "BuildPlayer-Forest:584",
+  "native": "native/89474ab72ed8cced818df758.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m05_marutaisu00_00-89474ab72ed8cced818df758.glb"
+}

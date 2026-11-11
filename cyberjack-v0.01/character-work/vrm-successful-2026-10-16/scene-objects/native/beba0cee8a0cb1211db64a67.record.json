@@ -1,0 +1,12 @@
+{
+  "id": "beba0cee8a0cb1211db64a67",
+  "name": "move_chair06",
+  "kind": "furniture",
+  "source": "map/scene/harbor.unity3d",
+  "sourceIdentity": "BuildPlayer-Harbor:86",
+  "native": "native/beba0cee8a0cb1211db64a67.json.gz",
+  "nodes": 5,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/move_chair06-beba0cee8a0cb1211db64a67.glb"
+}

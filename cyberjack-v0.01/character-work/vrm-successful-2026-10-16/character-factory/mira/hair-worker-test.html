@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>Проверка worker волос</title><style>body{font:16px monospace;white-space:pre-wrap;background:#161b24;color:#e8edf7;padding:24px}</style><h1>Проверка worker волос</h1><output id="status"></output><script type="module">
+const out=document.getElementById('status'),report=v=>out.textContent+=JSON.stringify(v)+'\n';
+const run=(worker,message)=>new Promise(resolve=>{const timer=setTimeout(()=>{worker.terminate();resolve({type:'timeout'});},3000);worker.onmessage=e=>{clearTimeout(timer);worker.terminate();resolve(e.data);};worker.onerror=e=>{clearTimeout(timer);worker.terminate();resolve({type:'error',message:e.message,filename:e.filename,line:e.lineno});};worker.postMessage(message);});
+try{
+report({Worker:typeof Worker});
+const echo=URL.createObjectURL(new Blob(['onmessage=e=>postMessage({type:"echo",data:e.data})'],{type:'text/javascript'}));report({blobEcho:await run(new Worker(echo),42)});URL.revokeObjectURL(echo);
+report({urlEcho:await run(new Worker('./worker-echo-test.js',{type:'module'}),42)});
+for(const url of ['hair-physics-worker.js?v=runtime92b','viewer-hair-physics.js?v=runtime92b','strand-contact-solver.js?v=sparse-contacts-2']){const response=await fetch(url);report({url,status:response.status,mime:response.headers.get('content-type')});}
+const count=4*13*3,positions=new Float32Array(count),normals=new Float32Array(count);for(let r=0;r<4;r++)for(let k=0;k<13;k++){const j=(r*13+k)*3,a=k/12*Math.PI*2;positions[j]=.003*Math.cos(a);positions[j+1]=1.5-r*.02;positions[j+2]=.003*Math.sin(a);normals[j]=Math.cos(a);normals[j+2]=Math.sin(a);}
+const message={type:'step',generation:1,dt:1/60,settings:{enabled:true,stiffness:.35,damping:.35,motion:.85,wind:0},cohesion:0,colliders:[],matrices:[[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]],init:[{offset:0,count,rigid:false,profile:'long',motionGroup:null}],positions,normals,reset:true};
+report({urlWorker:await run(new Worker('./hair-physics-worker.js?v=runtime92b',{type:'module'}),message)});
+const workerURL=new URL('./hair-physics-worker.js?v=runtime92b',location.href).href,blob=URL.createObjectURL(new Blob(['import('+JSON.stringify(workerURL)+').catch(e=>postMessage({type:"import-error",message:e.message,stack:e.stack}));'],{type:'text/javascript'}));report({blobImport:await run(new Worker(blob,{type:'module'}),message)});URL.revokeObjectURL(blob);
+}catch(error){report({exception:error.message,stack:error.stack});}
+</script>

@@ -1,0 +1,3 @@
+import fs from 'node:fs';
+import {parentPort} from 'node:worker_threads';import {planCharacterCommand,warmCommandPlanner} from './command-planner.mjs';
+parentPort.on('message',async ({id,request,stream})=>{try{parentPort.postMessage({id,result:request.warmup?warmCommandPlanner():await planCharacterCommand(request,{...(request.fixture?{interpret:async()=>{const demos=JSON.parse(fs.readFileSync(new URL('../data/support-demos.json',import.meta.url)));if(!Object.hasOwn(demos,request.fixture))throw Error('Неизвестная проба опор');return demos[request.fixture];}}:{}),...(stream?{onStep:progress=>parentPort.postMessage({id,progress})}:{})})})}catch(e){parentPort.postMessage({id,error:e.message})}});

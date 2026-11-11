@@ -1,0 +1,14 @@
+{
+ "id": "kk-tophat",
+ "slot": "head",
+ "mesh": "hatto",
+ "vrm": "Mira_outfit_03.vrm",
+ "jointCount": 971,
+ "jointMap": {
+  "cf_j_head": "cf_s_head"
+ },
+ "substitutes": [],
+ "missing": [],
+ "heelHeight": 0.0,
+ "bake": "v_body = Σ w·(W_rig·B)·v, W по rest-скелету source_rigs.json"
+}

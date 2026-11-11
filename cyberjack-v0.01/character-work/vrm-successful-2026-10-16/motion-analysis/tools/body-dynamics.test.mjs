@@ -1,0 +1,8 @@
+import assert from 'node:assert/strict';import {Vector3} from 'three';import {contactForces,frictionProject,GRAVITY,convexHull,nearestSupport} from './body-dynamics.mjs';
+const sample={com:new Vector3(0,1,0),acceleration:new Vector3(),angularRate:new Vector3()},contacts=[[-.2,0,-.15],[.2,0,-.15],[.2,0,.15],[-.2,0,.15]].map((point,id)=>({id,point})),options={mass:60,height:1.8,iterations:350};
+let r=contactForces(sample,contacts,options);assert(r.feasible);assert(Math.abs(r.normalNewtons-60*GRAVITY)<.1);assert(r.forces.every(c=>c.force[1]>=0));assert(Math.hypot(...r.cop)<.001);
+r=contactForces({...sample,com:new Vector3(1,1,0)},contacts,options);assert(!r.feasible,'outside support must be infeasible, not supported by pulling floor');assert(r.torqueResidual>.1);assert(r.forces.every(c=>c.force[1]>=0));
+r=contactForces({...sample,acceleration:new Vector3(8,0,0)},contacts.map(c=>({...c,friction:.2})),options);assert(!r.feasible);for(const c of r.forces)assert(Math.hypot(c.force[0],c.force[2])<=.2*c.force[1]+1e-6);
+r=contactForces(sample,[],options);assert(!r.feasible);r=contactForces({...sample,acceleration:new Vector3(0,-GRAVITY,0)},[],options);assert(r.feasible);assert.equal(r.normalNewtons,0);
+for(const f of [[1,-4,2],[2,.1,3],[0,-1,0],[1,100,1]]){const p=frictionProject(f,.4);assert(p[1]>=0);assert(Math.hypot(p[0],p[2])<=.4*p[1]+1e-9);}const hull=convexHull(contacts.map(c=>c.point));assert.deepEqual(nearestSupport([0,1,0],hull),[0,0,0]);assert(Math.abs(nearestSupport([1,1,0],hull)[0]-.2)<1e-8);
+console.log('PASS gravity/normal-force balance, nonnegative contacts, infeasible outside support, Coulomb friction, ballistic flight versus unsupported hover, support hull');

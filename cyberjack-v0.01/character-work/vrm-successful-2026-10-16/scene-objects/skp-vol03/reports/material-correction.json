@@ -1,0 +1,3640 @@
+{
+  "models": 24,
+  "errors": [],
+  "coordinateQuantizationMeters": 1e-06,
+  "note": "Physical triangle sets ignore winding and coincident front/back copies; a material-side grouping change can change raw triangle counts without changing surfaces. Original accent RGB colors must remain; only the layer fallback pink may disappear.",
+  "results": [
+    {
+      "model": "SexMachineModel-065",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "d1cd2855cef8e26b4ab2b5b6be4d0681361a07085ad39d0c1f208ebe6c50b398",
+        "uniqueTriangles": 252563,
+        "colors": [
+          {
+            "rgb": [
+              0.698039,
+              1.0,
+              0.396078
+            ],
+            "triangles": 12
+          },
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 309619
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 384
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.396078,
+              0.996078
+            ],
+            "triangles": 47
+          },
+          {
+            "rgb": [
+              0.956863,
+              0.956863,
+              0.956863
+            ],
+            "triangles": 94
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1548
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "d1cd2855cef8e26b4ab2b5b6be4d0681361a07085ad39d0c1f208ebe6c50b398",
+        "uniqueTriangles": 252563,
+        "colors": [
+          {
+            "rgb": [
+              0.698039,
+              1.0,
+              0.396078
+            ],
+            "triangles": 12
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 309619
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 384
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.396078,
+              0.996078
+            ],
+            "triangles": 47
+          },
+          {
+            "rgb": [
+              0.956863,
+              0.956863,
+              0.956863
+            ],
+            "triangles": 94
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1548
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-066",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "7bdfca2bdf7745e1bc872f407bae2734541117ad2c661a48fe3f3e34e004572d",
+        "uniqueTriangles": 60786,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 60730
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 176
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 772
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 176
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "7bdfca2bdf7745e1bc872f407bae2734541117ad2c661a48fe3f3e34e004572d",
+        "uniqueTriangles": 60786,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 60730
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 176
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 772
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 176
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-067",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "34653c3f3e96d3576092fd6cf03e10fb4a2745e14a3c6d48f400611f2d881c85",
+        "uniqueTriangles": 181026,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 218092
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 641
+          },
+          {
+            "rgb": [
+              0.698039,
+              1.0,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 3213
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 48
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 310
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 435
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 144
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 144
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.996078,
+              0.996078
+            ],
+            "triangles": 1040
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "34653c3f3e96d3576092fd6cf03e10fb4a2745e14a3c6d48f400611f2d881c85",
+        "uniqueTriangles": 181026,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 218092
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 641
+          },
+          {
+            "rgb": [
+              0.698039,
+              1.0,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 3213
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 310
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 435
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 144
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 144
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.996078,
+              0.996078
+            ],
+            "triangles": 1040
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-068",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "b977ba3621ba60c60f6270a83f7ab741d3ab61c6786a9903665abe30e4bde147",
+        "uniqueTriangles": 285757,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 326335
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "triangles": 10
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 88
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.8,
+              0.921569,
+              0.956863
+            ],
+            "triangles": 2160
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1032
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "b977ba3621ba60c60f6270a83f7ab741d3ab61c6786a9903665abe30e4bde147",
+        "uniqueTriangles": 285757,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 326335
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "triangles": 10
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 88
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.8,
+              0.921569,
+              0.956863
+            ],
+            "triangles": 2160
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1032
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-069",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "12622e6143f9d850f47f1bfc9cc6e85a993406a6f06d58d373583426adbbd498",
+        "uniqueTriangles": 58656,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 46632
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 30
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 332
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 290
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 146
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              0.8,
+              0.921569,
+              0.956863
+            ],
+            "triangles": 15120
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "12622e6143f9d850f47f1bfc9cc6e85a993406a6f06d58d373583426adbbd498",
+        "uniqueTriangles": 58656,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 46632
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 30
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 332
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 290
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 146
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              0.8,
+              0.921569,
+              0.956863
+            ],
+            "triangles": 15120
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-070",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "6020e1d974b606f9a61b634af40ca1740655cb41a0441b42cde0afe3d02be4ac",
+        "uniqueTriangles": 45664,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 45667
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 4
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 1916
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 2388
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 280
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 596
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 24
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "6020e1d974b606f9a61b634af40ca1740655cb41a0441b42cde0afe3d02be4ac",
+        "uniqueTriangles": 45664,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 45667
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 4
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 1916
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 2388
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 280
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 596
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 24
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-071",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "77737bf445674869efeedfb7b515a67e131d67b4996bdece765b3e39b02acff4",
+        "uniqueTriangles": 44075,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 44541
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 84
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 3
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 22
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 20
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "77737bf445674869efeedfb7b515a67e131d67b4996bdece765b3e39b02acff4",
+        "uniqueTriangles": 44075,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 44541
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 84
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 3
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 22
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 20
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-072",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "8ab7533143076c277d5cf06efff45570dee738cf4c4aa50c2554779068e96675",
+        "uniqueTriangles": 108309,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 108253
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 18
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 288
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 656
+          },
+          {
+            "rgb": [
+              0.196078,
+              1.0,
+              0.196078
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 224
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "8ab7533143076c277d5cf06efff45570dee738cf4c4aa50c2554779068e96675",
+        "uniqueTriangles": 108309,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 108253
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 18
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 288
+          },
+          {
+            "rgb": [
+              0.196078,
+              1.0,
+              0.196078
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 224
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-073",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "1d084634572654e7bebd239dabc78b72485120039319ebbd67724c6c855dbee9",
+        "uniqueTriangles": 46210,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 46676
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.196078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 84
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 3
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 332
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 290
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 146
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.698039
+            ],
+            "triangles": 280
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 288
+          },
+          {
+            "rgb": [
+              1.0,
+              0.6,
+              0.8
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 96
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "1d084634572654e7bebd239dabc78b72485120039319ebbd67724c6c855dbee9",
+        "uniqueTriangles": 46210,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 46676
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.196078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 84
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 3
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 332
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 290
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 146
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.698039
+            ],
+            "triangles": 280
+          },
+          {
+            "rgb": [
+              1.0,
+              0.6,
+              0.8
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 96
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-074",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "a92beeb595cfdf5d7982441b6349b946c6b58e526213dc01fe5fece0f1bd1da2",
+        "uniqueTriangles": 249179,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 248787
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 2324
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 2030
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 1022
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.698039
+            ],
+            "triangles": 1960
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 2016
+          },
+          {
+            "rgb": [
+              1.0,
+              0.6,
+              0.8
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 728
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 392
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 14
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "a92beeb595cfdf5d7982441b6349b946c6b58e526213dc01fe5fece0f1bd1da2",
+        "uniqueTriangles": 249179,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 248787
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 2324
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 2030
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 1022
+          },
+          {
+            "rgb": [
+              0.396078,
+              1.0,
+              1.0
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.698039
+            ],
+            "triangles": 1960
+          },
+          {
+            "rgb": [
+              1.0,
+              0.6,
+              0.8
+            ],
+            "triangles": 672
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 728
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 14
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 392
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 14
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-075",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "4dc7b59cd016ffe7b574ab0bc2a43d5ce16a0efefcc3220231bd7484bdb6faf3",
+        "uniqueTriangles": 391498,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 487257
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 2580
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "4dc7b59cd016ffe7b574ab0bc2a43d5ce16a0efefcc3220231bd7484bdb6faf3",
+        "uniqueTriangles": 391498,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 487257
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.756863,
+              0.756863,
+              0.756863
+            ],
+            "triangles": 2580
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-076",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "c8111c8a625a90178e75c5c2a8127b6d9d72ae2fe00b3dd8fcf91b0f59f6fbb8",
+        "uniqueTriangles": 39098,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 39098
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 32
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.196078
+            ],
+            "triangles": 6
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 22
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "c8111c8a625a90178e75c5c2a8127b6d9d72ae2fe00b3dd8fcf91b0f59f6fbb8",
+        "uniqueTriangles": 39098,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 39098
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 32
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.196078
+            ],
+            "triangles": 6
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 22
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-077",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "500153e77a6b067d3cb2c7fa7064134c5e6133a9057d7681e7f77b6d91575211",
+        "uniqueTriangles": 43447,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 43471
+          },
+          {
+            "rgb": [
+              0.627451,
+              0.627451,
+              0.627451
+            ],
+            "triangles": 16
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.196078,
+              1.0,
+              0.196078
+            ],
+            "triangles": 4
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "500153e77a6b067d3cb2c7fa7064134c5e6133a9057d7681e7f77b6d91575211",
+        "uniqueTriangles": 43447,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 43471
+          },
+          {
+            "rgb": [
+              0.627451,
+              0.627451,
+              0.627451
+            ],
+            "triangles": 16
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.196078,
+              1.0,
+              0.196078
+            ],
+            "triangles": 4
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-078",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "ce4965ec2fbd5c27998a014410aa914d870f7a7d518fcc2b3f2546005198d1ef",
+        "uniqueTriangles": 50843,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 51337
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 394
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "ce4965ec2fbd5c27998a014410aa914d870f7a7d518fcc2b3f2546005198d1ef",
+        "uniqueTriangles": 50843,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 51337
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 394
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-079",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "f180c01c6c529c9691e706a98e3b87422c14b0ad15acf0ce3f18aa44babecca7",
+        "uniqueTriangles": 41293,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 41213
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 440
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 4
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 22
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 26
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "f180c01c6c529c9691e706a98e3b87422c14b0ad15acf0ce3f18aa44babecca7",
+        "uniqueTriangles": 41293,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 41213
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 440
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 4
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 26
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-080",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "2f9aa2bc3e65841df8f82c2d9338d9476f2c3aeed161b87c381fa294771f2e27",
+        "uniqueTriangles": 246594,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 303601
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 82
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 2400
+          },
+          {
+            "rgb": [
+              1.0,
+              0.196078,
+              1.0
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 22
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 118
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 52
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 96
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "2f9aa2bc3e65841df8f82c2d9338d9476f2c3aeed161b87c381fa294771f2e27",
+        "uniqueTriangles": 246594,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 303601
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 82
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 2400
+          },
+          {
+            "rgb": [
+              1.0,
+              0.196078,
+              1.0
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.4,
+              0.8,
+              0.0
+            ],
+            "triangles": 22
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 52
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 96
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-081",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "372502cfae518dc464facf37770501a5b6df047c47ec97eecb82bf0f2a8dd05d",
+        "uniqueTriangles": 45278,
+        "colors": [
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 45010
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 52
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 212
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 296
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 2160
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 28
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 1
+          },
+          {
+            "rgb": [
+              0.627451,
+              0.627451,
+              0.627451
+            ],
+            "triangles": 240
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "372502cfae518dc464facf37770501a5b6df047c47ec97eecb82bf0f2a8dd05d",
+        "uniqueTriangles": 45278,
+        "colors": [
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 45010
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 24
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 52
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 212
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 296
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 28
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 1
+          },
+          {
+            "rgb": [
+              0.627451,
+              0.627451,
+              0.627451
+            ],
+            "triangles": 240
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-082",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "1d4cc9029805f2a3c753e022fdbddd191db04d569f60de9bdef372a0aa8f28bd",
+        "uniqueTriangles": 396205,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 396735
+          },
+          {
+            "rgb": [
+              0.537255,
+              0.537255,
+              0.537255
+            ],
+            "triangles": 5796
+          },
+          {
+            "rgb": [
+              1.0,
+              0.847059,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.898039,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 28
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 1
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "1d4cc9029805f2a3c753e022fdbddd191db04d569f60de9bdef372a0aa8f28bd",
+        "uniqueTriangles": 396205,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 396735
+          },
+          {
+            "rgb": [
+              0.537255,
+              0.537255,
+              0.537255
+            ],
+            "triangles": 5796
+          },
+          {
+            "rgb": [
+              1.0,
+              0.847059,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.898039,
+              0.8
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 28
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 1
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-083",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "fedd5343db66bb36dd14a2334925759c28bb84b19264752687af3ed635b308a0",
+        "uniqueTriangles": 36605,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 36077
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1880
+          },
+          {
+            "rgb": [
+              0.498039,
+              1.0,
+              0.0
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 16
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 16
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 310
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 121
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 12
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "fedd5343db66bb36dd14a2334925759c28bb84b19264752687af3ed635b308a0",
+        "uniqueTriangles": 36605,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 36077
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1880
+          },
+          {
+            "rgb": [
+              0.498039,
+              1.0,
+              0.0
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.337255,
+              0.337255,
+              0.337255
+            ],
+            "triangles": 16
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 16
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 310
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 12
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-084",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "824cd34c0920e3f8c77d5dbc6fa34b0ecd4cd32efdd221ddf823de1560686adf",
+        "uniqueTriangles": 811370,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 973696
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 2800
+          },
+          {
+            "rgb": [
+              0.698039,
+              1.0,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 312
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 26
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 58
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 1078
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.196078
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "824cd34c0920e3f8c77d5dbc6fa34b0ecd4cd32efdd221ddf823de1560686adf",
+        "uniqueTriangles": 811370,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 973696
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 2800
+          },
+          {
+            "rgb": [
+              0.698039,
+              1.0,
+              0.396078
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 312
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 58
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 1078
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 56
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              0.196078
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-085",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "742677f219f5e62c1bc89e8a5f57219ddfb91df0bceee46c466e4dba5e68daf6",
+        "uniqueTriangles": 43729,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 43730
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 64
+          },
+          {
+            "rgb": [
+              1.0,
+              0.6,
+              1.0
+            ],
+            "triangles": 4
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 10
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 14
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "742677f219f5e62c1bc89e8a5f57219ddfb91df0bceee46c466e4dba5e68daf6",
+        "uniqueTriangles": 43729,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 43730
+          },
+          {
+            "rgb": [
+              0.666667,
+              0.666667,
+              0.666667
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 64
+          },
+          {
+            "rgb": [
+              1.0,
+              0.6,
+              1.0
+            ],
+            "triangles": 4
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              0.6
+            ],
+            "triangles": 10
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 14
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-086",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "b220c2c0a729a1797dea230b3b2a15fee51b933624c3b81de3574ae8bbee4619",
+        "uniqueTriangles": 21531,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 21263
+          },
+          {
+            "rgb": [
+              0.196078,
+              1.0,
+              1.0
+            ],
+            "triangles": 272
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 48
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 240
+          },
+          {
+            "rgb": [
+              0.627451,
+              0.627451,
+              0.627451
+            ],
+            "triangles": 240
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 28
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 1
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "b220c2c0a729a1797dea230b3b2a15fee51b933624c3b81de3574ae8bbee4619",
+        "uniqueTriangles": 21531,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 21263
+          },
+          {
+            "rgb": [
+              0.196078,
+              1.0,
+              1.0
+            ],
+            "triangles": 272
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 48
+          },
+          {
+            "rgb": [
+              0.6,
+              1.0,
+              0.6
+            ],
+            "triangles": 2
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 240
+          },
+          {
+            "rgb": [
+              0.627451,
+              0.627451,
+              0.627451
+            ],
+            "triangles": 240
+          },
+          {
+            "rgb": [
+              0.819608,
+              0.819608,
+              0.819608
+            ],
+            "triangles": 28
+          },
+          {
+            "rgb": [
+              0.227451,
+              0.227451,
+              0.227451
+            ],
+            "triangles": 1
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-087",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "286e23292c5b299f67fe8e5ff3245b90716f06b6739e8d145665911a1fb7ef51",
+        "uniqueTriangles": 176949,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 215055
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1080
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 52
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 44
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.396078,
+              0.996078
+            ],
+            "triangles": 48
+          },
+          {
+            "rgb": [
+              0.8,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "286e23292c5b299f67fe8e5ff3245b90716f06b6739e8d145665911a1fb7ef51",
+        "uniqueTriangles": 176949,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 215055
+          },
+          {
+            "rgb": [
+              1.0,
+              0.396078,
+              1.0
+            ],
+            "triangles": 8
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 1080
+          },
+          {
+            "rgb": [
+              0.447059,
+              0.447059,
+              0.447059
+            ],
+            "triangles": 52
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 44
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.396078,
+              0.996078
+            ],
+            "triangles": 48
+          },
+          {
+            "rgb": [
+              0.8,
+              1.0,
+              0.8
+            ],
+            "triangles": 2
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    },
+    {
+      "model": "SexMachineModel-088",
+      "samePhysicalTriangleSet": true,
+      "before": {
+        "physicalTriangleSetSha256": "985a250da267211f425cfdd03828aff526d734208738d117d7880315be3f3f58",
+        "uniqueTriangles": 170660,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              0.329412,
+              0.329412
+            ],
+            "triangles": 208766
+          },
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 22
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 2216
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 44
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.396078,
+              0.996078
+            ],
+            "triangles": 48
+          }
+        ]
+      },
+      "after": {
+        "physicalTriangleSetSha256": "985a250da267211f425cfdd03828aff526d734208738d117d7880315be3f3f58",
+        "uniqueTriangles": 170660,
+        "colors": [
+          {
+            "rgb": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "triangles": 208766
+          },
+          {
+            "rgb": [
+              0.776471,
+              0.776471,
+              0.776471
+            ],
+            "triangles": 2216
+          },
+          {
+            "rgb": [
+              0.556863,
+              0.556863,
+              0.556863
+            ],
+            "triangles": 44
+          },
+          {
+            "rgb": [
+              0.886275,
+              0.886275,
+              0.886275
+            ],
+            "triangles": 96
+          },
+          {
+            "rgb": [
+              0.996078,
+              0.396078,
+              0.996078
+            ],
+            "triangles": 48
+          }
+        ]
+      },
+      "preservedAccentColors": true
+    }
+  ]
+}

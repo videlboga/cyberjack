@@ -1,0 +1,65 @@
+{
+  "golden": [
+    {
+      "raw": 0,
+      "value": 0
+    },
+    {
+      "raw": 0.5,
+      "value": 0.25
+    },
+    {
+      "raw": 0,
+      "value": 0.4
+    }
+  ],
+  "during": {
+    "state": {
+      "character": "rin",
+      "shown": false,
+      "playing": false,
+      "time": 0,
+      "bones": 0,
+      "voice": 0.3503494678727129,
+      "speech": true
+    },
+    "face": {
+      "Eye": 0,
+      "Eyebrow": 0,
+      "Mouth": 1,
+      "eyesOpen": 1,
+      "mouthOpen": 0,
+      "browStrength": 1,
+      "enabled": true,
+      "blink": false,
+      "character": "rin",
+      "meshes": 11
+    },
+    "disabled": true
+  },
+  "paused": {
+    "state": {
+      "character": "rin",
+      "shown": false,
+      "playing": false,
+      "time": 0,
+      "bones": 0,
+      "voice": 0,
+      "speech": false
+    },
+    "face": {
+      "Eye": 0,
+      "Eyebrow": 0,
+      "Mouth": 0,
+      "eyesOpen": 1,
+      "mouthOpen": 0,
+      "browStrength": 1,
+      "enabled": true,
+      "blink": false,
+      "character": "rin",
+      "meshes": 11
+    },
+    "disabled": false
+  },
+  "errors": []
+}

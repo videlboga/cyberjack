@@ -1,0 +1,1435 @@
+{
+  "disabled_physics": [
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_siri01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_d_siri01_L",
+        "cf_j_siri_L"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_siri01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_d_siri01_R",
+        "cf_j_siri_R"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_bust01_L",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_j_bust01_L",
+        "cf_j_bust02_L",
+        "cf_j_bust03_L"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    },
+    {
+      "CoordinateType": 0,
+      "Root": "cf_d_bust01_R",
+      "Damping": 0.0,
+      "DampingDistrib": "",
+      "Elasticity": 0.0,
+      "ElasticityDistrib": "",
+      "Stiffness": 0.0,
+      "StiffnessDistrib": "",
+      "Inert": 0.0,
+      "InertDistrib": "",
+      "Radius": 0.0,
+      "RadiusDistrib": "",
+      "EndLength": 0.0,
+      "EndOffset": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Gravity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Force": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "Colliders": [],
+      "Exclusions": [],
+      "NotRolls": [],
+      "ObjectScale": 0.0,
+      "Weight": 0.0,
+      "ParticleBones": [
+        "cf_j_bust01_R",
+        "cf_j_bust02_R",
+        "cf_j_bust03_R"
+      ],
+      "ParticleBoneLength": [],
+      "ParticleDamping": [],
+      "ParticleElasticity": [],
+      "ParticleEndOffset": [],
+      "ParticleInert": [],
+      "ParticleRadius": [],
+      "ParticleStiffness": []
+    }
+  ],
+  "materials": [
+    {
+      "name": "KK cf_m_noseline_00",
+      "base": "cf_m_noseline_00_light.png",
+      "shade": "cf_m_noseline_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_eyeline_kage",
+      "base": "cf_m_eyeline_kage_light.png",
+      "shade": "cf_m_eyeline_kage_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "BLEND"
+    },
+    {
+      "name": "KK Tears KamiwataKrista",
+      "base": "cf_m_namida_00_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4133 01",
+      "base": "cf_m_hair_b_21_00 4133 01_light.png",
+      "shade": "cf_m_hair_b_21_00 4133 01_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK acs_m_haibisukasu 3251",
+      "base": "acs_m_haibisukasu 3251_light.png",
+      "shade": "acs_m_haibisukasu 3251_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_top_aonep_m 8432",
+      "base": "cf_top_aonep_m 8432_light.png",
+      "shade": "cf_top_aonep_m 8432_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_eyeline_down",
+      "base": "cf_m_eyeline_down_light.png",
+      "shade": "cf_m_eyeline_down_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_mayuge_00",
+      "base": "cf_m_mayuge_00_light.png",
+      "shade": "cf_m_mayuge_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4133 00",
+      "base": "cf_m_hair_b_21_00 4133 00_light.png",
+      "shade": "cf_m_hair_b_21_00 4133 00_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK acs_m_chocker_bell 4770",
+      "base": "acs_m_chocker_bell 4770_light.png",
+      "shade": "acs_m_chocker_bell 4770_dark.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_top_aonep_m 8412",
+      "base": "cf_top_aonep_m 8412_light.png",
+      "shade": "cf_top_aonep_m 8412_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_eyeline_00_up",
+      "base": "cf_m_eyeline_00_up_light.png",
+      "shade": "cf_m_eyeline_00_up_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hitomi_00_cf_Ohitomi_R02",
+      "base": "cf_m_hitomi_00_cf_Ohitomi_R02_light.png",
+      "shade": "cf_m_hitomi_00_cf_Ohitomi_R02_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_top_aonep_m 8392",
+      "base": "cf_top_aonep_m 8392_light.png",
+      "shade": "cf_top_aonep_m 8392_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4133",
+      "base": "cf_m_hair_b_21_00 4133_light.png",
+      "shade": "cf_m_hair_b_21_00 4133_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK acs_chocker_belt 4760",
+      "base": "acs_chocker_belt 4760_light.png",
+      "shade": "acs_chocker_belt 4760_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hitomi_00_cf_Ohitomi_L02",
+      "base": "cf_m_hitomi_00_cf_Ohitomi_L02_light.png",
+      "shade": "cf_m_hitomi_00_cf_Ohitomi_L02_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_bot_spants 8480",
+      "base": "cf_m_bot_spants 8480_light.png",
+      "shade": "cf_m_bot_spants 8480_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4132 02",
+      "base": "cf_m_hair_b_21_00 4132 02_light.png",
+      "shade": "cf_m_hair_b_21_00 4132 02_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_top_aonep_m 8372",
+      "base": "cf_top_aonep_m 8372_light.png",
+      "shade": "cf_top_aonep_m 8372_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_body",
+      "base": "cf_m_body_light_alpha.png",
+      "shade": "cf_m_body_dark_alpha.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag01 KamiwataKrista",
+      "base": "cf_m_gageye_01_cf_t_gageye_03_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_305_00 4431",
+      "base": "cf_m_hair_f_305_00 4431_light.png",
+      "shade": "cf_m_hair_f_305_00 4431_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_tooth",
+      "base": "cf_m_tooth_light.png",
+      "shade": "cf_m_tooth_dark.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4132 01",
+      "base": "cf_m_hair_b_21_00 4132 01_light.png",
+      "shade": "cf_m_hair_b_21_00 4132 01_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK bra_lace_mat 8580",
+      "base": "bra_lace_mat 8580_light.png",
+      "shade": "bra_lace_mat 8580_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_f_305_00 4353",
+      "base": "cf_m_hair_f_305_00 4353_light.png",
+      "shade": "cf_m_hair_f_305_00 4353_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK pufferlong 8400",
+      "base": "pufferlong 8400_light.png",
+      "shade": "pufferlong 8400_dark.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4132 00",
+      "base": "cf_m_hair_b_21_00 4132 00_light.png",
+      "shade": "cf_m_hair_b_21_00 4132 00_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK ztoki_socks_02_00_ma 8780",
+      "base": "ztoki_socks_02_00_ma 8780_light.png",
+      "shade": "ztoki_socks_02_00_ma 8780_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_tang.001",
+      "base": "cf_m_tang_light.png",
+      "shade": "cf_m_tang_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_f_305_00 4352",
+      "base": "cf_m_hair_f_305_00 4352_light.png",
+      "shade": "cf_m_hair_f_305_00 4352_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK bra_lace_mat 8560",
+      "base": "bra_lace_mat 8560_light.png",
+      "shade": "bra_lace_mat 8560_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK panties_highleg_mat 8700",
+      "base": "panties_highleg_mat 8700_light.png",
+      "shade": "panties_highleg_mat 8700_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_tang",
+      "base": "cf_m_tang_light.png",
+      "shade": "cf_m_tang_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4132",
+      "base": "cf_m_hair_b_21_00 4132_light.png",
+      "shade": "cf_m_hair_b_21_00 4132_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK bra_lace_mat 8511",
+      "base": "bra_lace_mat 8511_light.png",
+      "shade": "bra_lace_mat 8511_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_f_305_00 4350",
+      "base": "cf_m_hair_f_305_00 4350_light.png",
+      "shade": "cf_m_hair_f_305_00 4350_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK panties_highleg_mat 8680",
+      "base": "panties_highleg_mat 8680_light.png",
+      "shade": "panties_highleg_mat 8680_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_sirome_00",
+      "base": "cf_m_sirome_00_light.png",
+      "shade": "cf_m_sirome_00_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4130 02",
+      "base": "cf_m_hair_b_21_00 4130 02_light.png",
+      "shade": "cf_m_hair_b_21_00 4130 02_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4211 02",
+      "base": "cf_m_hair_b_21_00 4211 02_light.png",
+      "shade": "cf_m_hair_b_21_00 4211 02_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK panties_highleg_mat 8660",
+      "base": "panties_highleg_mat 8660_light.png",
+      "shade": "panties_highleg_mat 8660_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK bra_lace_mat 8491",
+      "base": "bra_lace_mat 8491_light.png",
+      "shade": "bra_lace_mat 8491_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4130 01",
+      "base": "cf_m_hair_b_21_00 4130 01_light.png",
+      "shade": "cf_m_hair_b_21_00 4130 01_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_shorts_03 8631",
+      "base": "cf_m_shorts_03 8631_light.png",
+      "shade": "cf_m_shorts_03 8631_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4211 01",
+      "base": "cf_m_hair_b_21_00 4211 01_light.png",
+      "shade": "cf_m_hair_b_21_00 4211 01_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4130 00",
+      "base": "cf_m_hair_b_21_00 4130 00_light.png",
+      "shade": "cf_m_hair_b_21_00 4130 00_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_shorts_03 8611",
+      "base": "cf_m_shorts_03 8611_light.png",
+      "shade": "cf_m_shorts_03 8611_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag00 KamiwataKrista",
+      "base": "cf_m_gageye_00_cf_t_gageye_00_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4211 00",
+      "base": "cf_m_hair_b_21_00 4211 00_light.png",
+      "shade": "cf_m_hair_b_21_00 4211 00_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK Gag02 KamiwataKrista",
+      "base": "cf_m_gageye_02_cf_t_gageye_07_MT_CT.png",
+      "shade": null,
+      "size": [
+        512,
+        256
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4130",
+      "base": "cf_m_hair_b_21_00 4130_light.png",
+      "shade": "cf_m_hair_b_21_00 4130_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_shorts_03 8591",
+      "base": "cf_m_shorts_03 8591_light.png",
+      "shade": "cf_m_shorts_03 8591_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK acs_m_haibisukasu 3291",
+      "base": "acs_m_haibisukasu 3291_light.png",
+      "shade": "acs_m_haibisukasu 3291_dark.png",
+      "size": [
+        512,
+        512
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4211",
+      "base": "cf_m_hair_b_21_00 4211_light.png",
+      "shade": "cf_m_hair_b_21_00 4211_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    },
+    {
+      "name": "KK cf_m_face_00",
+      "base": "cf_m_face_00_light.png",
+      "shade": "cf_m_face_00_dark.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_shoes_tennis 8840",
+      "base": "cf_m_shoes_tennis 8840_light.png",
+      "shade": "cf_m_shoes_tennis 8840_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK m_cf_shoes_steampunk00 8900",
+      "base": "m_cf_shoes_steampunk00 8900_light.png",
+      "shade": "m_cf_shoes_steampunk00 8900_dark.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": "OPAQUE"
+    },
+    {
+      "name": "KK cf_m_hair_b_21_00 4133 02",
+      "base": "cf_m_hair_b_21_00 4133 02_light.png",
+      "shade": "cf_m_hair_b_21_00 4133 02_dark.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "alpha": "MASK"
+    }
+  ],
+  "physics": [
+    {
+      "name": "cf_J_hairB_00",
+      "source_particles": [
+        "cf_J_hairB_00",
+        "cf_J_hairB_01",
+        "cf_J_hairB_02",
+        "cf_J_hairB_03",
+        "cf_J_hairB_04",
+        "cf_J_hairB_05",
+        "cf_J_hairB_06"
+      ],
+      "joints": [
+        "cf_J_hairB_01",
+        "cf_J_hairB_02",
+        "cf_J_hairB_03",
+        "cf_J_hairB_04",
+        "cf_J_hairB_05",
+        "cf_J_hairB_06"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairBR_00",
+      "source_particles": [
+        "cf_J_hairBR_00",
+        "cf_J_hairBR_01",
+        "cf_J_hairBR_02",
+        "cf_J_hairBR_03",
+        "cf_J_hairBR_04",
+        "cf_J_hairBR_05",
+        "cf_J_hairBR_06"
+      ],
+      "joints": [
+        "cf_J_hairBR_01",
+        "cf_J_hairBR_02",
+        "cf_J_hairBR_03",
+        "cf_J_hairBR_04",
+        "cf_J_hairBR_05",
+        "cf_J_hairBR_06"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairBL_00",
+      "source_particles": [
+        "cf_J_hairBL_00",
+        "cf_J_hairBL_01",
+        "cf_J_hairBL_02",
+        "cf_J_hairBL_03",
+        "cf_J_hairBL_04",
+        "cf_J_hairBL_05",
+        "cf_J_hairBL_06"
+      ],
+      "joints": [
+        "cf_J_hairBL_01",
+        "cf_J_hairBL_02",
+        "cf_J_hairBL_03",
+        "cf_J_hairBL_04",
+        "cf_J_hairBL_05",
+        "cf_J_hairBL_06"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFC_00",
+      "source_particles": [
+        "cf_J_hairFC_00",
+        "cf_J_hairFC_00_vrm_end"
+      ],
+      "joints": [
+        "cf_J_hairFC_00",
+        "cf_J_hairFC_00_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFCL_00",
+      "source_particles": [
+        "cf_J_hairFCL_00",
+        "cf_J_hairFCL_00_vrm_end"
+      ],
+      "joints": [
+        "cf_J_hairFCL_00",
+        "cf_J_hairFCL_00_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFCLL_00",
+      "source_particles": [
+        "cf_J_hairFCLL_00",
+        "cf_J_hairFCLL_00_vrm_end"
+      ],
+      "joints": [
+        "cf_J_hairFCLL_00",
+        "cf_J_hairFCLL_00_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFCR_00",
+      "source_particles": [
+        "cf_J_hairFCR_00",
+        "cf_J_hairFCR_00_vrm_end"
+      ],
+      "joints": [
+        "cf_J_hairFCR_00",
+        "cf_J_hairFCR_00_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFL_01",
+      "source_particles": [
+        "cf_J_hairFL_01",
+        "cf_J_hairFL_01_vrm_end"
+      ],
+      "joints": [
+        "cf_J_hairFL_01",
+        "cf_J_hairFL_01_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cf_J_hairFR_01",
+      "source_particles": [
+        "cf_J_hairFR_01",
+        "cf_J_hairFR_01_vrm_end"
+      ],
+      "joints": [
+        "cf_J_hairFR_01",
+        "cf_J_hairFR_01_vrm_end"
+      ],
+      "colliders": 37
+    },
+    {
+      "name": "cm_J_dan_Pivot_f_L",
+      "source_particles": [
+        "cm_J_dan_Pivot_f_L",
+        "cm_J_dan_Dynamic_f_L"
+      ],
+      "joints": [
+        "cm_J_dan_Pivot_f_L",
+        "cm_J_dan_Dynamic_f_L"
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "cm_J_dan_Pivot_f_R",
+      "source_particles": [
+        "cm_J_dan_Pivot_f_R",
+        "cm_J_dan_Dynamic_f_R"
+      ],
+      "joints": [
+        "cm_J_dan_Pivot_f_R",
+        "cm_J_dan_Dynamic_f_R"
+      ],
+      "colliders": 1
+    }
+  ],
+  "source": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/Export_PMX/20261016013030_KamiwataKrista",
+  "blend_source": "/home/cyberkitty/Documents/Codex/2026-10-15/x20/outputs/krista_four_outfits/Krista_KKBP_source.blend",
+  "expressions": {
+    "blink": [
+      "Eye 両目閉じ"
+    ],
+    "blink_left": [
+      "Eye 左目ぎゅっと閉じ"
+    ],
+    "blink_right": [
+      "Eye 右目ぎゅっと閉じ"
+    ],
+    "aa": [
+      "Mouth あ　大"
+    ],
+    "ih": [
+      "Mouth い　大"
+    ],
+    "ou": [
+      "Mouth う　大"
+    ],
+    "ee": [
+      "Mouth え　大"
+    ],
+    "oh": [
+      "Mouth お　大"
+    ],
+    "happy": [
+      "Eye 笑顔",
+      "Mouth 笑顔, Closed"
+    ],
+    "angry": [
+      "Eye 怒り",
+      "Eyebrow 怒り",
+      "Mouth 怒り, Closed"
+    ],
+    "sad": [
+      "Eye 悲しい",
+      "Eyebrow 困り",
+      "Mouth 寂しい, Closed"
+    ],
+    "relaxed": [
+      "Eye 微笑"
+    ],
+    "surprised": [
+      "Eyebrow 驚き",
+      "Mouth 驚き"
+    ]
+  },
+  "neutral_pose": {
+    "method": "inverse weighted affine skinning from exported current pose to prefab posture, retaining per-character local stretch and offsets",
+    "posture_bones": 137,
+    "meshes": [
+      {
+        "name": "Body KamiwataKrista",
+        "verts": 12943,
+        "roundtrip_error_m": 7.216449660063518e-16,
+        "bounds": [
+          [
+            -0.6758224953186162,
+            -0.12483199843431958,
+            0.013685015546661107
+          ],
+          [
+            0.6736092246654884,
+            0.15202259739622365,
+            1.6043975564363704
+          ]
+        ]
+      },
+      {
+        "name": "Bottom shift 02 KamiwataKrista",
+        "verts": 531,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.1336505299392723,
+            -0.07498084697715562,
+            0.9673947957218468
+          ],
+          [
+            0.13399477498085757,
+            0.12513945175871338,
+            1.1074666358651066
+          ]
+        ]
+      },
+      {
+        "name": "Bra shift 00 KamiwataKrista",
+        "verts": 741,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.11093665104039518,
+            -0.07454995110435084,
+            1.1188258906014095
+          ],
+          [
+            0.11086294815428702,
+            0.08044794732157126,
+            1.4062076500104512
+          ]
+        ]
+      },
+      {
+        "name": "Bra shift 01 KamiwataKrista",
+        "verts": 741,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.11093665104039518,
+            -0.07454995110435084,
+            1.1188258906014095
+          ],
+          [
+            0.11086294815428702,
+            0.08044794732157126,
+            1.4062076500104512
+          ]
+        ]
+      },
+      {
+        "name": "Gag Eyes KamiwataKrista",
+        "verts": 720,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.07171457956798608,
+            -0.019460676658266743,
+            1.4645741643513903
+          ],
+          [
+            0.06001560021861602,
+            0.012392597063434596,
+            1.515305902919775
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 00 KamiwataKrista",
+        "verts": 13156,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.16615420938372438,
+            -0.1040640380934259,
+            1.0163127325678083
+          ],
+          [
+            0.1737517934683621,
+            0.15771106607903715,
+            1.6540865068519208
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 01 KamiwataKrista",
+        "verts": 13156,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.1661542218240791,
+            -0.1040640380934259,
+            1.0163128185118584
+          ],
+          [
+            0.1737517701699495,
+            0.15771129797917696,
+            1.6540865068519208
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 02 KamiwataKrista",
+        "verts": 13156,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.1661542218240791,
+            -0.1040640380934259,
+            1.0163128185925219
+          ],
+          [
+            0.1737517701699495,
+            0.15771129827974004,
+            1.6540865068519208
+          ]
+        ]
+      },
+      {
+        "name": "Hair Outfit 03 KamiwataKrista",
+        "verts": 13156,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.1661542218240791,
+            -0.1040640380934259,
+            1.0163128185925219
+          ],
+          [
+            0.1737517701699495,
+            0.15771129827974004,
+            1.6540865068519208
+          ]
+        ]
+      },
+      {
+        "name": "Indoor shoes 00 KamiwataKrista",
+        "verts": 2088,
+        "roundtrip_error_m": 1.1102230246251565e-16,
+        "bounds": [
+          [
+            -0.12153444312960635,
+            -0.11244730768328082,
+            0.00769130910250768
+          ],
+          [
+            0.12153682829897156,
+            0.08511737284064798,
+            0.09161493728731451
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 00 KamiwataKrista",
+        "verts": 11734,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.5600937560663655,
+            -0.13381883371615352,
+            -3.107090041049726e-06
+          ],
+          [
+            0.5607772947945546,
+            0.15408543111216208,
+            1.4200545513733107
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 01 KamiwataKrista",
+        "verts": 4190,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.1535624880309885,
+            -0.12538761181454522,
+            0.8271763300964581
+          ],
+          [
+            0.15634105923357824,
+            0.15248414998839688,
+            1.6241587915528886
+          ]
+        ]
+      },
+      {
+        "name": "Outfit 02 KamiwataKrista",
+        "verts": 2743,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.18063187511943612,
+            -0.11640320016854215,
+            0.7132083389376289
+          ],
+          [
+            0.18034851599213556,
+            0.17483642721836762,
+            1.3748431866621347
+          ]
+        ]
+      },
+      {
+        "name": "Tears KamiwataKrista",
+        "verts": 1162,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.06220860718971302,
+            -0.0013314101963828318,
+            1.4700147586423973
+          ],
+          [
+            0.050566366360510644,
+            0.008216446083194356,
+            1.4795306484557578
+          ]
+        ]
+      },
+      {
+        "name": "Tongue (rigged) KamiwataKrista",
+        "verts": 246,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.012505628216566658,
+            -0.048836146826099464,
+            1.4153235930368087
+          ],
+          [
+            0.012505616914517494,
+            0.010717349511062346,
+            1.4330201458128744
+          ]
+        ]
+      },
+      {
+        "name": "Top shift 02 KamiwataKrista",
+        "verts": 736,
+        "roundtrip_error_m": 6.661338147750939e-16,
+        "bounds": [
+          [
+            -0.13365084805856153,
+            -0.08523848551269383,
+            1.0856525723573285
+          ],
+          [
+            0.13375334732993804,
+            0.07575018872442715,
+            1.193854878517168
+          ]
+        ]
+      },
+      {
+        "name": "Underwear hang 00 KamiwataKrista",
+        "verts": 292,
+        "roundtrip_error_m": 1.1102230246251565e-16,
+        "bounds": [
+          [
+            0.0341935404082537,
+            0.0016052127932540614,
+            0.1475703975633389
+          ],
+          [
+            0.13032119227927771,
+            0.11189953462399393,
+            0.4420665350945734
+          ]
+        ]
+      },
+      {
+        "name": "Underwear hang 01 KamiwataKrista",
+        "verts": 292,
+        "roundtrip_error_m": 1.1102230246251565e-16,
+        "bounds": [
+          [
+            0.034193567609945685,
+            0.0016052520902959666,
+            0.1475702520296429
+          ],
+          [
+            0.13032124404905968,
+            0.11189957130534049,
+            0.44206651453620766
+          ]
+        ]
+      },
+      {
+        "name": "Underwear shift 00 KamiwataKrista",
+        "verts": 953,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.15356248254390764,
+            -0.0639039568482959,
+            0.827176448660288
+          ],
+          [
+            0.15634108060184834,
+            0.15248415082694822,
+            1.121433390677822
+          ]
+        ]
+      },
+      {
+        "name": "Underwear shift 01 KamiwataKrista",
+        "verts": 953,
+        "roundtrip_error_m": 4.440892098500626e-16,
+        "bounds": [
+          [
+            -0.15356247670684847,
+            -0.06390394635224898,
+            0.8271763293411517
+          ],
+          [
+            0.1563410687747794,
+            0.15248417004490739,
+            1.1214333904980074
+          ]
+        ]
+      }
+    ],
+    "core_positions": {
+      "Hips": [
+        5.0640664994716644e-09,
+        -5.704350769519806e-09,
+        1.07615327835083
+      ],
+      "Head": [
+        6.984919309616089e-09,
+        0.015775013715028763,
+        1.4261661767959595
+      ],
+      "Left arm": [
+        0.10318931937217712,
+        0.022362779825925827,
+        1.3299691677093506
+      ],
+      "Left elbow": [
+        0.34105557203292847,
+        0.03287884220480919,
+        1.3299692869186401
+      ],
+      "Left wrist": [
+        0.55750972032547,
+        0.03288527950644493,
+        1.3299692869186401
+      ],
+      "Left leg": [
+        0.07815144211053848,
+        0.015616551041603088,
+        0.9206239581108093
+      ],
+      "Left knee": [
+        0.08182869851589203,
+        0.013996776193380356,
+        0.48929768800735474
+      ],
+      "Left ankle": [
+        0.07815158367156982,
+        0.04853921756148338,
+        0.03196600079536438
+      ],
+      "Right wrist": [
+        -0.5574966073036194,
+        0.03248044475913048,
+        1.329970359802246
+      ]
+    }
+  },
+  "outfits": [
+    {
+      "id": 0,
+      "visible_meshes": [
+        "Body KamiwataKrista",
+        "Hair Outfit 00 KamiwataKrista",
+        "Outfit 00 KamiwataKrista"
+      ],
+      "mask": "cf_m_body_AM_00.png"
+    },
+    {
+      "id": 1,
+      "visible_meshes": [
+        "Body KamiwataKrista",
+        "Hair Outfit 01 KamiwataKrista",
+        "Outfit 01 KamiwataKrista"
+      ],
+      "mask": "cf_m_body_AM_01.png"
+    },
+    {
+      "id": 2,
+      "visible_meshes": [
+        "Body KamiwataKrista",
+        "Hair Outfit 02 KamiwataKrista",
+        "Outfit 02 KamiwataKrista"
+      ],
+      "mask": "cf_m_body_AM_02.png"
+    },
+    {
+      "id": 3,
+      "visible_meshes": [
+        "Body KamiwataKrista",
+        "Hair Outfit 03 KamiwataKrista"
+      ],
+      "mask": "cf_m_body_AM_03.png"
+    }
+  ],
+  "display_name": "Mira",
+  "body_mask": "R outer × G inner × original alpha",
+  "basis_synced": true
+}

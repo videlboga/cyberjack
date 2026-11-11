@@ -1,0 +1,11 @@
+{
+  "id": "17e6d0a096d5fb5335940d23",
+  "name": "senasi_isu_00 (1)_kind (5)",
+  "kind": "furniture",
+  "source": "map/scene/bathroom.unity3d",
+  "sourceIdentity": "BuildPlayer-BathRoom:83",
+  "native": "native/17e6d0a096d5fb5335940d23.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

@@ -1,0 +1,12 @@
+{
+  "id": "4bbd398dbd47b520ca0f11df",
+  "name": "move_chair04",
+  "kind": "furniture",
+  "source": "map/scene/gassyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuLobby:144",
+  "native": "native/4bbd398dbd47b520ca0f11df.json.gz",
+  "nodes": 5,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/move_chair04-4bbd398dbd47b520ca0f11df.glb"
+}

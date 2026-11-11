@@ -1,0 +1,1060 @@
+# Reparent outfits, alternate clothing, hairs, hitboxes and remove import empties
+# Unlocks the armature, uynlocks bones and removes bone constraints
+# Restores bone matrices and bone scales using the bone JSON files
+# Apply pose-as-rest (mysteryem.apply_pose_as_rest_pose_plus) to fix transform issues.
+# Adjusts bone heads / tails for legs and arms to make sure IKs don't bend backwards.
+# Create helper bones (Eyesx, Eye Controller) and add UV_WARP modifiers for eye UVs when scene.kkbp.use_rigify is enabled.
+# Finger/thumb edits: rotate/flip/resize finger bones and reset orientation for listed bones.
+# Scale/shorten skirt, face and BP bones; visually connect toe bones when present.
+# Remove empty vertex groups on body.
+# Reorganize bones into named bone-collections (layers) like Torso, Arm.L FK, Fingers, Skirt, Face (MCH), etc., and remove default mmd dummy layers.
+# Give each outfit a bone collection for accesories
+# Setup joint correction bones when Rigify is used: 
+# Rename bones to be more readable
+
+# Survey code was taken from MediaMoots here https://github.com/FlailingFog/KK-Blender-Shader-Pack/issues/29
+# Majority of the joint driver corrections were taken from a blend file by johnbbob_la_petite on the koikatsu discord
+
+import bpy, math
+
+from .. import common as c
+from mathutils import Vector, Matrix, Quaternion
+
+class modify_armature(bpy.types.Operator):
+    bl_idname = "kkbp.modifyarmature"
+    bl_label = bl_idname
+    bl_description = bl_idname
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    center_bones = ['cf_n_height']
+    core_bones = [ 'cf_j_waist02', 'cf_j_siri_L', 'cf_j_siri_R', 'cf_j_shoulder_L', 'cf_j_shoulder_R',
+                   'cf_j_neck', 'cf_j_head', 'cf_d_bust00', 'cf_j_bust01_L', 'cf_j_bust01_R',]
+
+    spine_bones =     ['cf_j_hips', 'cf_j_waist01', 'cf_j_spine01', 'cf_j_spine02', 'cf_j_spine03',]
+    arm_bones_left =  ['cf_j_arm00_L', 'cf_j_forearm01_L', 'cf_j_hand_L',]
+    arm_bones_right = ['cf_j_arm00_R', 'cf_j_forearm01_R', 'cf_j_hand_R',]
+
+    finger_bones = ['cf_j_thumb01_L','cf_j_thumb02_L', 'cf_j_thumb03_L',
+                    'cf_j_ring01_L', 'cf_j_ring02_L', 'cf_j_ring03_L', 
+                    'cf_j_middle01_L','cf_j_middle02_L', 'cf_j_middle03_L', 
+                    'cf_j_little01_L','cf_j_little02_L', 'cf_j_little03_L', 
+                    'cf_j_index01_L','cf_j_index02_L', 'cf_j_index03_L',
+                    
+                    'cf_j_thumb01_R','cf_j_thumb02_R',  'cf_j_thumb03_R',
+                    'cf_j_ring01_R','cf_j_ring02_R', 'cf_j_ring03_R', 
+                    'cf_j_middle01_R','cf_j_middle02_R', 'cf_j_middle03_R', 
+                    'cf_j_little01_R','cf_j_little02_R', 'cf_j_little03_R', 
+                    'cf_j_index01_R', 'cf_j_index02_R', 'cf_j_index03_R',]
+
+    leg_bones_left =  ['cf_j_thigh00_L',  'cf_j_leg01_L', 'cf_j_foot_L', 'cf_j_toes_L', ]
+    leg_bones_right = ['cf_j_thigh00_R', 'cf_j_leg01_R', 'cf_j_foot_R',  'cf_j_toes_R',]
+
+    face_bones = ['cf_J_CheekUp_s_L', 'cf_J_CheekUp_s_R', 'cf_J_CheekLow_s_L', 'cf_J_CheekLow_s_R', 
+                  'cf_J_Chin_s', 'cf_J_ChinTip_Base', 'cf_J_ChinLow', 'cf_J_MouthCavity', 'cf_J_MouthMove', 
+                  'cf_J_Mouth_L', 'cf_J_Mouth_R', 'cf_J_MouthLow', 'cf_J_Mouthup', 'cf_J_EarBase_ry_L', 
+                  'cf_J_EarLow_L', 'cf_J_EarUp_L', 'cf_J_EarBase_ry_R', 'cf_J_EarLow_R', 'cf_J_EarUp_R', 
+                  'cf_J_Eye_rz_L', 'cf_J_CheekUp2_L', 'cf_J_Eye01_s_L', 'cf_J_Eye02_s_L', 'cf_J_Eye03_s_L', 
+                  'cf_J_Eye04_s_L', 'cf_J_Eye05_s_L', 'cf_J_Eye06_s_L', 'cf_J_Eye07_s_L', 'cf_J_Eye08_s_L', 
+                  'cf_J_Eye_rz_R', 'cf_J_CheekUp2_R', 'cf_J_Eye01_s_R', 'cf_J_Eye02_s_R', 'cf_J_Eye03_s_R', 
+                  'cf_J_Eye04_s_R', 'cf_J_Eye05_s_R', 'cf_J_Eye06_s_R', 'cf_J_Eye07_s_R', 'cf_J_Eye08_s_R', 
+                  'cf_J_Mayu_L', 'cf_J_MayuMid_s_L', 'cf_J_MayuTip_s_L', 'cf_J_Mayu_R', 'cf_J_MayuMid_s_R', 
+                  'cf_J_MayuTip_s_R', 'cf_J_NoseBase', 'cf_J_Nose_tip', 'cf_J_NoseBridge_rx']
+    
+    face_bones_mch = ['p_cf_head_bone', 'cf_J_N_FaceRoot', 'cf_J_FaceRoot', 'cf_J_FaceBase', 'cf_J_FaceLow_tz',
+                      'cf_J_FaceLow_sx', 'cf_J_CheekUpBase', 'cf_J_Chin_Base', 'cf_J_MouthBase_ty', 
+                      'cf_J_MouthBase_rx', 'cf_J_FaceUp_ty', 'cf_J_FaceUp_tz', 'cf_J_Eye_tz', 'cf_J_Eye_txdam_L', 
+                      'cf_J_Eye_tx_L', 'cf_J_Eye_txdam_R', 'cf_J_Eye_tx_R', 'cf_J_Mayu_ty', 'cf_J_Mayumoto_L', 
+                      'cf_J_Mayumoto_R', 'cf_J_NoseBase_rx', 'cf_J_Nose_rx', 'cf_J_NoseBridge_ty']
+    
+    rigged_tongue_bones = ['cf_j_tang_01', 'cf_j_tang_02', 'cf_j_tang_03', 'cf_j_tang_04', 'cf_j_tang_05', 
+                           'cf_j_tang_L_05', 'cf_j_tang_R_05', 'cf_j_tang_L_04', 'cf_j_tang_R_04', 
+                           'cf_j_tang_L_03', 'cf_j_tang_R_03', 'cf_J_hairFR_02_01']
+    
+    skirt_bones =  ['cf_j_sk_00_00', 'cf_j_sk_00_01', 'cf_j_sk_00_02', 'cf_j_sk_00_03', 'cf_j_sk_00_04',
+                    'cf_j_sk_01_00', 'cf_j_sk_01_01', 'cf_j_sk_01_02', 'cf_j_sk_01_03', 'cf_j_sk_01_04',
+                    'cf_j_sk_02_00', 'cf_j_sk_02_01', 'cf_j_sk_02_02', 'cf_j_sk_02_03', 'cf_j_sk_02_04',
+                    'cf_j_sk_03_00', 'cf_j_sk_03_01', 'cf_j_sk_03_02', 'cf_j_sk_03_03', 'cf_j_sk_03_04',
+                    'cf_j_sk_04_00', 'cf_j_sk_04_01', 'cf_j_sk_04_02', 'cf_j_sk_04_03', 'cf_j_sk_04_04',
+                    'cf_j_sk_05_00', 'cf_j_sk_05_01', 'cf_j_sk_05_02', 'cf_j_sk_05_03', 'cf_j_sk_05_04',
+                    'cf_j_sk_06_00', 'cf_j_sk_06_01', 'cf_j_sk_06_02', 'cf_j_sk_06_03', 'cf_j_sk_06_04',
+                    'cf_j_sk_07_00', 'cf_j_sk_07_01', 'cf_j_sk_07_02', 'cf_j_sk_07_03', 'cf_j_sk_07_04']
+
+    bp_bones = ['cf_j_kokan', 'cf_j_ana', 'cf_J_Vagina_root', 'cf_J_Vagina_B', 'cf_J_Vagina_F',
+                'cf_J_Vagina_L.001', 'cf_J_Vagina_L.002', 'cf_J_Vagina_L.003', 'cf_J_Vagina_L.004', 'cf_J_Vagina_L.005', 
+                'cf_J_Vagina_R.001', 'cf_J_Vagina_R.002', 'cf_J_Vagina_R.003', 'cf_J_Vagina_R.004', 'cf_J_Vagina_R.005']
+    
+    toe_bones = ['cf_j_toes0_L', 'cf_j_toes1_L', 'cf_j_toes10_L',
+                'cf_j_toes2_L', 'cf_j_toes20_L',
+                'cf_j_toes3_L', 'cf_j_toes30_L', 'cf_j_toes4_L',
+                
+                'cf_j_toes0_R', 'cf_j_toes1_R', 'cf_j_toes10_R',
+                'cf_j_toes2_R', 'cf_j_toes20_R',
+                'cf_j_toes3_R', 'cf_j_toes30_R', 'cf_j_toes4_R']
+
+    bone_rename_dict = {
+        'cf_n_height':'Center',
+        'cf_j_hips':'Hips',
+        'cf_j_waist01':'Pelvis',
+        'cf_j_spine01':'Spine',
+        'cf_j_spine02':'Chest',
+        'cf_j_spine03':'Upper Chest',
+        'cf_j_neck':'Neck',
+        'cf_j_head':'Head',
+        'cf_j_shoulder_L':'Left shoulder',
+        'cf_j_shoulder_R':'Right shoulder',
+        'cf_j_arm00_L':'Left arm',
+        'cf_j_arm00_R':'Right arm',
+        'cf_j_forearm01_L':'Left elbow',
+        'cf_j_forearm01_R':'Right elbow',
+        'cf_j_hand_R':'Right wrist',
+        'cf_j_hand_L':'Left wrist',
+        'cf_J_hitomi_tx_L':'Left Eye',
+        'cf_J_hitomi_tx_R':'Right Eye',
+
+        'cf_j_thumb01_L':'Thumb0_L',
+        'cf_j_thumb02_L':'Thumb1_L',
+        'cf_j_thumb03_L':'Thumb2_L',
+        'cf_j_ring01_L':'RingFinger1_L',
+        'cf_j_ring02_L':'RingFinger2_L',
+        'cf_j_ring03_L':'RingFinger3_L',
+        'cf_j_middle01_L':'MiddleFinger1_L',
+        'cf_j_middle02_L':'MiddleFinger2_L',
+        'cf_j_middle03_L':'MiddleFinger3_L',
+        'cf_j_little01_L':'LittleFinger1_L',
+        'cf_j_little02_L':'LittleFinger2_L',
+        'cf_j_little03_L':'LittleFinger3_L',
+        'cf_j_index01_L':'IndexFinger1_L',
+        'cf_j_index02_L':'IndexFinger2_L',
+        'cf_j_index03_L':'IndexFinger3_L',
+
+        'cf_j_thumb01_R':'Thumb0_R',
+        'cf_j_thumb02_R':'Thumb1_R',
+        'cf_j_thumb03_R':'Thumb2_R',
+        'cf_j_ring01_R':'RingFinger1_R',
+        'cf_j_ring02_R':'RingFinger2_R',
+        'cf_j_ring03_R':'RingFinger3_R',
+        'cf_j_middle01_R':'MiddleFinger1_R',
+        'cf_j_middle02_R':'MiddleFinger2_R',
+        'cf_j_middle03_R':'MiddleFinger3_R',
+        'cf_j_little01_R':'LittleFinger1_R',
+        'cf_j_little02_R':'LittleFinger2_R',
+        'cf_j_little03_R':'LittleFinger3_R',
+        'cf_j_index01_R':'IndexFinger1_R',
+        'cf_j_index02_R':'IndexFinger2_R',
+        'cf_j_index03_R':'IndexFinger3_R',
+
+        'cf_j_thigh00_L':'Left leg',
+        'cf_j_thigh00_R':'Right leg',
+        'cf_j_leg01_L':'Left knee',
+        'cf_j_leg01_R':'Right knee',
+        'cf_j_foot_L':'Left ankle',
+        'cf_j_foot_R':'Right ankle',
+        'cf_j_toes_L':'Left toe',
+        'cf_j_toes_R':'Right toe'
+        }
+
+    def execute(self, context):
+        try:
+            is_kk = c.is_kk()
+
+            self.reparent_all_objects()
+
+            self.remove_bone_locks_and_modifiers()
+            self.scale_armature_bones_down()
+            self.rebuild_bone_data()
+            
+            self.unparent_body_bone()
+            self.delete_non_height_bones()
+            self.bend_bones_for_iks()
+            
+            self.remove_empty_vertex_groups()
+            self.reorganize_armature_layers()
+            self.relayer_accessory_bones()
+            
+            self.create_eye_controller_bone()
+            self.shorten_kokan_bone()
+            self.scale_skirt_and_face_bones()
+            if is_kk:
+                self.modify_finger_bone_orientations()
+                self.create_joint_drivers()
+
+            self.rename_bones_for_clarity()
+
+            return {'FINISHED'}
+        except Exception as error:
+            c.handle_error(self, error)
+            return {"CANCELLED"}
+
+    # %% Main functions        
+    def reparent_all_objects(self):
+        '''Reparents all objects to the main armature'''
+        armature = c.get_armature()
+        outfits = c.get_outfits()
+        body = c.get_body()
+        c.switch(armature, 'object')
+        armature.parent = None
+        armature.name = 'Armature ' + c.get_name()
+
+        #edit armature modifier on body
+        body.modifiers[0].show_in_editmode = True
+        body.modifiers[0].show_on_cage = True
+        body.modifiers[0].show_expanded = False
+        body.modifiers[0].name = 'Armature modifier'
+        
+        #reparent the outfit meshes as well
+        for outfit in outfits:
+            outfit_armature = outfit.parent.name
+            outfit.parent = armature
+            outfit.modifiers[0].object = armature
+            outfit.modifiers[0].show_in_editmode = True
+            outfit.modifiers[0].show_on_cage = True
+            outfit.modifiers[0].show_expanded = False
+            outfit.modifiers[0].name = 'Armature modifier'
+            bpy.data.objects.remove(bpy.data.objects[outfit_armature])
+        #remove the empties
+        empties = c.get_empties()
+        for empty in empties:
+            bpy.data.objects.remove(empty)
+        #reparent the alts and hairs to the main outfit object
+        for alt in c.get_alts():
+            alt.parent = armature
+            alt.modifiers[0].object = armature
+            alt.modifiers[0].show_in_editmode = True
+            alt.modifiers[0].show_on_cage = True
+            alt.modifiers[0].show_expanded = False
+            alt.modifiers[0].name = 'Armature modifier'
+
+        for hair in c.get_hairs():
+            hair.parent = armature
+            hair.modifiers[0].object = armature
+            hair.modifiers[0].show_in_editmode = True
+            hair.modifiers[0].show_on_cage = True
+            hair.modifiers[0].show_expanded = False
+            hair.modifiers[0].name = 'Armature modifier'
+
+        #reparent the tongue, tears and gag eyes if they exist
+        objects = []
+        if c.get_tongue():
+            objects.append(c.get_tongue())
+        if c.get_tears():
+            objects.append(c.get_tears())
+        if c.get_gags():
+            objects.append(c.get_gags())
+        for object in objects:
+            object.parent = body
+        #reparent hitboxes if they exist
+        for hb in c.get_hitboxes():
+            hb.parent = armature
+        c.print_timer('reparent_all_objects')
+    
+    def scale_armature_bones_down(self):
+        '''scale all bone sizes down by a factor of 12. (all armature bones must be sticking upwards)'''
+        c.switch(c.get_armature(), 'edit')
+        for bone in c.get_armature().data.edit_bones:
+            bone.tail.z = bone.head.z + (bone.tail.z - bone.head.z)/12
+        c.print_timer('scale_armature_bones_down')
+
+    def remove_bone_locks_and_modifiers(self):
+        '''Removes mmd bone constraints and bone drivers, unlocks all bones'''
+        #remove all constraints from all bones
+        armature = c.get_armature()
+        c.switch(armature, 'pose')
+        for bone in armature.pose.bones:
+            for constraint in bone.constraints:
+                bone.constraints.remove(constraint)
+        
+        #remove all drivers from all armature bones
+        #animation_data is nonetype if no drivers have been created yet
+        if armature.animation_data:
+            drivers_data = armature.animation_data.drivers
+            for driver in drivers_data:  
+                armature.driver_remove(driver.data_path, -1)
+
+        #unlock the armature and all bones
+        armature.lock_location = [False, False, False]
+        armature.lock_rotation = [False, False, False]
+        armature.lock_scale = [False, False, False]
+        
+        for bone in armature.pose.bones:
+            bone.lock_location = [False, False, False]
+        c.print_timer('remove_bone_locks_and_modifiers')
+
+    def unparent_body_bone(self):
+        '''Unparent the body_bone bone to match the koikatsu armature'''
+        armature = c.get_armature()
+        c.switch(armature, 'EDIT')
+        armature.data.edit_bones['p_cf_body_bone' if c.is_kk() else 'p_cf_sv_body_bone_00(Clone)'].parent = None
+        c.print_timer('unparent_body_bone')
+
+    def delete_non_height_bones(self):
+        '''delete bones not under the cf_n_height bone'''
+        armature = c.get_armature()
+        c.switch(armature, 'EDIT')
+        keep_these = set()
+        def keep_these_children(parent):
+            keep_these.add(parent.name)
+            for child in parent.children:
+                keep_these_children(child)
+        keep_these_children(armature.data.edit_bones['cf_n_height'])
+        #make sure these bones aren't deleted
+        keep_these.add('cf_j_root')
+        keep_these.add('p_cf_body_bone' if c.is_kk() else 'p_cf_sv_body_bone_00(Clone)')
+        keep_these.add('cf_n_height')
+        for bone in armature.data.edit_bones:
+            if bone.name not in keep_these:
+                armature.data.edit_bones.remove(bone)
+        c.print_timer('delete_non_height_bones')
+
+    def modify_finger_bone_orientations(self):
+        '''Reorient the finger bones to match the in game koikatsu armature'''
+        armature = c.get_armature()
+        c.switch(armature, 'edit')
+        height_adjust = Vector((0,0,0.1))
+        
+        #all finger bones need to be rotated a specific direction
+        def rotate_thumb(bone):
+            bpy.ops.armature.select_all(action='DESELECT')
+            armature.data.edit_bones[bone].select = True
+            armature.data.edit_bones[bone].select_head = True
+            armature.data.edit_bones[bone].select_tail = True
+            parent = armature.data.edit_bones[bone].parent
+            armature.data.edit_bones[bone].parent = None
+
+            #right thumbs face towards hand center
+            #left thumbs face away from hand center
+            angle = -math.pi/2
+            s = math.sin(angle)
+            c = math.cos(angle)
+
+            # translate point to origin:
+            armature.data.edit_bones[bone].tail.x -= armature.data.edit_bones[bone].head.x
+            armature.data.edit_bones[bone].tail.y -= armature.data.edit_bones[bone].head.y
+
+            # rotate point around origin
+            xnew = armature.data.edit_bones[bone].tail.x * c - armature.data.edit_bones[bone].tail.y * s
+            ynew = armature.data.edit_bones[bone].tail.x * s + armature.data.edit_bones[bone].tail.y * c
+
+            # translate point back to original position:
+            armature.data.edit_bones[bone].tail.x = xnew + armature.data.edit_bones[bone].head.x
+            armature.data.edit_bones[bone].tail.y = ynew + armature.data.edit_bones[bone].head.y
+            armature.data.edit_bones[bone].roll = 0
+            armature.data.edit_bones[bone].parent = parent
+            
+        rotate_thumb('cf_j_thumb03_L')
+        rotate_thumb('cf_j_thumb02_L')
+        rotate_thumb('cf_j_thumb01_L')
+        rotate_thumb('cf_j_thumb03_R')
+        rotate_thumb('cf_j_thumb02_R')
+        rotate_thumb('cf_j_thumb01_R')
+        
+        height_adjust = Vector((0,0,0.05))
+        def flip_finger(bone):
+            parent = armature.data.edit_bones[bone].parent
+            armature.data.edit_bones[bone].parent = None
+            armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head - height_adjust
+            armature.data.edit_bones[bone].parent = parent
+        
+        finger_list = (
+        'cf_j_index03_R', 'cf_j_index02_R', 'cf_j_index01_R',
+        'cf_j_middle03_R', 'cf_j_middle02_R', 'cf_j_middle01_R',
+        'cf_j_ring03_R', 'cf_j_ring02_R', 'cf_j_ring01_R',
+        'cf_j_little03_R', 'cf_j_little02_R', 'cf_j_little01_R'
+        )
+        
+        for finger in finger_list:
+            flip_finger(finger)
+        
+            height_adjust = Vector((0,0,0.05))
+        def resize_finger(bone):
+            parent = armature.data.edit_bones[bone].parent
+            armature.data.edit_bones[bone].parent = None
+            armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head + height_adjust
+            armature.data.edit_bones[bone].parent = parent
+        
+        finger_list = (
+        'cf_j_index03_L', 'cf_j_index02_L', 'cf_j_index01_L',
+        'cf_j_middle03_L', 'cf_j_middle02_L', 'cf_j_middle01_L',
+        'cf_j_ring03_L', 'cf_j_ring02_L', 'cf_j_ring01_L',
+        'cf_j_little03_L', 'cf_j_little02_L', 'cf_j_little01_L'
+        )
+        
+        for finger in finger_list:
+            resize_finger(finger)
+        
+        #reset the orientation of certain bones
+        height_adjust = Vector((0,0,0.1))
+        def reorient(bone):
+            armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head + height_adjust
+
+        reorient_list = [
+            'cf_j_thigh00_R', 'cf_j_thigh00_L',
+            'cf_j_leg01_R', 'cf_j_leg01_L',
+            'cf_j_leg03_R', 'cf_j_leg03_L',
+            'cf_j_foot_R', 'cf_j_foot_L',
+            'cf_d_arm01_R', 'cf_d_arm01_L',
+            'cf_d_shoulder02_R', 'cf_d_shoulder02_L',]
+
+        for bone in reorient_list:
+            reorient(bone)
+        c.print_timer('modify_finger_bone_orientations')
+
+    def rebuild_bone_data(self):
+        edit_bone_info = {}
+        prefix = c.get_prefix()
+        for _bone in c.json_file_manager.get_json_file(f"{prefix}_EditBoneInfo.json"):
+            world_transform = _bone['worldTransform']
+            edit_bone_info[_bone['boneName']] = {
+                'worldMatrix': Matrix([
+                    [world_transform[0], world_transform[1], world_transform[2], world_transform[3]],
+                    [world_transform[4], world_transform[5], world_transform[6], world_transform[7]],
+                    [world_transform[8], world_transform[9], world_transform[10], world_transform[11]],
+                    [world_transform[12], world_transform[13], world_transform[14], world_transform[15]],
+                ]),
+            }
+
+        # Don't set the roll data for these bones because they are rotation sensitive bones
+        ignore_bones = ['cf_j_leg01_R', 'cf_j_foot_R', 'cf_j_leg01_L', 'cf_j_foot_L', 'cf_j_forearm01_R', 
+            'cf_j_hand_R', 'cf_j_forearm01_L', 'cf_j_hand_L', 'cf_pv_hand_R', 'cf_j_hand_R', 
+            'cf_pv_hand_L', 'cf_j_hand_L', 'cf_j_foot_R', 'cf_j_toes_R', 'cf_j_foot_L', 'cf_j_toes_L', 
+            'Toes4_L', 'Toes4_L', 'Toes0_L', 'Toes0_L', 'Toes30_L', 'Toes30_L', 'Toes20_L', 'Toes20_L', 
+            'Toes10_L', 'Toes10_L', 'Toes4_R', 'Toes4_R', 'Toes0_R', 'Toes0_R', 'Toes30_R', 'Toes30_R', 
+            'Toes20_R', 'Toes20_R', 'Toes10_R', 'Toes10_R', 'Toes30_L', 'Toes30_L', 'Toes10_L', 'Toes30_L', 
+            'Toes30_L', 'Toes30_L', 'Toes20_L', 'Toes20_L', 'Toes10_L', 'Toes10_L', 'Toes30_R', 'Toes30_R', 
+            'Toes10_R', 'Toes30_R', 'Toes30_R', 'Toes30_R', 'Toes20_R', 'Toes20_R', 'Toes10_R', 'Toes10_R', 
+            'cf_j_kokan', 'cf_pv_root_upper', 'cf_j_spine01', 'cf_pv_elbo_R', 'cf_pv_root_upper', 'cf_pv_elbo_L', 
+            'cf_pv_root_upper', 'cf_j_forearm01_R', 'cf_pv_hand_R', 'cf_pv_elbo_R', 'cf_j_forearm01_L', 'cf_pv_hand_L', 
+            'cf_pv_elbo_L', 'cf_j_leg01_R', 'cf_pv_foot_R', 'cf_pv_knee_R', 'cf_j_leg01_L', 'cf_pv_foot_L', 'cf_pv_knee_L', 
+            'cf_pv_foot_R', 'cf_j_leg01_R', 'cf_j_toes_R', 'cf_j_foot_R', 'cf_pv_foot_L', 'cf_j_leg01_L', 'cf_j_toes_L', 
+            'cf_j_foot_L', 'cf_d_shoulder02_L', 'cf_j_arm00_Lcf_d_arm01_L', 'cf_j_arm00_L', 'cf_d_arm02_L', 'cf_j_arm00_L', 
+            'cf_d_arm03_L', 'cf_j_arm00_L', 'cf_d_forearm02_L', 'cf_j_hand_L', 'cf_d_wrist_L', 'cf_j_hand_L', 'cf_d_kneeF_L', 
+            'cf_j_leg01_L', 'cf_d_siri_L', 'cf_j_thigh00_L', 'cf_d_thigh02_L', 'cf_j_thigh00_L', 'cf_d_thigh03_L', 
+            'cf_j_thigh00_L', 'cf_d_leg02_L', 'cf_j_leg01_L', 'cf_d_leg03_L', 'cf_j_leg01_L', 'cf_d_shoulder02_R', 
+            'cf_j_arm00_R', 'cf_d_arm01_R', 'cf_j_arm00_R', 'cf_d_arm02_R', 'cf_j_arm00_R', 'cf_d_arm03_R', 'cf_j_arm00_R', 
+            'cf_d_forearm02_R', 'cf_j_hand_R', 'cf_d_wrist_R', 'cf_j_hand_R', 'cf_d_kneeF_R', 'cf_j_leg01_R', 'cf_d_siri_R', 
+            'cf_j_thigh00_R', 'cf_d_thigh02_R', 'cf_j_thigh00_R', 'cf_d_thigh03_R', 'cf_j_thigh00_R', 'cf_d_leg02_R', 
+            'cf_j_leg01_R', 'cf_d_leg03_R', 'cf_j_leg01_R', 'cf_s_waist02', 'cf_j_thigh00_L', 'cf_j_thigh00_R', 'cf_s_leg_L', 
+            'cf_s_leg_R', 'cf_s_kneeB_R', 'cf_s_kneeB_L', 'cf_d_kneeF_R', 'cf_d_kneeF_L', 'cf_d_siri_R', 'cf_d_siri_L', 
+            'cf_d_hand_R', 'cf_d_hand_L', 'cf_s_elboback_R', 'cf_s_elbo_R', 'cf_s_elboback_L', 'cf_s_elbo_L', 'cf_d_shoulder02_R', 
+            'cf_d_shoulder02_L', 'cf_s_leg_R', 'cf_s_leg_L', 'cf_s_waist02', 'cf_j_leg03_R', 'cf_j_leg03_L', 'cf_n_height', 
+            'cf_j_shoulder_L', 'cf_j_shoulder_R', 'cf_j_neck', 'cf_j_head', 'cf_j_waist01', 'cf_j_spine01', 'cf_j_spine02', 
+            'cf_j_spine03', 'cf_j_hips', 'cf_hit_head', 'cf_j_waist02']
+        ignore_bones.extend(self.finger_bones)
+
+        # Set roll data
+        c.switch(c.get_armature(), 'Edit')
+        for bone_name, bone_info in edit_bone_info.items():
+            if bone := c.get_armature().data.edit_bones.get(bone_name):
+                if bone.name not in ignore_bones:
+                    bone.matrix = bone_info['worldMatrix'].copy()
+
+        #if the bone is in the ignore list, set the tail of the bone to be above the head of the bone
+	    #or the rest of the IK / driver scripts will break
+        for bone_name in ignore_bones:
+            if bone := c.get_armature().data.edit_bones.get(bone_name):
+                bone.tail.z = bone.head.z + 0.1
+        
+        #If the user wanted the rest of the bones (other than the core bones) to be pointing up, do that now
+        if bpy.context.scene.kkbp.unify_bone_orientation:
+            c.kklog('Unifying bone orientations...')
+            #bones in the ignore list will maintain their orientations
+            ignore_bones.extend(
+                self.spine_bones + self.arm_bones_left + self.arm_bones_right + self.leg_bones_left + 
+                self.leg_bones_right + self.finger_bones + self.skirt_bones + self.bp_bones +
+                self.face_bones + self.face_bones_mch + self.core_bones + self.center_bones +
+                ['cf_j_bust01_L', 'cf_j_bust02_L', 'cf_j_bust03_L', 'cf_j_bnip02_L',
+                    'cf_j_bust01_R', 'cf_j_bust02_R', 'cf_j_bust03_R', 'cf_j_bnip02_R'])
+            for bone in c.get_armature().data.edit_bones:
+                if bone.name not in ignore_bones:
+                    bone.tail = bone.head + Vector((0, 0, 0.1))
+                    bone.roll = 0
+
+        c.switch(c.get_armature(), 'OBJECT')
+        c.print_timer('Rebuild bone data')
+    
+    def bend_bones_for_iks(self):
+        '''slightly modify the armature to support IKs'''
+        
+        armature = c.get_armature()
+        c.switch(armature, 'edit')
+        armature.data.edit_bones['cf_n_height'].parent = None
+        armature.data.edit_bones['cf_j_root'].parent = armature.data.edit_bones['cf_pv_root']
+        armature.data.edit_bones['p_cf_body_bone' if c.is_kk() else 'p_cf_sv_body_bone_00(Clone)'].parent = armature.data.edit_bones['cf_pv_root']
+        #relocate the tail of some bones to make IKs easier
+        def relocate_tail(bone1, bone2, direction):
+            if direction == 'leg':
+                armature.data.edit_bones[bone1].tail.z = armature.data.edit_bones[bone2].head.z
+                armature.data.edit_bones[bone1].roll = 0
+                #move the bone forward a bit or the ik bones might not bend correctly
+                armature.data.edit_bones[bone1].head.y += -0.01
+            elif direction == 'arm':
+                armature.data.edit_bones[bone1].tail.x = armature.data.edit_bones[bone2].head.x
+                armature.data.edit_bones[bone1].tail.z = armature.data.edit_bones[bone2].head.z
+                armature.data.edit_bones[bone1].roll = -math.pi/2
+            elif direction == 'hand':
+                armature.data.edit_bones[bone1].tail = armature.data.edit_bones[bone2].tail
+                #make hand bone shorter so you can easily click the hand and the pv bone
+                armature.data.edit_bones[bone1].tail.z += .01 
+                armature.data.edit_bones[bone1].head = armature.data.edit_bones[bone2].head
+            else:
+                armature.data.edit_bones[bone1].tail.y = armature.data.edit_bones[bone2].head.y
+                armature.data.edit_bones[bone1].tail.z = armature.data.edit_bones[bone2].head.z
+                armature.data.edit_bones[bone1].roll = 0
+        relocate_tail('cf_j_leg01_R', 'cf_j_foot_R', 'leg')
+        relocate_tail('cf_j_leg01_L', 'cf_j_foot_L', 'leg')
+        relocate_tail('cf_j_forearm01_R', 'cf_j_hand_R', 'arm')
+        relocate_tail('cf_j_forearm01_L', 'cf_j_hand_L', 'arm')
+        relocate_tail('cf_pv_hand_R', 'cf_j_hand_R', 'hand')
+        relocate_tail('cf_pv_hand_L', 'cf_j_hand_L', 'hand')
+        relocate_tail('cf_j_foot_R', 'cf_j_toes_R', 'foot')
+        relocate_tail('cf_j_foot_L', 'cf_j_toes_L', 'foot')
+        c.print_timer('bend_bones_for_iks')
+
+    def remove_empty_vertex_groups(self):
+        '''check body for groups with no vertexes. Delete if the group is not a bone on the armature'''
+        body = c.get_body()
+        vertexWeightMap = self.survey_vertexes(body)
+        bones_in_armature = [bone.name for bone in c.get_armature().data.bones]
+        for group in vertexWeightMap:
+            if group not in bones_in_armature and vertexWeightMap[group] == False and 'cf_J_Vagina' not in group:
+                body.vertex_groups.remove(body.vertex_groups[group])
+        c.print_timer('remove_empty_vertex_groups')
+
+    def reorganize_armature_layers(self):
+        '''Moves all bones to different armature layers'''
+        armature = c.get_armature()
+        c.switch(armature, 'object')
+        
+        #throw all bones to the junk layer for now
+        for bone in armature.data.bones:
+            self.set_armature_layer(bone.name, layer_name = 'Junk')
+        #extract charamaker bones to their own layer
+        for bone in [bones for bones in armature.data.bones if 'cf_s_' in bones.name]:
+            self.set_armature_layer(bone.name, layer_name = 'Charamaker bones')
+        #extract deform bones to their own layer
+        for bone in [bones for bones in armature.data.bones if 'cf_d_' in bones.name]:
+            self.set_armature_layer(bone.name, layer_name = 'Deform bones')
+        #extract core bones
+        for bone in self.core_bones:
+            self.set_armature_layer(bone, layer_name = 'Torso')
+        #extract more core bones
+        for bone in self.spine_bones:
+            self.set_armature_layer(bone, layer_name = 'Torso')
+        #extract left arm bones 
+        for bone in self.arm_bones_left:
+            self.set_armature_layer(bone, layer_name = 'Arm.L FK')
+        #xtract left leg bones
+        for bone in self.leg_bones_left:
+            self.set_armature_layer(bone, layer_name = 'Leg.L FK')
+        #extract right arm bones
+        for bone in self.arm_bones_right:
+            self.set_armature_layer(bone, layer_name = 'Arm.R FK')
+        #extract right leg bones
+        for bone in self.leg_bones_right:
+            self.set_armature_layer(bone, layer_name = 'Leg.R FK')
+        #extract fingers
+        for bone in self.finger_bones:
+            self.set_armature_layer(bone, layer_name = 'Fingers')
+        #extract skirt bones
+        for bone in self.skirt_bones:
+            self.set_armature_layer(bone, layer_name = 'Skirt')
+        #extract face bones
+        for bone in self.face_bones:
+            self.set_armature_layer(bone, layer_name = 'Face')
+        #extract face bone mch
+        for bone in self.face_bones_mch:
+            self.set_armature_layer(bone, layer_name = 'Face (MCH)')
+        #extract rigged tongue bones
+        for bone in self.rigged_tongue_bones:
+            self.set_armature_layer(bone, layer_name = 'Rigged tongue')
+        
+        #extract the better penetration bones
+        for bone in self.bp_bones:
+            self.set_armature_layer(bone, layer_name = 'NSFW')
+            #rename the bones so you can mirror them over the x axis in pose mode
+            if 'Vagina_L_' in bone or 'Vagina_R_' in bone:
+                armature.data.bones[bone].name = 'Vagina' + bone[8:] + '_' + bone[7]
+        #extract the toe bones
+        for bone in self.toe_bones:
+            self.set_armature_layer(bone, layer_name = 'Toes')
+        
+        # remove the default mmd bone layers
+        armature.data.collections.remove(armature.data.collections['mmd_dummy'])
+        armature.data.collections.remove(armature.data.collections['mmd_shadow'])
+
+        armature.data.display_type = 'STICK'
+        c.switch(armature, 'object')
+        c.print_timer('reorganize_armature_layers')
+
+    def relayer_accessory_bones(self):
+        '''Moves the accessory bones that have weight to their own armature layers'''
+        armature = c.get_armature()
+        c.switch(armature, 'object')
+        #go through each outfit and move ALL accessory bones to their own armature layers.
+        #each outfit gets it's own layer
+        dont_move_these = [
+                'cf_pv', 'Eyesx',
+                'cf_J_hitomi_tx_', 'cf_J_FaceRoot', 'cf_J_FaceUp_t',
+                'n_cam', 'EyesLookTar', 'N_move', 'a_n_', 'cf_hit',
+                'cf_j_bnip02', 'cf_j_kokan', 'cf_j_ana']
+        for bone in [bone for bone in armature.data.bones if bone.collections.get('Junk')]:
+            for this_prefix in dont_move_these:
+                if bone.name.startswith(this_prefix):
+                    bone['useless'] = True
+                    break
+        
+        outfits = c.get_outfits()
+        outfits.extend(c.get_alts())
+        outfits.extend(c.get_hairs())
+        for outfit_or_hair in outfits:
+            # Find empty vertex groups
+            vertexWeightMap = self.survey_vertexes(outfit_or_hair)
+            #add outfit id to all accessory bones used by that outfit in an array
+            for bone in [bone for bone in armature.data.bones if bone.collections.get('Junk')]:
+                if vertexWeightMap.get(bone.name):
+                    try:
+                        outfit_id_array = bone['id'].to_list()
+                        outfit_id_array.append(outfit_or_hair['id'])
+                        bone['id'] = outfit_id_array
+                        bone.parent['id'] = bone.get('id')
+                        if bone.children:
+                            bone.children[0]['id'] = bone.get('id')
+                    except:
+                        bone['id'] = [outfit_or_hair['id']]
+                        bone.parent['id'] = bone.get('id')
+                        if bone.children:
+                            bone.children[0]['id'] = bone.get('id')
+        
+        #move accessory bones to their own armature layer
+        for bone in [bone for bone in armature.data.bones if bone.get('id') and not bone.get('useless')]:
+            self.set_armature_layer(bone.name, layer_name = 'Hair/Accessories')# + str(bone.get('id')[0]))
+        #reset the bone to be vertical because a lot of these accessory bones are sideways
+        c.switch(armature, 'edit')
+        for bone in [bone.name for bone in armature.data.bones if bone.get('id') and not bone.get('useless')]:
+            armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head + Vector((0, 0, 0.05))
+        c.switch(armature, 'object')
+        c.print_timer('relayer_accessory_bones')
+
+    def visually_connect_bones(self):
+        '''make sure certain bones are visually connected'''
+        armature = c.get_armature()
+        c.switch(armature, 'edit')
+        # Make sure all toe bones are visually correct if using the better penetration armature 
+        try:
+            armature.data.edit_bones['Toes4_L'].tail.y = armature.data.edit_bones['Toes30_L'].head.y
+            armature.data.edit_bones['Toes4_L'].tail.z = armature.data.edit_bones['Toes30_L'].head.z*.8
+            armature.data.edit_bones['Toes0_L'].tail.y = armature.data.edit_bones['Toes10_L'].head.y
+            armature.data.edit_bones['Toes0_L'].tail.z = armature.data.edit_bones['Toes30_L'].head.z*.9
+            
+            armature.data.edit_bones['Toes30_L'].tail.z = armature.data.edit_bones['Toes30_L'].head.z*0.8
+            armature.data.edit_bones['Toes30_L'].tail.y = armature.data.edit_bones['Toes30_L'].head.y*1.2
+            armature.data.edit_bones['Toes20_L'].tail.z = armature.data.edit_bones['Toes20_L'].head.z*0.8
+            armature.data.edit_bones['Toes20_L'].tail.y = armature.data.edit_bones['Toes20_L'].head.y*1.2
+            armature.data.edit_bones['Toes10_L'].tail.z = armature.data.edit_bones['Toes10_L'].head.z*0.8
+            armature.data.edit_bones['Toes10_L'].tail.y = armature.data.edit_bones['Toes10_L'].head.y*1.2
+            
+            armature.data.edit_bones['Toes4_R'].tail.y = armature.data.edit_bones['Toes30_R'].head.y
+            armature.data.edit_bones['Toes4_R'].tail.z = armature.data.edit_bones['Toes30_R'].head.z*.8
+            armature.data.edit_bones['Toes0_R'].tail.y = armature.data.edit_bones['Toes10_R'].head.y
+            armature.data.edit_bones['Toes0_R'].tail.z = armature.data.edit_bones['Toes30_R'].head.z*.9
+            
+            armature.data.edit_bones['Toes30_R'].tail.z = armature.data.edit_bones['Toes30_R'].head.z*0.8
+            armature.data.edit_bones['Toes30_R'].tail.y = armature.data.edit_bones['Toes30_R'].head.y*1.2
+            armature.data.edit_bones['Toes20_R'].tail.z = armature.data.edit_bones['Toes20_R'].head.z*0.8
+            armature.data.edit_bones['Toes20_R'].tail.y = armature.data.edit_bones['Toes20_R'].head.y*1.2
+            armature.data.edit_bones['Toes10_R'].tail.z = armature.data.edit_bones['Toes10_R'].head.z*0.8
+            armature.data.edit_bones['Toes10_R'].tail.y = armature.data.edit_bones['Toes10_R'].head.y*1.2
+        except:
+            #this character isn't using the BP/toe control armature
+            c.kklog('No toe bones detected. Skipping...', type = 'warn')
+            pass
+        c.switch(armature, 'object')
+        c.print_timer('visually_connect_bones')
+
+    def shorten_kokan_bone(self):
+        '''make the kokan bone shorter if it's on the armature'''
+        armature = c.get_armature()
+        c.switch(armature, 'edit')
+        if armature.data.edit_bones.get('cf_j_kokan'):
+            armature.data.edit_bones['cf_j_kokan'].tail.z = armature.data.edit_bones['cf_s_waist02'].head.z
+        c.print_timer('shorten_kokan_bone')
+
+    def scale_skirt_and_face_bones(self):
+        '''scales skirt bones and face bones down. Scales BP bones down if exists'''
+        
+        armature = c.get_armature()
+        c.switch(armature, 'edit')
+
+        def shorten_bone(bone):
+            if armature.data.edit_bones.get(bone):
+                armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head + Vector((0, 0, 0.01))
+        
+        def connect_bone(root, chain):
+            bone = 'cf_j_sk_0'+str(root)+'_0'+str(chain)
+            child_bone = 'cf_j_sk_0'+str(root)+'_0'+str(chain+1)
+            #first connect tail to child bone to keep head in place during connection
+            if armature.data.edit_bones.get(bone) and armature.data.edit_bones.get(child_bone) and chain <= 4:
+                armature.data.edit_bones[bone].tail = armature.data.edit_bones[child_bone].head
+                #then connect child head to parent tail (both are at the same position, so head doesn't move)
+                armature.data.edit_bones[child_bone].use_connect = True
+            elif armature.data.edit_bones.get(bone) and chain == 5:
+                armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head - Vector((0, 0, 0.05))
+
+        skirtchain = [0,1,2,3,4,5,6,7]
+        skirtchild = [0,1,2,3,4]
+        for root in skirtchain:
+            for chain in skirtchild:
+                connect_bone(root, chain)
+        
+        #scale eye bones, mouth bones, eyebrow bones        
+        for bone in self.face_bones + self.face_bones_mch:
+            shorten_bone(bone)
+        
+        #move eye bone location
+        if bpy.context.scene.kkbp.use_rigify:
+            for eyebone in ['Eyesx', 'Eye Controller']:
+                if armature.data.edit_bones.get('cf_J_NoseBridge_rx'):
+                    armature.data.edit_bones[eyebone].head.y = armature.data.edit_bones['cf_J_NoseBridge_rx'].head.y
+                    armature.data.edit_bones[eyebone].tail.y = armature.data.edit_bones['cf_J_NoseBridge_rx'].head.y*1.5
+                    armature.data.edit_bones[eyebone].tail.z = armature.data.edit_bones['cf_J_NoseBridge_rx'].head.z
+                    armature.data.edit_bones[eyebone].head.z = armature.data.edit_bones['cf_J_NoseBridge_rx'].head.z
+                else:
+                    armature.data.edit_bones[eyebone].head = armature.data.edit_bones['cf_j_head'].head
+                    armature.data.edit_bones[eyebone].tail = armature.data.edit_bones[eyebone].head + Vector((0,1,0))
+
+        #scale BP bones if they exist
+        for bone in self.bp_bones:
+            if armature.data.edit_bones.get(bone):
+                armature.data.edit_bones[bone].tail = armature.data.edit_bones[bone].head + Vector((0,0,0.02))
+        c.print_timer('scale_skirt_and_face_bones')
+
+    def create_eye_controller_bone(self):
+        if not bpy.context.scene.kkbp.use_rigify:
+            return
+
+        armature = c.get_armature()
+        c.switch(armature, 'edit')       
+        new_bone = armature.data.edit_bones.new('Eyesx')
+        new_bone.head = armature.data.edit_bones['cf_hit_head'].tail
+        new_bone.head.y = new_bone.head.y + 0.05
+        new_bone.tail = armature.data.edit_bones['cf_J_Mayu_R'].tail
+        new_bone.tail.x = new_bone.head.x
+        new_bone.tail.y = new_bone.head.y
+        new_bone.parent = armature.data.edit_bones['cf_j_head']
+        c.switch(armature, 'object')
+        self.set_armature_layer('Eyesx', 'Deform bones')
+    
+        #roll the eye bone. create a copy and name it eye controller
+        c.switch(armature, 'edit')
+        armature_data = armature.data
+        armature_data.edit_bones['Eyesx'].roll = -math.pi/2
+        copy = self.new_bone('Eye Controller')
+        copy.head = armature_data.edit_bones['Eyesx'].head/2
+        copy.tail = armature_data.edit_bones['Eyesx'].tail/2
+        copy.matrix = armature_data.edit_bones['Eyesx'].matrix
+        copy.parent = armature_data.edit_bones['cf_j_head']
+        armature_data.edit_bones['Eye Controller'].roll = -math.pi/2
+
+        c.switch(armature, 'pose')
+        #Lock y location at zero
+        armature.pose.bones['Eye Controller'].lock_location[1] = True
+        #Hide the original Eyesx bone
+        armature.data.bones['Eyesx'].hide = True
+        self.set_armature_layer('Eye Controller', 'Torso')
+        c.switch(armature, 'object')
+
+        #Create a UV warp modifier for the eyes. Controlled by the Eye controller bone
+        def eyeUV(modifiername, eyevertexgroup):
+            mod = c.get_body().modifiers.new(modifiername, 'UV_WARP')
+            mod.axis_u = 'Z'
+            mod.axis_v = 'X'
+            mod.object_from = armature
+            mod.bone_from = armature.data.bones['Eyesx'].name
+            mod.object_to = armature
+            mod.bone_to = armature.data.bones['Eye Controller'].name
+            mod.vertex_group = eyevertexgroup
+            mod.uv_layer = 'UVMap'
+            mod.show_expanded = False
+
+        eyeUV("Left Eye UV warp",  'Left Eye')
+        eyeUV("Right Eye UV warp", 'Right Eye')
+        c.print_timer('create_eye_controller_bone')
+
+    def create_joint_drivers(self):
+        '''There are several joint corrections that use the cf_d_ and cf_s_ bones on the armature. This function attempts to replicate them using blender drivers and bone constraints'''
+        if not bpy.context.scene.kkbp.use_rigify:
+            return
+        
+        armature = c.get_armature()
+        c.switch(armature, 'pose')
+        #generic function to set a copy rotation modifier
+        def set_copy(bone, bonetarget, influence, axis = 'all', mix = 'replace', space = 'LOCAL'):
+            constraint = armature.pose.bones[bone].constraints.new("COPY_ROTATION")
+            constraint.target = armature
+            constraint.subtarget = bonetarget
+            constraint.influence = influence
+            constraint.target_space = space
+            constraint.owner_space = space
+
+            if axis == 'X':
+                constraint.use_y = False
+                constraint.use_z = False
+            
+            elif axis == 'Y':
+                constraint.use_x = False
+                constraint.use_z = False
+            
+            elif axis == 'antiX':
+                constraint.use_y = False
+                constraint.use_z = False
+                constraint.invert_x = True
+            
+            elif axis == 'Z':
+                constraint.use_x = False
+                constraint.use_y = False
+
+            if mix == 'add':
+                constraint.mix_mode = 'ADD'
+
+        #setup most of the drivers with this
+        set_copy('cf_d_shoulder02_L', 'cf_j_arm00_L', 0.5)
+        set_copy('cf_d_arm01_L', 'cf_j_arm00_L', 0.75, axis = 'X')
+        set_copy('cf_d_arm02_L', 'cf_j_arm00_L', 0.5, axis = 'X')
+        set_copy('cf_d_arm03_L', 'cf_j_arm00_L', 0.25, axis = 'X')
+        set_copy('cf_d_forearm02_L', 'cf_j_hand_L', 0.33, axis = 'X')
+        set_copy('cf_d_wrist_L', 'cf_j_hand_L', 0.33, axis = 'X', )
+        set_copy('cf_d_kneeF_L', 'cf_j_leg01_L', 0.5, axis = 'antiX', mix = 'add')
+        set_copy('cf_d_siri_L', 'cf_j_thigh00_L', 0.33)
+        set_copy('cf_d_thigh02_L', 'cf_j_thigh00_L', 0.25, axis='Y')
+        set_copy('cf_d_thigh03_L', 'cf_j_thigh00_L', 0.25, axis='Y')
+        set_copy('cf_d_leg02_L', 'cf_j_leg01_L', 0.33, axis='Y')
+        set_copy('cf_d_leg03_L', 'cf_j_leg01_L', 0.66, axis='Y')
+
+        set_copy('cf_d_shoulder02_R', 'cf_j_arm00_R', 0.5)
+        set_copy('cf_d_arm01_R', 'cf_j_arm00_R', 0.75, axis = 'X')
+        set_copy('cf_d_arm02_R', 'cf_j_arm00_R', 0.5, axis = 'X')
+        set_copy('cf_d_arm03_R', 'cf_j_arm00_R', 0.25, axis = 'X')
+        set_copy('cf_d_forearm02_R', 'cf_j_hand_R', 0.33, axis = 'X')
+        set_copy('cf_d_wrist_R', 'cf_j_hand_R', 0.33, axis = 'X')
+        set_copy('cf_d_kneeF_R', 'cf_j_leg01_R', 0.5, axis = 'antiX', mix = 'add')
+        set_copy('cf_d_siri_R', 'cf_j_thigh00_R', 0.33)
+        set_copy('cf_d_thigh02_R', 'cf_j_thigh00_R', 0.25, axis='Y')
+        set_copy('cf_d_thigh03_R', 'cf_j_thigh00_R', 0.25, axis='Y')
+        set_copy('cf_d_leg02_R', 'cf_j_leg01_R', 0.33, axis='Y')
+        set_copy('cf_d_leg03_R', 'cf_j_leg01_R', 0.66, axis='Y')
+
+        #move the waist some if only one leg is rotated
+        set_copy('cf_s_waist02', 'cf_j_thigh00_L', 0.1, mix = 'add')
+        set_copy('cf_s_waist02', 'cf_j_thigh00_R', 0.1, mix = 'add')
+        #set_copy('cf_s_waist02', 'cf_j_thigh00_R', 0.1, mix = 'add')
+        #set_copy('cf_s_waist02', 'cf_j_thigh00_L', 0.1, mix = 'add')
+
+        set_copy('cf_s_waist02', 'cf_j_waist02', 0.5, axis = 'antiX')
+
+        #this rotation helps when doing a split
+        set_copy('cf_s_leg_L', 'cf_j_thigh00_L', .9, axis = 'Z', mix = 'add')
+        set_copy('cf_s_leg_R', 'cf_j_thigh00_R', .9, axis = 'Z', mix = 'add')
+
+        #generic function for creating a driver
+        def setDriver (bone, drivertype, drivertypeselect, drivertarget, drivertt, drivermult, expresstype = 'move'):
+
+            #add driver to first component
+            #drivertype is the kind of driver you want to be applied to the bone and can be location/rotation
+            #drivertypeselect is the component of the bone you want the driver to be applied to
+            # for location it's (0 is x component, y is 1, z is 2)
+            # for rotation it's (0 is w, 1 is x, etc)
+            # for scale it's (0 is x, 1 is y, 2 is z)
+            driver = armature.pose.bones[bone].driver_add(drivertype, drivertypeselect)
+
+            #add driver variable
+            vari = driver.driver.variables.new()
+            vari.name = 'var'
+            vari.type = 'TRANSFORMS'
+
+            #set the target and subtarget
+            target = vari.targets[0]
+            target.id = armature
+            target.bone_target = armature.pose.bones[drivertarget].name
+
+            #set the transforms for the target. this can be rotation or location 
+            target.transform_type = drivertt
+
+            #set the transform space. can be world space too
+            target.transform_space = 'LOCAL_SPACE'
+            target.rotation_mode = 'QUATERNION' if expresstype in ['scale', 'quat'] else 'AUTO'
+
+            #use the distance to the target bone's parent to make results consistent for different sized bones
+            targetbonelength = str(round((armature.pose.bones[drivertarget].head - armature.pose.bones[drivertarget].parent.head).length,3))
+            
+            #driver expression is the rotation value of the target bone multiplied by a percentage of the driver target bone's length
+            if expresstype in ['move', 'quat']:
+                driver.driver.expression = vari.name + '*' + targetbonelength + '*' + drivermult 
+            
+            #move but only during positive rotations
+            elif expresstype == 'movePos':
+                driver.driver.expression = vari.name + '*' + targetbonelength + '*' + drivermult + ' if ' + vari.name + ' > 0 else 0'
+            
+            #move but only during negative rotations
+            elif expresstype == 'moveNeg':
+                driver.driver.expression = vari.name + '*' + targetbonelength + '*' + drivermult + ' if ' + vari.name + ' < 0 else 0'
+            
+            #move but the ABS value
+            elif expresstype == 'moveABS':    
+                driver.driver.expression = 'abs(' + vari.name + '*' + targetbonelength + '*' + drivermult +')'
+
+            #move but the negative ABS value
+            elif expresstype == 'moveABSNeg':
+                driver.driver.expression = '-abs(' + vari.name + '*' + targetbonelength + '*' + drivermult +')'
+            
+            #move but exponentially
+            elif expresstype == 'moveexp':
+                driver.driver.expression = vari.name + '*' + vari.name + '*' + targetbonelength + '*' + drivermult
+            
+            elif expresstype == 'scale':
+                driver.driver.expression = '1 + ' + vari.name + '*' + targetbonelength + '*' + drivermult
+            
+            elif expresstype == 'rotation':
+                driver.driver.expression = vari.name + '*' + targetbonelength + '*' + drivermult
+
+        #Set the remaining joint correction drivers
+        #set knee joint corrections. These go in toward the body and down toward the foot at an exponential rate
+        setDriver('cf_s_kneeB_R', 'location', 1, 'cf_j_leg01_R', 'ROT_X',  '-0.2', expresstype = 'moveexp')
+        setDriver('cf_s_kneeB_R', 'location', 2, 'cf_j_leg01_R', 'ROT_X',  '-0.08')
+
+        setDriver('cf_s_kneeB_L', 'location', 1, 'cf_j_leg01_L', 'ROT_X',  '-0.2', expresstype = 'moveexp')
+        setDriver('cf_s_kneeB_L', 'location', 2, 'cf_j_leg01_L', 'ROT_X',  '-0.08')
+
+        #knee tip corrections go up toward the waist and in toward the body, also rotate a bit
+        setDriver('cf_d_kneeF_R', 'location', 1, 'cf_j_leg01_R', 'ROT_X',  '0.02')
+        setDriver('cf_d_kneeF_R', 'location', 2, 'cf_j_leg01_R', 'ROT_X',  '-0.04')
+
+        setDriver('cf_d_kneeF_L', 'location', 1, 'cf_j_leg01_L', 'ROT_X',  '0.02')
+        setDriver('cf_d_kneeF_L', 'location', 2, 'cf_j_leg01_L', 'ROT_X',  '-0.04')
+
+        #butt corrections go slightly up to the spine and in to the waist 
+        setDriver('cf_d_siri_R', 'location', 1, 'cf_j_thigh00_R', 'ROT_X',  '0.02')
+        setDriver('cf_d_siri_R', 'location', 2, 'cf_j_thigh00_R',  'ROT_X',  '0.02')
+
+        setDriver('cf_d_siri_L', 'location', 1, 'cf_j_thigh00_L', 'ROT_X',  '0.02')
+        setDriver('cf_d_siri_L', 'location', 2, 'cf_j_thigh00_L',  'ROT_X',  '0.02')
+        
+        #hand corrections go up to the head and in towards the elbow
+        setDriver('cf_d_hand_R', 'location', 0, 'cf_j_hand_R', 'ROT_Z',  '-0.4', expresstype = 'moveNeg')
+        setDriver('cf_d_hand_R', 'location', 1, 'cf_j_hand_R', 'ROT_Z', '-0.4', expresstype = 'moveNeg')
+
+        setDriver('cf_d_hand_L', 'location', 0, 'cf_j_hand_L', 'ROT_Z', '-0.4', expresstype = 'movePos')
+        setDriver('cf_d_hand_L', 'location', 1, 'cf_j_hand_L', 'ROT_Z', '0.4', expresstype = 'movePos')
+
+        #elboback goes out to the chest and into the shoulder
+        #elbo goes does the opposite
+        setDriver('cf_s_elboback_R', 'location', 0, 'cf_j_forearm01_R', 'ROT_X',  '-0.7')
+        setDriver('cf_s_elboback_R', 'location', 2, 'cf_j_forearm01_R', 'ROT_X',  '0.6')
+        setDriver('cf_s_elbo_R', 'location', 0, 'cf_j_forearm01_R', 'ROT_X',  '0.025')
+        setDriver('cf_s_elbo_R', 'location', 2, 'cf_j_forearm01_R', 'ROT_X',  '0.025')
+
+        setDriver('cf_s_elboback_L', 'location', 0, 'cf_j_forearm01_L', 'ROT_X',  '-0.7')
+        setDriver('cf_s_elboback_L', 'location', 2, 'cf_j_forearm01_L', 'ROT_X',  '-0.6')
+        setDriver('cf_s_elbo_L', 'location', 0, 'cf_j_forearm01_L', 'ROT_X',  '0.025')
+        setDriver('cf_s_elbo_L', 'location', 2, 'cf_j_forearm01_L', 'ROT_X',  '-0.025')
+
+        #shoulder bones have a few corrections as well
+        setDriver('cf_d_shoulder02_R', 'location', 1, 'cf_j_arm00_R', 'ROT_Z',  '-0.1', expresstype = 'moveNeg')
+        setDriver('cf_d_shoulder02_R', 'location', 0, 'cf_j_arm00_R', 'ROT_Y',  '0.1', expresstype = 'moveABSNeg')
+        setDriver('cf_d_shoulder02_R', 'location', 2, 'cf_j_arm00_R', 'ROT_Y',  '-0.1')
+
+        setDriver('cf_d_shoulder02_L', 'location', 1, 'cf_j_arm00_L', 'ROT_Z',  '0.1', expresstype = 'movePos')
+        setDriver('cf_d_shoulder02_L', 'location', 0, 'cf_j_arm00_L', 'ROT_Y',  '-0.1', expresstype = 'moveABS')
+        setDriver('cf_d_shoulder02_L', 'location', 2, 'cf_j_arm00_L', 'ROT_Y',  '0.1')
+
+        #leg corrections go up to the head and slightly forwards/backwards
+        setDriver('cf_s_leg_R', 'location', 1, 'cf_j_thigh00_R', 'ROT_X',  '1', expresstype = 'moveexp')
+        setDriver('cf_s_leg_R', 'location', 2, 'cf_j_thigh00_R', 'ROT_X',  '-1.5')
+
+        setDriver('cf_s_leg_L', 'location', 1, 'cf_j_thigh00_L', 'ROT_X',  '1', expresstype = 'moveexp')
+        setDriver('cf_s_leg_L', 'location', 2, 'cf_j_thigh00_L', 'ROT_X',  '-1.5')
+
+        #waist correction slightly moves out to chest when lower waist rotates
+        setDriver('cf_s_waist02', 'location', 2, 'cf_j_waist02', 'ROT_X',  '0.2', expresstype='moveABS')
+
+    def rename_bones_for_clarity(self):
+        '''rename core bones for easier identification'''
+        for bone in self.bone_rename_dict:
+            if c.get_armature().data.bones.get(bone):
+                c.get_armature().data.bones[bone].name = self.bone_rename_dict[bone]
+        
+        if bpy.context.scene.kkbp.use_rigify:
+            #reset the eye vertex groups after renaming the bones
+            mod = c.get_body().modifiers[1]
+            mod.vertex_group = 'Left Eye'
+            mod = c.get_body().modifiers[2]
+            mod.vertex_group = 'Right Eye'
+        
+        if not c.is_kk():
+            #also rename the Right and Left Eye target bones
+            if bone := c.get_armature().data.bones.get('EyeTargetL'):
+                bone.name = 'Left Eye'
+            if bone := c.get_armature().data.bones.get('EyeTargetR'):
+                bone.name = 'Right Eye'
+                
+
+    # %% Supporting functions
+    @staticmethod
+    def survey(obj):
+        '''Function to check for empty vertex groups of an object
+        returns a dictionary in the form {vertex_group1: maxweight1, vertex_group2: maxweight2, etc}'''
+        maxWeight = {}
+        #prefill vertex group list with zeroes
+        for i in obj.vertex_groups:
+            maxWeight[i.name] = 0
+        #preserve the indexes
+        keylist = list(maxWeight)
+        #then fill in the real value using the indexes
+        for v in obj.data.vertices:
+            for g in v.groups:
+                gn = g.group
+                w = obj.vertex_groups[g.group].weight(v.index)
+                if (maxWeight.get(keylist[gn]) is None or w>maxWeight[keylist[gn]]):
+                    maxWeight[keylist[gn]] = w
+        return maxWeight
+
+    @staticmethod
+    def survey_vertexes(obj):
+        has_vertexes = {}
+        for i in obj.vertex_groups:
+            has_vertexes[i.name] = False
+        #preserve the indexes
+        keylist = list(has_vertexes)
+        #then fill in the real value using the indexes
+        for v in obj.data.vertices:
+            for group in v.groups:
+                gname = group.group
+                wweight = obj.vertex_groups[group.group].weight(v.index)
+                if (has_vertexes.get(keylist[gname]) is None or wweight > has_vertexes[keylist[gname]]):
+                    has_vertexes[keylist[gname]] = True
+        return has_vertexes
+
+    def set_armature_layer(self, bone_name, layer_name: str, hidden = False):
+        '''Assigns a bone to a bone collection.'''
+        armature = c.get_armature()
+        if bone := armature.data.bones.get(bone_name):
+            # original_mode = bpy.context.object.mode
+            # bpy.ops.object.mode_set(mode = 'OBJECT')
+            bone.collections.clear()
+            if armature.data.bones.get(bone_name):
+                if armature.data.collections.get(layer_name):
+                    armature.data.collections[layer_name].assign(armature.data.bones.get(bone_name))
+                else:
+                    armature.data.collections.new(layer_name)
+                    armature.data.collections[layer_name].assign(armature.data.bones.get(bone_name))
+                armature.data.bones[bone_name].hide = hidden
+            # bpy.ops.object.mode_set(mode = original_mode)
+
+    def new_bone(self, new_bone_name):
+        '''Creates a new bone on the armature with the specified name and returns the blender bone'''
+        if bpy.app.version[0] == 3:
+            bpy.ops.armature.bone_primitive_add()
+            bone = c.get_armature().data.edit_bones['Bone']
+            bone.name = new_bone_name
+        else:
+            bone = c.get_armature().data.edit_bones.new(new_bone_name)
+        return bone
+

@@ -1,0 +1,272 @@
+	public void ChangeEyesPtn(int ptn, bool blend = true)
+	{
+		if (base.eyesCtrl == null)
+		{
+			return;
+		}
+		base.fileStatus.eyesPtn = ptn;
+		ListInfoBase info = base.lstCtrl.GetInfo(ChaListDefine.CategoryNo.cha_eyeset, ptn);
+		if (info == null)
+		{
+			base.fileStatus.eyesPtn = (ptn = 0);
+			info = base.lstCtrl.GetInfo(ChaListDefine.CategoryNo.cha_eyeset, ptn);
+		}
+		if (info == null)
+		{
+			return;
+		}
+		GameObject referenceInfo = GetReferenceInfo(RefObjKey.N_EyeBase);
+		if ((bool)referenceInfo)
+		{
+			referenceInfo.SetActiveIfDifferent(1 == info.GetInfoInt(ChaListDefine.KeyType.EyeBase));
+		}
+		GameObject referenceInfo2 = GetReferenceInfo(RefObjKey.N_Hitomi);
+		if ((bool)referenceInfo2)
+		{
+			referenceInfo2.SetActiveIfDifferent(info.GetInfoInt(ChaListDefine.KeyType.EyeHitomi) != 0);
+		}
+		GameObject[] array = new GameObject[3]
+		{
+			GetReferenceInfo(RefObjKey.N_Gag00),
+			GetReferenceInfo(RefObjKey.N_Gag01),
+			GetReferenceInfo(RefObjKey.N_Gag02)
+		};
+		int infoInt = info.GetInfoInt(ChaListDefine.KeyType.EyeObjNo);
+		for (int i = 0; i < array.Length; i++)
+		{
+			if ((bool)array[i])
+			{
+				array[i].SetActiveIfDifferent(i + 1 == infoInt);
+			}
+		}
+		if (base.rendEye != null && 2 == base.rendEye.Length)
+		{
+			Texture value = null;
+			string info2 = info.GetInfo(ChaListDefine.KeyType.EpsTexAB);
+			string text = info.GetInfo(ChaListDefine.KeyType.EpsTex);
+			float value2 = 0f;
+			if ("0" != info2 && "0" != text)
+			{
+				if (!base.hiPoly)
+				{
+					text += "_low";
+				}
+				value = CommonLib.LoadAsset<Texture2D>(info2, text);
+				value2 = 1f;
+			}
+			Renderer[] array2 = base.rendEye;
+			foreach (Renderer renderer in array2)
+			{
+				if (!(null == renderer))
+				{
+					renderer.material.SetTexture(ChaShader._expression, value);
+					renderer.material.SetFloat(ChaShader._exppower, value2);
+				}
+			}
+		}
+		if (array != null && array.Length != 0 && infoInt != 0)
+		{
+			Texture tex = null;
+			string info3 = info.GetInfo(ChaListDefine.KeyType.MainTexAB);
+			string text2 = info.GetInfo(ChaListDefine.KeyType.MainTex);
+			if ("0" != info3 && "0" != text2)
+			{
+				if (!base.hiPoly)
+				{
+					text2 += "_low";
+				}
+				tex = CommonLib.LoadAsset<Texture2D>(info3, text2);
+			}
+			string[] array3 = info.GetInfo(ChaListDefine.KeyType.TileAnim).Split('/');
+			Vector4 zero = Vector4.zero;
+			if (3 <= array3.Length)
+			{
+				float.TryParse(array3[0], out zero.x);
+				float.TryParse(array3[1], out zero.y);
+				float.TryParse(array3[2], out zero.z);
+			}
+			float infoFloat = info.GetInfoFloat(ChaListDefine.KeyType.SizeSpeed);
+			float infoFloat2 = info.GetInfoFloat(ChaListDefine.KeyType.SizeWidth);
+			float infoFloat3 = info.GetInfoFloat(ChaListDefine.KeyType.AngleSpeed);
+			float infoFloat4 = info.GetInfoFloat(ChaListDefine.KeyType.Yurayura);
+			ChangeGagEyesMaterial(infoInt - 1, tex, zero, infoFloat, infoFloat2, infoFloat3, infoFloat4);
+		}
+		SetForegroundEyesAndEyebrow();
+		ChangeSettingEyeShadowColor();
+		base.eyesCtrl.ChangePtn(info.GetInfoInt(ChaListDefine.KeyType.EyesPtn), blend);
+	}
+
+	public int GetEyesPtn()
+	{
+		return base.fileStatus.eyesPtn;
+	}
+
+	public void ChangeGagEyesMaterial(int no, Texture tex, Vector4 v4TileAnim, float sizeSpeed, float sizeWidth, float angleSpeed, float yurayura)
+	{
+		GameObject gameObject = null;
+		switch (no)
+		{
+		case 0:
+			gameObject = GetReferenceInfo(RefObjKey.N_Gag00);
+			break;
+		case 1:
+			gameObject = GetReferenceInfo(RefObjKey.N_Gag01);
+			break;
+		case 2:
+			gameObject = GetReferenceInfo(RefObjKey.N_Gag02);
+			break;
+		}
+		if (null == gameObject)
+		{
+			return;
+		}
+		SkinnedMeshRenderer component = gameObject.GetComponent<SkinnedMeshRenderer>();
+		if (!(null == component))
+		{
+			base.matGag[no].SetTexture(ChaShader._MainTex, null);
+			base.matGag[no].SetTexture(ChaShader._MainTex, tex);
+			base.matGag[no].SetVector(ChaShader._TileAnimation, v4TileAnim);
+			base.matGag[no].SetFloat(ChaShader._SizeSpeed, sizeSpeed);
+			base.matGag[no].SetFloat(ChaShader._SizeWidth, sizeWidth);
+			base.matGag[no].SetFloat(ChaShader._angleSpeed, angleSpeed);
+			base.matGag[no].SetFloat(ChaShader._yurayura, yurayura);
+			component.material = base.matGag[no];
+			if (Character.enableCharaLoadGCClear)
+			{
+				Resources.UnloadUnusedAssets();
+			}
+		}
+	}
+
+	public void ChangeEyesOpenMax(float maxValue)
+	{
+		if (base.eyesCtrl != null)
+		{
+			float num = Mathf.Clamp(maxValue, 0f, 1f);
+			base.fileStatus.eyesOpenMax = num;
+			base.eyesCtrl.OpenMax = Mathf.Clamp(maxValue, 0f, 0.92f);
+			if (!base.fileStatus.eyesBlink)
+			{
+				base.eyesCtrl.SetOpenRateForce(num);
+			}
+		}
+	}
+
+	public float GetEyesOpenMax()
+	{
+		return base.fileStatus.eyesOpenMax;
+	}
+
+	public void ChangeEyebrowPtn(int ptn, bool blend = true)
+	{
+		if (base.eyebrowCtrl != null)
+		{
+			base.fileStatus.eyebrowPtn = ptn;
+			base.eyebrowCtrl.ChangePtn(ptn, blend);
+		}
+	}
+
+	public int GetEyebrowPtn()
+	{
+		return base.fileStatus.eyebrowPtn;
+	}
+
+	public void ChangeEyebrowOpenMax(float maxValue)
+	{
+		if (base.eyebrowCtrl != null)
+		{
+			float num = Mathf.Clamp(maxValue, 0f, 1f);
+			base.fileStatus.eyebrowOpenMax = num;
+			base.eyebrowCtrl.OpenMax = num;
+			if (!base.fileStatus.eyesBlink)
+			{
+				base.eyebrowCtrl.SetOpenRateForce(1f);
+			}
+		}
+	}
+
+	public float GetEyebrowOpenMax()
+	{
+		return base.fileStatus.eyebrowOpenMax;
+	}
+
+	public void ChangeEyesBlinkFlag(bool blink)
+	{
+		if (!(null == base.fbsCtrl) && base.fbsCtrl.BlinkCtrl != null)
+		{
+			base.fileStatus.eyesBlink = blink;
+			base.fbsCtrl.BlinkCtrl.SetFixedFlags((!blink) ? ((byte)1) : ((byte)0));
+			if (!blink)
+			{
+				base.eyesCtrl.SetOpenRateForce(1f);
+				base.eyebrowCtrl.SetOpenRateForce(1f);
+			}
+		}
+	}
+
+	public bool GetEyesBlinkFlag()
+	{
+		return base.fileStatus.eyesBlink;
+	}
+
+	public void ChangeMouthPtn(int ptn, bool blend = true)
+	{
+		if (base.mouthCtrl != null)
+		{
+			base.fileStatus.mouthPtn = ptn;
+			base.mouthCtrl.ChangePtn(ptn, blend);
+			ChangeTongueState((ptn == 21) ? ((byte)1) : ((byte)0));
+			base.mouthCtrl.UseAdjustWidthScale(ptn != 21 && ptn != 22);
+		}
+	}
+
+	public int GetMouthPtn()
+	{
+		return base.fileStatus.mouthPtn;
+	}
+
+	public void ChangeMouthOpenMax(float maxValue)
+	{
+		if (base.mouthCtrl != null)
+		{
+			float num = Mathf.Clamp(maxValue, 0f, 1f);
+			base.fileStatus.mouthOpenMax = num;
+			base.mouthCtrl.OpenMax = num;
+			if (base.fileStatus.mouthFixed)
+			{
+				base.mouthCtrl.FixedRate = num;
+			}
+		}
+	}
+
+	public float GetMouthOpenMax()
+	{
+		return base.fileStatus.mouthOpenMax;
+	}
+
+	public void ChangeMouthFixed(bool fix)
+	{
+		if (base.mouthCtrl != null)
+		{
+			base.fileStatus.mouthFixed = fix;
+			if (fix)
+			{
+				base.mouthCtrl.FixedRate = base.fileStatus.mouthOpenMax;
+			}
+			else
+			{
+				base.mouthCtrl.FixedRate = -1f;
+			}
+		}
+	}
+
+	public bool GetMouthFixed()
+	{
+		return base.fileStatus.mouthFixed;
+	}
+
+	public void ChangeTongueState(byte state)
+	{
+		base.fileStatus.tongueState = state;
+	}
+

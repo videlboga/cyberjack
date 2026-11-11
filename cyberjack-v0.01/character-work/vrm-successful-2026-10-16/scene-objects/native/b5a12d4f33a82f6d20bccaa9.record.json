@@ -1,0 +1,12 @@
+{
+  "id": "b5a12d4f33a82f6d20bccaa9",
+  "name": "p_ks_m06_bench00_00",
+  "kind": "furniture",
+  "source": "map/scene/minsyukuoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuOutside:568",
+  "native": "native/b5a12d4f33a82f6d20bccaa9.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m06_bench00_00-b5a12d4f33a82f6d20bccaa9.glb"
+}

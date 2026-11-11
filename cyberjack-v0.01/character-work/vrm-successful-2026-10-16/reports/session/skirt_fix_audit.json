@@ -1,0 +1,92 @@
+{
+  "source": "/home/cyberkitty/Projects/control-room/dashboard-frontend/models/x20/Rin_restored2.vrm",
+  "source_sha256": "781b3b8c47ec034ac139f55510cc57bc74c5e1106d8a2d01f7845a49afae09d2",
+  "file": "Rin_restored_v2.vrm",
+  "sha256": "d8439518ebd31c84480ca2389db114dead4203c461b4c63d0539aa048918c815",
+  "binary_chunk_unchanged": true,
+  "geometry_materials_images_skins_morphs_unchanged": true,
+  "chains": 12,
+  "joint_nodes": 68,
+  "simulated_segments": 56,
+  "colliders_total": 39,
+  "skirt_colliders": 4,
+  "skirt_hit_radius_m": 0.028,
+  "upper_skirt_stiffness": [
+    1.5,
+    1.2,
+    0.9
+  ],
+  "fitted_colliders": [
+    {
+      "side": "Left",
+      "section": "thigh",
+      "bone": "Left leg",
+      "a": [
+        0.07374151585800837,
+        0.8686747550964355,
+        -0.014735338278114796
+      ],
+      "b": [
+        0.0737415184826319,
+        0.4602470159391775,
+        -0.014735337667697647
+      ],
+      "radius": 0.08641742924415474
+    },
+    {
+      "side": "Left",
+      "section": "calf",
+      "bone": "Left knee",
+      "a": [
+        0.0737415184826319,
+        0.4602470159391775,
+        -0.014735337667697647
+      ],
+      "b": [
+        0.07374152281396563,
+        0.028214861564522,
+        -0.01473533766009161
+      ],
+      "radius": 0.07629480007298144
+    },
+    {
+      "side": "Right",
+      "section": "thigh",
+      "bone": "Right leg",
+      "a": [
+        -0.0737039914895754,
+        0.8686747550964355,
+        -0.014735338278114796
+      ],
+      "b": [
+        -0.07370399064902294,
+        0.46024543708862814,
+        -0.014735338452394097
+      ],
+      "radius": 0.08640730966293181
+    },
+    {
+      "side": "Right",
+      "section": "calf",
+      "bone": "Right knee",
+      "a": [
+        -0.07370399064902294,
+        0.46024543708862814,
+        -0.014735338452394097
+      ],
+      "b": [
+        -0.07370398350620687,
+        0.028228212121907154,
+        -0.01473533562039311
+      ],
+      "radius": 0.07629262166837249
+    }
+  ],
+  "changes": [
+    "Full skirt chains include all 6 real bones and endpoint; no fixed top-three gap",
+    "Replace skirt collision references with 4 capsules fitted to leg surface vertices",
+    "Preserve existing removed head/floor colliders from user restored2 baseline",
+    "Hair spring settings and collision references preserved",
+    "No geometry, texture or skin buffer changed"
+  ]
+}

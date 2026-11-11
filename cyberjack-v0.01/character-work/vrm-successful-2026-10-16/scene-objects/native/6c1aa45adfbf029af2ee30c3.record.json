@@ -1,0 +1,12 @@
+{
+  "id": "6c1aa45adfbf029af2ee30c3",
+  "name": "p_ks_m03bench00_00 (4)",
+  "kind": "furniture",
+  "source": "map/scene/gassyukuoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuOutside:837",
+  "native": "native/6c1aa45adfbf029af2ee30c3.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m03bench00_00_4_-6c1aa45adfbf029af2ee30c3.glb"
+}

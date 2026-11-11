@@ -1,0 +1,569 @@
+{
+ "format": "vrm-springbone-draft-1",
+ "units": "meters",
+ "fps": 30,
+ "notice": "черновик настроек пружин: имена костей соответствуют арматуре hair_arm; colliderNodes — кости тела",
+ "groups": [
+  {
+   "comment": "hair_00",
+   "bones": [
+    "hair_00_0",
+    "hair_00_1",
+    "hair_00_2",
+    "hair_00_3",
+    "hair_00_4",
+    "hair_00_5",
+    "hair_00_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_01",
+   "bones": [
+    "hair_01_0",
+    "hair_01_1",
+    "hair_01_2",
+    "hair_01_3",
+    "hair_01_4",
+    "hair_01_5",
+    "hair_01_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_02",
+   "bones": [
+    "hair_02_0",
+    "hair_02_1",
+    "hair_02_2",
+    "hair_02_3",
+    "hair_02_4",
+    "hair_02_5",
+    "hair_02_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_03",
+   "bones": [
+    "hair_03_0",
+    "hair_03_1",
+    "hair_03_2",
+    "hair_03_3",
+    "hair_03_4",
+    "hair_03_5",
+    "hair_03_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_04",
+   "bones": [
+    "hair_04_0",
+    "hair_04_1",
+    "hair_04_2",
+    "hair_04_3",
+    "hair_04_4",
+    "hair_04_5",
+    "hair_04_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_05",
+   "bones": [
+    "hair_05_0",
+    "hair_05_1",
+    "hair_05_2",
+    "hair_05_3",
+    "hair_05_4",
+    "hair_05_5",
+    "hair_05_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_06",
+   "bones": [
+    "hair_06_0",
+    "hair_06_1",
+    "hair_06_2",
+    "hair_06_3",
+    "hair_06_4",
+    "hair_06_5",
+    "hair_06_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_07",
+   "bones": [
+    "hair_07_0",
+    "hair_07_1",
+    "hair_07_2",
+    "hair_07_3",
+    "hair_07_4",
+    "hair_07_5",
+    "hair_07_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_08",
+   "bones": [
+    "hair_08_0",
+    "hair_08_1",
+    "hair_08_2",
+    "hair_08_3",
+    "hair_08_4",
+    "hair_08_5",
+    "hair_08_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_09",
+   "bones": [
+    "hair_09_0",
+    "hair_09_1",
+    "hair_09_2",
+    "hair_09_3",
+    "hair_09_4",
+    "hair_09_5",
+    "hair_09_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_10",
+   "bones": [
+    "hair_10_0",
+    "hair_10_1",
+    "hair_10_2",
+    "hair_10_3",
+    "hair_10_4",
+    "hair_10_5",
+    "hair_10_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_11",
+   "bones": [
+    "hair_11_0",
+    "hair_11_1",
+    "hair_11_2",
+    "hair_11_3",
+    "hair_11_4",
+    "hair_11_5",
+    "hair_11_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_12",
+   "bones": [
+    "hair_12_0",
+    "hair_12_1",
+    "hair_12_2",
+    "hair_12_3",
+    "hair_12_4",
+    "hair_12_5",
+    "hair_12_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_13",
+   "bones": [
+    "hair_13_0",
+    "hair_13_1",
+    "hair_13_2",
+    "hair_13_3",
+    "hair_13_4",
+    "hair_13_5",
+    "hair_13_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_14",
+   "bones": [
+    "hair_14_0",
+    "hair_14_1",
+    "hair_14_2",
+    "hair_14_3",
+    "hair_14_4",
+    "hair_14_5",
+    "hair_14_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_15",
+   "bones": [
+    "hair_15_0",
+    "hair_15_1",
+    "hair_15_2",
+    "hair_15_3",
+    "hair_15_4",
+    "hair_15_5",
+    "hair_15_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_16",
+   "bones": [
+    "hair_16_0",
+    "hair_16_1",
+    "hair_16_2",
+    "hair_16_3",
+    "hair_16_4",
+    "hair_16_5",
+    "hair_16_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  },
+  {
+   "comment": "hair_17",
+   "bones": [
+    "hair_17_0",
+    "hair_17_1",
+    "hair_17_2",
+    "hair_17_3",
+    "hair_17_4",
+    "hair_17_5",
+    "hair_17_6"
+   ],
+   "stiffness": 1.8,
+   "dragForce": 0.35,
+   "gravityPower": 0.6,
+   "gravityDir": {
+    "x": 0,
+    "y": 0,
+    "z": -1
+   },
+   "hitRadius": 0.012,
+   "colliderGroups": [
+    "head",
+    "neck",
+    "shoulders",
+    "chest",
+    "hips"
+   ]
+  }
+ ],
+ "colliders": [
+  {
+   "id": "head",
+   "node": "head",
+   "shape": "sphere",
+   "offset": [
+    0.0,
+    0.015,
+    0.005
+   ],
+   "radius": 0.095
+  },
+  {
+   "id": "neck",
+   "node": "neck",
+   "shape": "capsule",
+   "offset": [
+    0.0,
+    0.0,
+    0.06
+   ],
+   "radius": 0.055
+  },
+  {
+   "id": "shoulders",
+   "node": "upperChest",
+   "shape": "capsule",
+   "offset": [
+    0.0,
+    0.02,
+    0.0
+   ],
+   "radius": 0.07
+  },
+  {
+   "id": "chest",
+   "node": "chest",
+   "shape": "capsule",
+   "offset": [
+    0.0,
+    0.0,
+    0.1
+   ],
+   "radius": 0.095
+  },
+  {
+   "id": "hips",
+   "node": "hips",
+   "shape": "capsule",
+   "offset": [
+    0.0,
+    0.0,
+    0.1
+   ],
+   "radius": 0.11
+  }
+ ]
+}

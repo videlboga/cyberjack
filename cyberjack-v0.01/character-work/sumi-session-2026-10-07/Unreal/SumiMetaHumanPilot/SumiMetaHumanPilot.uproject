@@ -1,0 +1,24 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Category": "",
+  "Description": "Sumi MetaHuman pilot: separate project, no Kate character assets",
+  "Plugins": [
+    {
+      "Name": "MetaHumanCharacter",
+      "Enabled": true
+    },
+    {
+      "Name": "PythonScriptPlugin",
+      "Enabled": true
+    },
+    {
+      "Name": "EditorScriptingUtilities",
+      "Enabled": true
+    },
+    {
+      "Name": "KateFaceTools",
+      "Enabled": true
+    }
+  ]
+}

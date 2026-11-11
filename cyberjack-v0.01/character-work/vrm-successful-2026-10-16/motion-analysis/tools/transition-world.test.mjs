@@ -1,0 +1,6 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import {Quaternion,Vector3} from 'three';import {poseTools,pack} from '../review/command-pose.mjs';
+const t=poseTools(JSON.parse(fs.readFileSync(new URL('../data/mix-bank.json',import.meta.url)))),a=t.m.makePose(),b=t.m.makePose(),axis=new Vector3(0,1,0),hip=t.m.index.get('cf_j_hips');
+// Equivalent body orientations, represented by opposite exporter/root counter-rotations.
+for(const [p,v]of [[a,2.8],[b,-2.8]]){p[0].q.premultiply(new Quaternion().setFromAxisAngle(axis,v));p[hip].q.premultiply(new Quaternion().setFromAxisAngle(axis,-v));for(const n of p)n.q.normalize();t.m.fk(p);}
+const start=t.point(a,'hips'),end=t.point(b,'hips');for(let i=0;i<=30;i++){const u=i/30,p=t.interpolateTransition(a,b,u);assert(p[hip].worldQ.angleTo(a[hip].worldQ)<1e-5,'body must not spin through compensating root channels');assert(t.point(p,'hips').distanceTo(start.clone().lerp(end,u))<1e-7,'pelvis path must not orbit exporter origin');}
+for(const [u,source]of [[0,a],[1,b]]){const p=t.interpolateTransition(a,b,u);for(let i=0;i<p.length;i++){assert(p[i].p.distanceTo(source[i].p)<1e-12);assert(p[i].q.angleTo(source[i].q)<1e-6);}}console.log('PASS world-space transition: no counter-rotation spins, no pelvis orbit, exact endpoints');

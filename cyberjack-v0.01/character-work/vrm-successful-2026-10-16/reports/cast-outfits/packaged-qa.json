@@ -1,0 +1,111 @@
+{
+  "result": {
+    "before": {
+      "time": 0.19999999999999998,
+      "states": [
+        "L_WLoop1",
+        "L_WLoop1",
+        "L_WLoop1"
+      ],
+      "cast": [
+        {
+          "role": "male",
+          "character": "kai",
+          "main": true,
+          "outfit": 0,
+          "label": "Kai · мужская роль",
+          "controller": "70a3c2ad404ee36f3d6122cd"
+        },
+        {
+          "role": "female",
+          "character": "rin",
+          "main": false,
+          "outfit": 0,
+          "label": "Rin · основная женская роль",
+          "controller": "2e246ea6d854c291311e85d2"
+        },
+        {
+          "role": "second",
+          "character": "mira",
+          "main": false,
+          "outfit": 0,
+          "label": "Mira · третья роль",
+          "controller": "ea143bcf390926880ef441a0"
+        }
+      ],
+      "count": 3
+    },
+    "female": {
+      "time": 0.19999999999999998,
+      "othersUnchanged": true,
+      "name": "Rin · Outfit 01"
+    },
+    "second": {
+      "time": 0.19999999999999998,
+      "name": "Mira · Outfit 02",
+      "paused": true
+    },
+    "own": {
+      "time": 0.19999999999999998,
+      "name": "Kai · Outfit 01",
+      "otherOutfits": [
+        1,
+        2
+      ],
+      "states": [
+        "L_WLoop1",
+        "L_WLoop1",
+        "L_WLoop1"
+      ],
+      "top": "1",
+      "castSelect": "1"
+    },
+    "resumed": {
+      "playing": true,
+      "delta": 0
+    },
+    "restart": {
+      "cast": [
+        {
+          "role": "male",
+          "character": "kai",
+          "main": true,
+          "outfit": 1,
+          "label": "Kai · мужская роль",
+          "controller": "70a3c2ad404ee36f3d6122cd"
+        },
+        {
+          "role": "female",
+          "character": "rin",
+          "main": false,
+          "outfit": 2,
+          "label": "Rin · основная женская роль",
+          "controller": "2e246ea6d854c291311e85d2"
+        },
+        {
+          "role": "second",
+          "character": "mira",
+          "main": false,
+          "outfit": 2,
+          "label": "Mira · третья роль",
+          "controller": "ea143bcf390926880ef441a0"
+        }
+      ],
+      "outfits": [
+        {
+          "role": "female",
+          "outfit": 2
+        },
+        {
+          "role": "second",
+          "outfit": 2
+        }
+      ],
+      "name": "Kai · Outfit 01"
+    },
+    "topSync": "2",
+    "invalid": true,
+    "active": true
+  },
+  "errors": []
+}

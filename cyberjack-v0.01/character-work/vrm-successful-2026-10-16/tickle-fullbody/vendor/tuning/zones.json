@@ -1,0 +1,59 @@
+{
+ "zones": {
+  "heel": {
+   "family": "SOLE",
+   "faces": 38,
+   "area_cm2": 37.64,
+   "sensitivity": 0.56
+  },
+  "arch_medial": {
+   "family": "SOLE",
+   "faces": 20,
+   "area_cm2": 21.48,
+   "sensitivity": 0.845
+  },
+  "arch_lateral": {
+   "family": "SOLE",
+   "faces": 22,
+   "area_cm2": 20.39,
+   "sensitivity": 0.699
+  },
+  "ball": {
+   "family": "SOLE",
+   "faces": 45,
+   "area_cm2": 37.24,
+   "sensitivity": 0.798
+  },
+  "toe_pad_1": {
+   "family": "TOES",
+   "faces": 197,
+   "area_cm2": 32.91,
+   "sensitivity": 0.867
+  },
+  "toe_pad_2_5": {
+   "family": "TOES",
+   "faces": 588,
+   "area_cm2": 49.61,
+   "sensitivity": 0.667
+  },
+  "instep": {
+   "family": "ANKLE",
+   "faces": 100,
+   "area_cm2": 89.05,
+   "sensitivity": 0.497
+  },
+  "ankle_ring": {
+   "family": "ANKLE",
+   "faces": 9,
+   "area_cm2": 9.05,
+   "sensitivity": 0.403
+  }
+ },
+ "intertoe_faces_per_toe": {
+  "1": 2,
+  "2": 41,
+  "3": 13,
+  "5": 58,
+  "4": 2
+ }
+}

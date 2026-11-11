@@ -1,0 +1,2108 @@
+{
+ "format": "koikatsu-mod-map-v2",
+ "guids": {
+  "a10b95613615bdaa": {
+   "label": "[KKS][Body][BP] Profundis.zipmod",
+   "archive": "mods/BetterPenetration/[KKS][Body][BP] Profundis.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_profundis.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "8f42a88b3610c08b": {
+   "label": "[KKS][Body][BP] SAC Innie.zipmod",
+   "archive": "mods/BetterPenetration/[KKS][Body][BP] SAC Innie.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_sac_innie.unity3d"
+   ],
+   "previousLabel": "chara/base overlay bundle (+mannequin.bytes)"
+  },
+  "085f87175a498e00": {
+   "label": "[KK][Female]BP Profundis_NT.zipmod",
+   "archive": "mods/BetterPenetration/[KK][Female]BP Profundis_NT.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bpprofundis_nt.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "2ca797ceb8a86ac6": {
+   "label": "[KK][Female]BP_SAC_Clit2.zipmod",
+   "archive": "mods/BetterPenetration/[KK][Female]BP_SAC_Clit2.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_sacclit2.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "8609e6d1525c0408": {
+   "label": "[KK][Female]BP_SAC_Clit2_NT.zipmod",
+   "archive": "mods/BetterPenetration/[KK][Female]BP_SAC_Clit2_NT.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_sacclit2_nt.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "f2a0940bd95fb6c9": {
+   "label": "[KK][Female]BP_SAC_Innie_NT.zipmod",
+   "archive": "mods/BetterPenetration/[KK][Female]BP_SAC_Innie_NT.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_sacinnie_nt.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "65ec54a7a135e019": {
+   "label": "[KK][Female]BP_SAC_Roastie.zipmod",
+   "archive": "mods/BetterPenetration/[KK][Female]BP_SAC_Roastie.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_sacroastie.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "09b2169a2c2f37d6": {
+   "label": "[KK][Female]BP_SAC_Roastie_NT.zipmod",
+   "archive": "mods/BetterPenetration/[KK][Female]BP_SAC_Roastie_NT.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_bp_sacroastie_nt.unity3d"
+   ],
+   "previousLabel": "BetterPenetration-family (additional_fknodes + chara/base)"
+  },
+  "85984cc243471b94": {
+   "label": "[katarsys] KPlug Animation Bundles 2.9.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 2.9.0.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_40.unity3d",
+    "abdata/anim_imports/kplug/female/01_41.unity3d",
+    "abdata/anim_imports/kplug/female/01_42.unity3d",
+    "abdata/anim_imports/kplug/female/01_43.unity3d",
+    "abdata/anim_imports/kplug/female/01_44.unity3d",
+    "abdata/anim_imports/kplug/female/01_45.unity3d",
+    "abdata/anim_imports/kplug/female/01_46.unity3d",
+    "abdata/anim_imports/kplug/female/01_47.unity3d",
+    "abdata/anim_imports/kplug/female/01_48.unity3d",
+    "abdata/anim_imports/kplug/female/01_49.unity3d",
+    "abdata/anim_imports/kplug/female/01_50.unity3d",
+    "abdata/anim_imports/kplug/female/01_51.unity3d",
+    "abdata/anim_imports/kplug/female/01_52.unity3d",
+    "abdata/anim_imports/kplug/female/01_53.unity3d",
+    "abdata/anim_imports/kplug/female/01_54.unity3d",
+    "abdata/anim_imports/kplug/female/01_55.unity3d",
+    "abdata/anim_imports/kplug/female/01_56.unity3d",
+    "abdata/anim_imports/kplug/female/01_57.unity3d",
+    "abdata/anim_imports/kplug/female/01_58.unity3d",
+    "abdata/anim_imports/kplug/female/01_59.unity3d",
+    "abdata/anim_imports/kplug/female/01_60.unity3d",
+    "abdata/anim_imports/kplug/female/01_61.unity3d",
+    "abdata/anim_imports/kplug/female/01_62.unity3d",
+    "abdata/anim_imports/kplug/female/01_63.unity3d",
+    "abdata/anim_imports/kplug/female/01_64.unity3d",
+    "abdata/anim_imports/kplug/female/01_65.unity3d",
+    "abdata/anim_imports/kplug/female/01_66.unity3d",
+    "abdata/anim_imports/kplug/female/01_67.unity3d",
+    "abdata/anim_imports/kplug/female/01_68.unity3d",
+    "abdata/anim_imports/kplug/female/01_69.unity3d",
+    "abdata/anim_imports/kplug/female/01_70.unity3d",
+    "abdata/anim_imports/kplug/female/01_71.unity3d",
+    "abdata/anim_imports/kplug/female/01_72.unity3d",
+    "abdata/anim_imports/kplug/female/01_73.unity3d",
+    "abdata/anim_imports/kplug/female/01_74.unity3d",
+    "abdata/anim_imports/kplug/female/01_75.unity3d",
+    "abdata/anim_imports/kplug/female/01_76.unity3d",
+    "abdata/anim_imports/kplug/female/01_77.unity3d",
+    "abdata/anim_imports/kplug/female/02_40.unity3d",
+    "abdata/anim_imports/kplug/female/02_41.unity3d",
+    "abdata/anim_imports/kplug/female/02_42.unity3d",
+    "abdata/anim_imports/kplug/female/02_43.unity3d",
+    "abdata/anim_imports/kplug/female/02_44.unity3d",
+    "abdata/anim_imports/kplug/female/02_45.unity3d",
+    "abdata/anim_imports/kplug/female/02_46.unity3d",
+    "abdata/anim_imports/kplug/female/02_47.unity3d",
+    "abdata/anim_imports/kplug/female/02_48.unity3d",
+    "abdata/anim_imports/kplug/female/02_49.unity3d",
+    "abdata/anim_imports/kplug/female/02_50.unity3d",
+    "abdata/anim_imports/kplug/female/02_51.unity3d",
+    "abdata/anim_imports/kplug/female/02_52.unity3d",
+    "abdata/anim_imports/kplug/female/02_53.unity3d",
+    "abdata/anim_imports/kplug/female/02_54.unity3d",
+    "abdata/anim_imports/kplug/female/02_55.unity3d",
+    "abdata/anim_imports/kplug/female/02_56.unity3d",
+    "abdata/anim_imports/kplug/female/02_57.unity3d",
+    "abdata/anim_imports/kplug/female/02_58.unity3d",
+    "abdata/anim_imports/kplug/female/02_59.unity3d",
+    "abdata/anim_imports/kplug/female/02_60.unity3d",
+    "abdata/anim_imports/kplug/female/02_61.unity3d",
+    "abdata/anim_imports/kplug/female/02_62.unity3d",
+    "abdata/anim_imports/kplug/female/02_63.unity3d",
+    "abdata/anim_imports/kplug/female/02_64.unity3d",
+    "abdata/anim_imports/kplug/female/02_65.unity3d",
+    "abdata/anim_imports/kplug/female/02_66.unity3d",
+    "abdata/anim_imports/kplug/female/03_01.unity3d",
+    "abdata/anim_imports/kplug/female/03_02.unity3d",
+    "abdata/anim_imports/kplug/female/04_01.unity3d",
+    "abdata/anim_imports/kplug/female/04_02.unity3d",
+    "abdata/anim_imports/kplug/female/04_03.unity3d",
+    "abdata/anim_imports/kplug/female/04_04.unity3d",
+    "abdata/anim_imports/kplug/female/04_05.unity3d",
+    "abdata/anim_imports/kplug/female/04_06.unity3d",
+    "abdata/anim_imports/kplug/female/04_07.unity3d",
+    "abdata/anim_imports/kplug/female/04_08.unity3d",
+    "abdata/anim_imports/kplug/female/04_09.unity3d",
+    "abdata/anim_imports/kplug/female/05_01.unity3d",
+    "abdata/anim_imports/kplug/female/05_02.unity3d",
+    "abdata/anim_imports/kplug/female/05_03.unity3d",
+    "abdata/anim_imports/kplug/female/05_04.unity3d",
+    "abdata/anim_imports/kplug/female/06_01.unity3d",
+    "abdata/anim_imports/kplug/female/07_01.unity3d",
+    "abdata/anim_imports/kplug/male/01_40.unity3d",
+    "abdata/anim_imports/kplug/male/01_41.unity3d",
+    "abdata/anim_imports/kplug/male/01_42.unity3d",
+    "abdata/anim_imports/kplug/male/01_43.unity3d",
+    "abdata/anim_imports/kplug/male/01_44.unity3d",
+    "abdata/anim_imports/kplug/male/01_45.unity3d",
+    "abdata/anim_imports/kplug/male/01_46.unity3d",
+    "abdata/anim_imports/kplug/male/01_47.unity3d",
+    "abdata/anim_imports/kplug/male/01_48.unity3d",
+    "abdata/anim_imports/kplug/male/01_49.unity3d",
+    "abdata/anim_imports/kplug/male/01_50.unity3d",
+    "abdata/anim_imports/kplug/male/01_51.unity3d",
+    "abdata/anim_imports/kplug/male/01_52.unity3d",
+    "abdata/anim_imports/kplug/male/01_53.unity3d",
+    "abdata/anim_imports/kplug/male/01_54.unity3d",
+    "abdata/anim_imports/kplug/male/01_55.unity3d",
+    "abdata/anim_imports/kplug/male/01_56.unity3d",
+    "abdata/anim_imports/kplug/male/01_57.unity3d",
+    "abdata/anim_imports/kplug/male/01_58.unity3d",
+    "abdata/anim_imports/kplug/male/01_59.unity3d",
+    "abdata/anim_imports/kplug/male/01_60.unity3d",
+    "abdata/anim_imports/kplug/male/01_61.unity3d",
+    "abdata/anim_imports/kplug/male/01_62.unity3d",
+    "abdata/anim_imports/kplug/male/01_63.unity3d",
+    "abdata/anim_imports/kplug/male/01_64.unity3d",
+    "abdata/anim_imports/kplug/male/01_65.unity3d",
+    "abdata/anim_imports/kplug/male/01_66.unity3d",
+    "abdata/anim_imports/kplug/male/01_67.unity3d",
+    "abdata/anim_imports/kplug/male/01_68.unity3d",
+    "abdata/anim_imports/kplug/male/01_69.unity3d",
+    "abdata/anim_imports/kplug/male/01_70.unity3d",
+    "abdata/anim_imports/kplug/male/01_71.unity3d",
+    "abdata/anim_imports/kplug/male/01_72.unity3d",
+    "abdata/anim_imports/kplug/male/01_73.unity3d",
+    "abdata/anim_imports/kplug/male/01_74.unity3d",
+    "abdata/anim_imports/kplug/male/01_75.unity3d",
+    "abdata/anim_imports/kplug/male/01_76.unity3d",
+    "abdata/anim_imports/kplug/male/01_77.unity3d",
+    "abdata/anim_imports/kplug/male/02_40.unity3d",
+    "abdata/anim_imports/kplug/male/02_41.unity3d",
+    "abdata/anim_imports/kplug/male/02_42.unity3d",
+    "abdata/anim_imports/kplug/male/02_43.unity3d",
+    "abdata/anim_imports/kplug/male/02_44.unity3d",
+    "abdata/anim_imports/kplug/male/02_45.unity3d",
+    "abdata/anim_imports/kplug/male/02_46.unity3d",
+    "abdata/anim_imports/kplug/male/02_47.unity3d",
+    "abdata/anim_imports/kplug/male/02_48.unity3d",
+    "abdata/anim_imports/kplug/male/02_49.unity3d",
+    "abdata/anim_imports/kplug/male/02_50.unity3d",
+    "abdata/anim_imports/kplug/male/02_51.unity3d",
+    "abdata/anim_imports/kplug/male/02_52.unity3d",
+    "abdata/anim_imports/kplug/male/02_53.unity3d",
+    "abdata/anim_imports/kplug/male/02_54.unity3d",
+    "abdata/anim_imports/kplug/male/02_55.unity3d",
+    "abdata/anim_imports/kplug/male/02_56.unity3d",
+    "abdata/anim_imports/kplug/male/02_57.unity3d",
+    "abdata/anim_imports/kplug/male/02_58.unity3d",
+    "abdata/anim_imports/kplug/male/02_59.unity3d",
+    "abdata/anim_imports/kplug/male/02_60.unity3d",
+    "abdata/anim_imports/kplug/male/02_61.unity3d",
+    "abdata/anim_imports/kplug/male/02_62.unity3d",
+    "abdata/anim_imports/kplug/male/02_63.unity3d",
+    "abdata/anim_imports/kplug/male/02_64.unity3d",
+    "abdata/anim_imports/kplug/male/02_65.unity3d",
+    "abdata/anim_imports/kplug/male/02_66.unity3d",
+    "abdata/anim_imports/kplug/male/04_01.unity3d",
+    "abdata/anim_imports/kplug/male/04_02.unity3d",
+    "abdata/anim_imports/kplug/male/04_03.unity3d",
+    "abdata/anim_imports/kplug/male/04_04.unity3d",
+    "abdata/anim_imports/kplug/male/04_05.unity3d",
+    "abdata/anim_imports/kplug/male/04_06.unity3d",
+    "abdata/anim_imports/kplug/male/04_07.unity3d",
+    "abdata/anim_imports/kplug/male/04_08.unity3d",
+    "abdata/anim_imports/kplug/male/04_09.unity3d",
+    "abdata/anim_imports/kplug/male/06_01.unity3d",
+    "abdata/anim_imports/kplug/male/07_01.unity3d"
+   ],
+   "previousLabel": "khs-animators (KKS H-scene animator controllers, khs_f/khs_m, assets/illusion ... h/animator)"
+  },
+  "ef63370a391bab37": {
+   "label": "[Omega] Free_H_Animations_Bundles v1.1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Omega/[Omega] Free_H_Animations_Bundles v1.1.0.zipmod",
+   "entries": [
+    "abdata/h/anim/female/Armpitjob_F.unity3d",
+    "abdata/h/anim/female/Cowgirl_leaning_F.unity3d",
+    "abdata/h/anim/female/Footjob_sitting_F.unity3d",
+    "abdata/h/anim/female/Forward_bending_F.unity3d",
+    "abdata/h/anim/female/Horizon_F.unity3d",
+    "abdata/h/anim/female/Leg_hold_F.unity3d",
+    "abdata/h/anim/female/Loop_halloween_F.unity3d",
+    "abdata/h/anim/female/Reverse_cowgirl_F.unity3d",
+    "abdata/h/anim/female/Reverse_lift_F.unity3d",
+    "abdata/h/anim/female/V_shell_F.unity3d",
+    "abdata/h/anim/male/Armpitjob_M.unity3d",
+    "abdata/h/anim/male/Cowgirl_leaning_M.unity3d",
+    "abdata/h/anim/male/Footjob_sitting_M.unity3d",
+    "abdata/h/anim/male/Forward_bending_M.unity3d",
+    "abdata/h/anim/male/Horizon_M.unity3d",
+    "abdata/h/anim/male/Leg_hold_M.unity3d",
+    "abdata/h/anim/male/Loop_halloween_M.unity3d",
+    "abdata/h/anim/male/Reverse_cowgirl_M.unity3d",
+    "abdata/h/anim/male/Reverse_lift_M.unity3d",
+    "abdata/h/anim/male/V_shell_M.unity3d"
+   ],
+   "previousLabel": "khh_f_94 / khh_m_94 (KKS H position 94 packs)"
+  },
+  "1e6f0663d211d540": {
+   "label": "[Omega] Free_H_Animations_Lists v1.1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Omega/[Omega] Free_H_Animations_Lists v1.1.0.zipmod",
+   "entries": [
+    "abdata/studio/V_shell_F_Studio.unity3d"
+   ],
+   "previousLabel": "khs_f_n97_s controller bundle"
+  },
+  "4bdd80c225daef5a": {
+   "label": "kkstub.grind.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.grind.zipmod",
+   "entries": [
+    "abdata/h/anim/female/custom_911_0.unity3d",
+    "abdata/h/anim/male/custom_911_0.unity3d"
+   ],
+   "previousLabel": "kkstub male (Katarsys kkstub.zipmod)"
+  },
+  "1daaaeb6ad49416a": {
+   "label": "[DeathWeasel][KKS] Honey Select 2 Map - Suite v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Honey Select 2 Map - Suite v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/hs2suite.unity3d",
+    "abdata/map/scene/hs2suite.unity3d",
+    "abdata/vr/common/h2suite.unity3d"
+   ],
+   "previousLabel": "Map Suite (hs2suite.unity)"
+  },
+  "78252604f85ff139": {
+   "label": "[DeathWeasel][KKS] Musumakeup Map - Bath v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Musumakeup Map - Bath v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/mmbath.unity3d",
+    "abdata/vr/common/mmbath.unity3d"
+   ],
+   "previousLabel": "map: bath (HPoint)"
+  },
+  "46422bf864af04b5": {
+   "label": "kkstub.behind.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.behind.zipmod",
+   "entries": [
+    "abdata/h/anim/female/custom_911_3.unity3d",
+    "abdata/h/anim/male/custom_911_3.unity3d"
+   ],
+   "previousLabel": "kkstub/behind (Katarsys kkstub.behind.zipmod)"
+  },
+  "0ea7f2dfc08b16de": {
+   "label": "kkstub.stickbug.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.stickbug.zipmod",
+   "entries": [
+    "abdata/h/anim/female/stickbug.unity3d"
+   ],
+   "previousLabel": "kkstub/stickbug"
+  },
+  "c969c1f2a32976b0": {
+   "label": "[DarkSoldier27] Project Diva H-Maps Collection v1.2.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27] Project Diva H-Maps Collection v1.2.zipmod",
+   "entries": [
+    "abdata/h/common/PDHM001.unity3d",
+    "abdata/h/common/PDHM002.unity3d",
+    "abdata/h/common/PDHM003.unity3d",
+    "abdata/h/common/PDHM004.unity3d",
+    "abdata/h/common/PDHM005.unity3d",
+    "abdata/h/common/PDHM006.unity3d",
+    "abdata/h/common/PDHM007.unity3d",
+    "abdata/h/common/PDHM008.unity3d",
+    "abdata/h/common/PDHM009.unity3d",
+    "abdata/h/common/PDHM010.unity3d",
+    "abdata/h/common/PDHM011.unity3d",
+    "abdata/h/common/PDHM012.unity3d",
+    "abdata/h/common/PDHM013.unity3d",
+    "abdata/h/common/PDHM014.unity3d",
+    "abdata/h/common/PDHM015.unity3d",
+    "abdata/h/common/PDHM016.unity3d",
+    "abdata/h/common/PDHM017.unity3d",
+    "abdata/h/common/PDHM018.unity3d",
+    "abdata/h/common/PDHM019.unity3d",
+    "abdata/h/common/PDHM020.unity3d",
+    "abdata/h/common/PDHM021.unity3d",
+    "abdata/h/common/PDHM022.unity3d",
+    "abdata/h/common/PDHM023.unity3d",
+    "abdata/h/common/PDHM024.unity3d",
+    "abdata/h/common/pdhm025.unity3d",
+    "abdata/h/common/pdhm026.unity3d",
+    "abdata/h/common/pdhm027.unity3d",
+    "abdata/h/common/pdhm028.unity3d",
+    "abdata/h/common/pdhm029.unity3d",
+    "abdata/h/common/pdhm030.unity3d",
+    "abdata/h/common/pdhm031.unity3d",
+    "abdata/h/common/pdhm032.unity3d",
+    "abdata/h/common/pdhm033.unity3d",
+    "abdata/h/common/pdhm035.unity3d",
+    "abdata/h/common/pdhm036.unity3d",
+    "abdata/h/common/pdhm037.unity3d",
+    "abdata/h/common/pdhm038.unity3d",
+    "abdata/h/common/pdhm039.unity3d",
+    "abdata/map/scene/PDHM001.unity3d",
+    "abdata/map/scene/PDHM004.unity3d",
+    "abdata/map/scene/PDHM006.unity3d",
+    "abdata/map/scene/PDHM010.unity3d",
+    "abdata/map/scene/PDHM013.unity3d",
+    "abdata/map/scene/PDHM014.unity3d",
+    "abdata/map/scene/PDHM016.unity3d",
+    "abdata/map/scene/PDHM017.unity3d",
+    "abdata/map/scene/PDHM022.unity3d",
+    "abdata/map/scene/pdhm026.unity3d",
+    "abdata/map/scene/pdhm029.unity3d",
+    "abdata/map/scene/pdhm032.unity3d",
+    "abdata/map/scene/pdhm033.unity3d",
+    "abdata/map/scene/pdhm036.unity3d",
+    "abdata/vr/common/pdhm001.unity3d",
+    "abdata/vr/common/pdhm002.unity3d",
+    "abdata/vr/common/pdhm003.unity3d",
+    "abdata/vr/common/pdhm004.unity3d",
+    "abdata/vr/common/pdhm005.unity3d",
+    "abdata/vr/common/pdhm006.unity3d",
+    "abdata/vr/common/pdhm007.unity3d",
+    "abdata/vr/common/pdhm008.unity3d",
+    "abdata/vr/common/pdhm009.unity3d",
+    "abdata/vr/common/pdhm010.unity3d",
+    "abdata/vr/common/pdhm011.unity3d",
+    "abdata/vr/common/pdhm012.unity3d",
+    "abdata/vr/common/pdhm013.unity3d",
+    "abdata/vr/common/pdhm014.unity3d",
+    "abdata/vr/common/pdhm015.unity3d",
+    "abdata/vr/common/pdhm016.unity3d",
+    "abdata/vr/common/pdhm017.unity3d",
+    "abdata/vr/common/pdhm018.unity3d",
+    "abdata/vr/common/pdhm019.unity3d",
+    "abdata/vr/common/pdhm020.unity3d",
+    "abdata/vr/common/pdhm021.unity3d",
+    "abdata/vr/common/pdhm022.unity3d",
+    "abdata/vr/common/pdhm023.unity3d",
+    "abdata/vr/common/pdhm024.unity3d",
+    "abdata/vr/common/pdhm025.unity3d",
+    "abdata/vr/common/pdhm026.unity3d",
+    "abdata/vr/common/pdhm027.unity3d",
+    "abdata/vr/common/pdhm028.unity3d",
+    "abdata/vr/common/pdhm029.unity3d",
+    "abdata/vr/common/pdhm030.unity3d",
+    "abdata/vr/common/pdhm031.unity3d",
+    "abdata/vr/common/pdhm032.unity3d",
+    "abdata/vr/common/pdhm033.unity3d",
+    "abdata/vr/common/pdhm035.unity3d",
+    "abdata/vr/common/pdhm036.unity3d",
+    "abdata/vr/common/pdhm037.unity3d"
+   ],
+   "previousLabel": "map-mods HPoints: pdhm003 - japanese subur + template (hpoint prefabs)"
+  },
+  "982734a9a46d2563": {
+   "label": "[Nam Miyoo] Nam Outlined Pussy Pack v0.2.3.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[Nam Miyoo] Nam Outlined Pussy Pack v0.2.3.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_Nam_OL_long_slit.unity3d",
+    "abdata/chara/oo_base_Nam_OL_mid_slit.unity3d",
+    "abdata/chara/oo_base_Nam_OL_short_slit.unity3d"
+   ],
+   "previousLabel": "chara/base overlay bundle (cf/cm body textures)"
+  },
+  "eb73297119867707": {
+   "label": "[Unknown] KK_LO_pussy v0.5.4.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[Unknown] KK_LO_pussy v0.5.4.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_KK_LO.unity3d"
+   ],
+   "previousLabel": "chara/base overlay bundle (cf/cm body textures)"
+  },
+  "10d40642cd5a7759": {
+   "label": "[DeathWeasel][KKS] Map - Sakura's Room v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Map - Sakura's Room v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/sakuraroom.unity3d",
+    "abdata/map/scene/sakuraroom.unity3d",
+    "abdata/vr/common/sakuraroom.unity3d"
+   ],
+   "previousLabel": "map: Sakura's room (HPoint)"
+  },
+  "6bc0b88e542162a8": {
+   "label": "[Reverie][KKS] BFW Apartment 1 v1.3.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/Reverie/[Reverie][KKS] BFW Apartment 1 v1.3.zipmod",
+   "entries": [
+    "abdata/map/scene/bfwapartment1.unity3d",
+    "abdata/h/common/bfwapartment1.unity3d"
+   ],
+   "previousLabel": "map: BFW Apartment 1"
+  },
+  "3a38f76d709e54c2": {
+   "label": "[SAC] Uncensor Selector Pack v0.9.2.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[SAC] Uncensor Selector Pack v0.9.2.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_sacclit.unity3d",
+    "abdata/chara/oo_base_sacclit2.unity3d",
+    "abdata/chara/oo_base_sacgash.unity3d",
+    "abdata/chara/oo_base_sacgash2.unity3d",
+    "abdata/chara/oo_base_sacinnie.unity3d",
+    "abdata/chara/oo_base_sacinnie2.unity3d",
+    "abdata/chara/oo_base_sackupaa.unity3d",
+    "abdata/chara/oo_base_sacmeaty.unity3d",
+    "abdata/chara/oo_base_sacmeaty2.unity3d",
+    "abdata/chara/oo_base_sacpuffy.unity3d",
+    "abdata/chara/oo_base_sacroastie.unity3d",
+    "abdata/chara/oo_base_sacroastie2.unity3d",
+    "abdata/chara/oo_base_sacroastie3.unity3d",
+    "abdata/chara/oo_base_sacslit.unity3d"
+   ],
+   "previousLabel": "chara/base textures + cf_anmshapebody (overlay bundle)"
+  },
+  "39b5d949d7e267ab": {
+   "label": "[anon] SAC_Uncensor_Selector_Pack v0.0.2.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[anon] SAC_Uncensor_Selector_Pack v0.0.2.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_sacinnie.unity3d"
+   ],
+   "previousLabel": "chara/base overlay bundle (cf/cm body textures)"
+  },
+  "e4047b23f7d39cda": {
+   "label": "[johnbbob_la_petite]Custom Animations.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/[johnbbob_la_petite]Custom Animations.zipmod",
+   "entries": [
+    "abdata/studio/anime/crap/female.unity3d",
+    "abdata/studio/anime/crap/male.unity3d",
+    "abdata/studio/anime/crap/un-human.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "15b3ffb5ee848814": {
+   "label": "kkstub.sideways.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.sideways.zipmod",
+   "entries": [
+    "abdata/h/anim/female/custom_911_1.unity3d",
+    "abdata/h/anim/male/custom_911_1.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "ee1c0c3c5a801447": {
+   "label": "[DarkSoldier27] More H-Maps v1.0.1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27] More H-Maps v1.0.1.zipmod",
+   "entries": [
+    "abdata/h/common/mhm001.unity3d",
+    "abdata/h/common/mhm002.unity3d",
+    "abdata/h/common/mhm003.unity3d",
+    "abdata/h/common/mhm004.unity3d",
+    "abdata/h/common/mhm005.unity3d",
+    "abdata/h/common/mhm006.unity3d",
+    "abdata/h/common/mhm007.unity3d",
+    "abdata/h/common/mhm008.unity3d",
+    "abdata/h/common/mhm009.unity3d",
+    "abdata/h/common/mhm010.unity3d",
+    "abdata/h/common/mhm011.unity3d",
+    "abdata/h/common/mhm012.unity3d",
+    "abdata/h/common/mhm013.unity3d",
+    "abdata/h/common/mhm014.unity3d",
+    "abdata/h/common/mhm015.unity3d",
+    "abdata/h/common/mhm016.unity3d",
+    "abdata/h/common/mhm017.unity3d",
+    "abdata/h/common/mhm018.unity3d",
+    "abdata/h/common/mhm019.unity3d",
+    "abdata/h/common/mhm020.unity3d",
+    "abdata/h/common/mhm021.unity3d",
+    "abdata/h/common/mhm022.unity3d",
+    "abdata/h/common/mhm023.unity3d",
+    "abdata/h/common/mhm024.unity3d",
+    "abdata/h/common/mhm025.unity3d",
+    "abdata/h/common/mhm026.unity3d",
+    "abdata/h/common/mhm027.unity3d",
+    "abdata/h/common/mhm028.unity3d",
+    "abdata/h/common/mhm029.unity3d",
+    "abdata/h/common/mhm030.unity3d",
+    "abdata/h/common/mhm031.unity3d",
+    "abdata/h/common/mhm032.unity3d",
+    "abdata/h/common/mhm033.unity3d",
+    "abdata/h/common/mhm034.unity3d",
+    "abdata/h/common/mhm035.unity3d",
+    "abdata/h/common/mhm036.unity3d",
+    "abdata/map/scene/mhm001.unity3d",
+    "abdata/map/scene/mhm025.unity3d",
+    "abdata/map/scene/mhm026.unity3d",
+    "abdata/map/scene/mhm028.unity3d",
+    "abdata/map/scene/mhm030.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "011205d761b420c0": {
+   "label": "[DeathWeasel][KKS] Map - Pool v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Map - Pool v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/poolmap.unity3d",
+    "abdata/vr/common/poolmap.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "190c10c177c94271": {
+   "label": "[DeathWeasel][KKS] Musumakeup Map - House 01 v1.1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Musumakeup Map - House 01 v1.1.zipmod",
+   "entries": [
+    "abdata/h/common/mmhouse01.unity3d",
+    "abdata/vr/common/mmhouse01.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "b352f067e60b9400": {
+   "label": "[DeathWeasel] Amputee Body Mod v1.0.3.zip",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[DeathWeasel] Amputee Body Mod v1.0.3.zip",
+   "entries": [
+    "abdata/chara/oo_base_amputee.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "9bf5ea04890a5d33": {
+   "label": "[Evaan] EV_MuscleBody v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[Evaan] EV_MuscleBody v1.0.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_musclef.unity3d",
+    "abdata/chara/oo_base_musclef2.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "6b1d9ecd7dff2bd9": {
+   "label": "[anon] Anon Profundis v0.5.2.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[anon] Anon Profundis v0.5.2.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_profundisanonmod.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "3f324f2fa7dc7396": {
+   "label": "[Evaan]Overlord Albedo Mod.zipmod",
+   "archive": "mods/Sideloader Modpack/Evaan/[Evaan]Overlord Albedo Mod.zipmod",
+   "entries": [
+    "abdata/chara/Overlord_Albedo.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "5323466e141e50a1": {
+   "label": "[GaryuX] JKO_mod + Jack-O hair Strive v1.1.zipmod",
+   "archive": "mods/Sideloader Modpack/GaryuX/[GaryuX] JKO_mod + Jack-O hair Strive v1.1.zipmod",
+   "entries": [
+    "abdata/chara/JKO mask.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "751235158a0ac127": {
+   "label": "[MrDelegado]Rosalina Luma v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/MrDelegado/[MrDelegado]Rosalina Luma v1.0.zipmod",
+   "entries": [
+    "abdata/chara/mrdelegado/rosalina_luma.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "0595db69ac594451": {
+   "label": "[Noble_Kale] Saiyan Tail animated v2.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_Kale] Saiyan Tail animated v2.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/sjanim.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "182d32722aaa8f64": {
+   "label": "[Noble_kale]  Animated Poro v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Animated Poro v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/animporo.unity3d",
+    "abdata/chara/noblekale/animvelkoz.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "657b9c40d42cd841": {
+   "label": "[RCL_circuit]Eden Venus Blood Lagoon.zipmod",
+   "archive": "mods/Sideloader Modpack/RCL_circuit/[RCL_circuit]Eden Venus Blood Lagoon.zipmod",
+   "entries": [
+    "abdata/chara/mod/mod_eden_vb.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "72b94c3c3a875141": {
+   "label": "[moderchan] Moderchan Uncensor.zipmod",
+   "archive": "mods/Sideloader Modpack - KK_UncensorSelector/[moderchan] Moderchan Uncensor.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_moderchan.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "c623aaa227489d0c": {
+   "label": "[GaryuX] Ram_mod v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/GaryuX/[GaryuX] Ram_mod v1.0.zipmod",
+   "entries": [
+    "abdata/chara/RAM_accs.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "f28caee40c803354": {
+   "label": "[Noble_kale]  Altair Assets Pack v1.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Altair Assets Pack v1.zipmod",
+   "entries": [
+    "abdata/studio/nk/altairweapons.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "1e05c015cd6d14c0": {
+   "label": "[RCL_circuit]Fox Ears with Animation.zipmod",
+   "archive": "mods/Sideloader Modpack/RCL_circuit/[RCL_circuit]Fox Ears with Animation.zipmod",
+   "entries": [
+    "abdata/chara/mod/mod_sample_rcl_00.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "e91b9e762cee15d8": {
+   "label": "[koikoi]AI Items v0.9.zipmod",
+   "archive": "mods/Sideloader Modpack/koikoi/[koikoi]AI Items v0.9.zipmod",
+   "entries": [
+    "abdata/chara/koikoi/ao_body_07.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "3afa8536c6b8caca": {
+   "label": "[GaryuX] KOS-MOS Rework.zipmod",
+   "archive": "mods/Sideloader Modpack/GaryuX/[GaryuX] KOS-MOS Rework.zipmod",
+   "entries": [
+    "abdata/chara/ethercanon_new.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "cd6b4ecc66040753": {
+   "label": "[Noble_kale]  Altair Bundle 1 v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Altair Bundle 1 v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/altairpack.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "d0c02260e77da43a": {
+   "label": "[Noble_kale]  Dynamic Extra eye v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Dynamic Extra eye v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/dneye.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "1d9777496fd5f1bb": {
+   "label": "[Noble_kale] Fox Ears Animated Convert v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale] Fox Ears Animated Convert v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/nkconvertion.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "4bfb525a9b0e8614": {
+   "label": "[Ω-F13]White Carol 2019.zipmod",
+   "archive": "mods/Sideloader Modpack/Omega/[Ω-F13]White Carol 2019.zipmod",
+   "entries": [
+    "abdata/chara/White_Carol_2019.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "33635eb28264db5a": {
+   "label": "[RCL_circuit]Ranrin-Yuiki Amayui Castle Meister.zipmod",
+   "archive": "mods/Sideloader Modpack/RCL_circuit/[RCL_circuit]Ranrin-Yuiki Amayui Castle Meister.zipmod",
+   "entries": [
+    "abdata/chara/mod/mod_ranrin_acm.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "6ba39c6e14bdb783": {
+   "label": "[HeldMesin]Wings v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/[HeldMesin]Wings v1.0.zipmod",
+   "entries": [
+    "abdata/chara/hld/accessory_body_wing01_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing01_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing02_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing02_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing03_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing03_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing04_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing04_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing05_b.unity3d"
+   ],
+   "previousLabel": null
+  },
+  "7e6cb14ecb0ebe36": {
+   "label": "[katarsys] KPlug Animation Bundles 2.9.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 2.9.0.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_40.unity3d",
+    "abdata/anim_imports/kplug/female/01_41.unity3d",
+    "abdata/anim_imports/kplug/female/01_42.unity3d",
+    "abdata/anim_imports/kplug/female/01_43.unity3d",
+    "abdata/anim_imports/kplug/female/01_44.unity3d",
+    "abdata/anim_imports/kplug/female/01_45.unity3d",
+    "abdata/anim_imports/kplug/female/01_46.unity3d",
+    "abdata/anim_imports/kplug/female/01_47.unity3d",
+    "abdata/anim_imports/kplug/female/01_48.unity3d",
+    "abdata/anim_imports/kplug/female/01_49.unity3d",
+    "abdata/anim_imports/kplug/female/01_50.unity3d",
+    "abdata/anim_imports/kplug/female/01_51.unity3d",
+    "abdata/anim_imports/kplug/female/01_52.unity3d",
+    "abdata/anim_imports/kplug/female/01_53.unity3d",
+    "abdata/anim_imports/kplug/female/01_54.unity3d",
+    "abdata/anim_imports/kplug/female/01_55.unity3d",
+    "abdata/anim_imports/kplug/female/01_56.unity3d",
+    "abdata/anim_imports/kplug/female/01_57.unity3d",
+    "abdata/anim_imports/kplug/female/01_58.unity3d",
+    "abdata/anim_imports/kplug/female/01_59.unity3d",
+    "abdata/anim_imports/kplug/female/01_60.unity3d",
+    "abdata/anim_imports/kplug/female/01_61.unity3d",
+    "abdata/anim_imports/kplug/female/01_62.unity3d",
+    "abdata/anim_imports/kplug/female/01_63.unity3d",
+    "abdata/anim_imports/kplug/female/01_64.unity3d",
+    "abdata/anim_imports/kplug/female/01_65.unity3d",
+    "abdata/anim_imports/kplug/female/01_66.unity3d",
+    "abdata/anim_imports/kplug/female/01_67.unity3d",
+    "abdata/anim_imports/kplug/female/01_68.unity3d",
+    "abdata/anim_imports/kplug/female/01_69.unity3d",
+    "abdata/anim_imports/kplug/female/01_70.unity3d",
+    "abdata/anim_imports/kplug/female/01_71.unity3d",
+    "abdata/anim_imports/kplug/female/01_72.unity3d",
+    "abdata/anim_imports/kplug/female/01_73.unity3d",
+    "abdata/anim_imports/kplug/female/01_74.unity3d",
+    "abdata/anim_imports/kplug/female/01_75.unity3d",
+    "abdata/anim_imports/kplug/female/01_76.unity3d",
+    "abdata/anim_imports/kplug/female/01_77.unity3d",
+    "abdata/anim_imports/kplug/female/02_40.unity3d",
+    "abdata/anim_imports/kplug/female/02_41.unity3d",
+    "abdata/anim_imports/kplug/female/02_42.unity3d",
+    "abdata/anim_imports/kplug/female/02_43.unity3d",
+    "abdata/anim_imports/kplug/female/02_44.unity3d",
+    "abdata/anim_imports/kplug/female/02_45.unity3d",
+    "abdata/anim_imports/kplug/female/02_46.unity3d",
+    "abdata/anim_imports/kplug/female/02_47.unity3d",
+    "abdata/anim_imports/kplug/female/02_48.unity3d",
+    "abdata/anim_imports/kplug/female/02_49.unity3d",
+    "abdata/anim_imports/kplug/female/02_50.unity3d",
+    "abdata/anim_imports/kplug/female/02_51.unity3d",
+    "abdata/anim_imports/kplug/female/02_52.unity3d",
+    "abdata/anim_imports/kplug/female/02_53.unity3d",
+    "abdata/anim_imports/kplug/female/02_54.unity3d",
+    "abdata/anim_imports/kplug/female/02_55.unity3d",
+    "abdata/anim_imports/kplug/female/02_56.unity3d",
+    "abdata/anim_imports/kplug/female/02_57.unity3d",
+    "abdata/anim_imports/kplug/female/02_58.unity3d",
+    "abdata/anim_imports/kplug/female/02_59.unity3d",
+    "abdata/anim_imports/kplug/female/02_60.unity3d",
+    "abdata/anim_imports/kplug/female/02_61.unity3d",
+    "abdata/anim_imports/kplug/female/02_62.unity3d",
+    "abdata/anim_imports/kplug/female/02_63.unity3d",
+    "abdata/anim_imports/kplug/female/02_64.unity3d",
+    "abdata/anim_imports/kplug/female/02_65.unity3d",
+    "abdata/anim_imports/kplug/female/02_66.unity3d",
+    "abdata/anim_imports/kplug/female/03_01.unity3d",
+    "abdata/anim_imports/kplug/female/03_02.unity3d",
+    "abdata/anim_imports/kplug/female/04_01.unity3d",
+    "abdata/anim_imports/kplug/female/04_02.unity3d",
+    "abdata/anim_imports/kplug/female/04_03.unity3d",
+    "abdata/anim_imports/kplug/female/04_04.unity3d",
+    "abdata/anim_imports/kplug/female/04_05.unity3d",
+    "abdata/anim_imports/kplug/female/04_06.unity3d",
+    "abdata/anim_imports/kplug/female/04_07.unity3d",
+    "abdata/anim_imports/kplug/female/04_08.unity3d",
+    "abdata/anim_imports/kplug/female/04_09.unity3d",
+    "abdata/anim_imports/kplug/female/05_01.unity3d",
+    "abdata/anim_imports/kplug/female/05_02.unity3d",
+    "abdata/anim_imports/kplug/female/05_03.unity3d",
+    "abdata/anim_imports/kplug/female/05_04.unity3d",
+    "abdata/anim_imports/kplug/female/06_01.unity3d",
+    "abdata/anim_imports/kplug/female/07_01.unity3d",
+    "abdata/anim_imports/kplug/male/01_40.unity3d",
+    "abdata/anim_imports/kplug/male/01_41.unity3d",
+    "abdata/anim_imports/kplug/male/01_42.unity3d",
+    "abdata/anim_imports/kplug/male/01_43.unity3d",
+    "abdata/anim_imports/kplug/male/01_44.unity3d",
+    "abdata/anim_imports/kplug/male/01_45.unity3d",
+    "abdata/anim_imports/kplug/male/01_46.unity3d",
+    "abdata/anim_imports/kplug/male/01_47.unity3d",
+    "abdata/anim_imports/kplug/male/01_48.unity3d",
+    "abdata/anim_imports/kplug/male/01_49.unity3d",
+    "abdata/anim_imports/kplug/male/01_50.unity3d",
+    "abdata/anim_imports/kplug/male/01_51.unity3d",
+    "abdata/anim_imports/kplug/male/01_52.unity3d",
+    "abdata/anim_imports/kplug/male/01_53.unity3d",
+    "abdata/anim_imports/kplug/male/01_54.unity3d",
+    "abdata/anim_imports/kplug/male/01_55.unity3d",
+    "abdata/anim_imports/kplug/male/01_56.unity3d",
+    "abdata/anim_imports/kplug/male/01_57.unity3d",
+    "abdata/anim_imports/kplug/male/01_58.unity3d",
+    "abdata/anim_imports/kplug/male/01_59.unity3d",
+    "abdata/anim_imports/kplug/male/01_60.unity3d",
+    "abdata/anim_imports/kplug/male/01_61.unity3d",
+    "abdata/anim_imports/kplug/male/01_62.unity3d",
+    "abdata/anim_imports/kplug/male/01_63.unity3d",
+    "abdata/anim_imports/kplug/male/01_64.unity3d",
+    "abdata/anim_imports/kplug/male/01_65.unity3d",
+    "abdata/anim_imports/kplug/male/01_66.unity3d",
+    "abdata/anim_imports/kplug/male/01_67.unity3d",
+    "abdata/anim_imports/kplug/male/01_68.unity3d",
+    "abdata/anim_imports/kplug/male/01_69.unity3d",
+    "abdata/anim_imports/kplug/male/01_70.unity3d",
+    "abdata/anim_imports/kplug/male/01_71.unity3d",
+    "abdata/anim_imports/kplug/male/01_72.unity3d",
+    "abdata/anim_imports/kplug/male/01_73.unity3d",
+    "abdata/anim_imports/kplug/male/01_74.unity3d",
+    "abdata/anim_imports/kplug/male/01_75.unity3d",
+    "abdata/anim_imports/kplug/male/01_76.unity3d",
+    "abdata/anim_imports/kplug/male/01_77.unity3d",
+    "abdata/anim_imports/kplug/male/02_40.unity3d",
+    "abdata/anim_imports/kplug/male/02_41.unity3d",
+    "abdata/anim_imports/kplug/male/02_42.unity3d",
+    "abdata/anim_imports/kplug/male/02_43.unity3d",
+    "abdata/anim_imports/kplug/male/02_44.unity3d",
+    "abdata/anim_imports/kplug/male/02_45.unity3d",
+    "abdata/anim_imports/kplug/male/02_46.unity3d",
+    "abdata/anim_imports/kplug/male/02_47.unity3d",
+    "abdata/anim_imports/kplug/male/02_48.unity3d",
+    "abdata/anim_imports/kplug/male/02_49.unity3d",
+    "abdata/anim_imports/kplug/male/02_50.unity3d",
+    "abdata/anim_imports/kplug/male/02_51.unity3d",
+    "abdata/anim_imports/kplug/male/02_52.unity3d",
+    "abdata/anim_imports/kplug/male/02_53.unity3d",
+    "abdata/anim_imports/kplug/male/02_54.unity3d",
+    "abdata/anim_imports/kplug/male/02_55.unity3d",
+    "abdata/anim_imports/kplug/male/02_56.unity3d",
+    "abdata/anim_imports/kplug/male/02_57.unity3d",
+    "abdata/anim_imports/kplug/male/02_58.unity3d",
+    "abdata/anim_imports/kplug/male/02_59.unity3d",
+    "abdata/anim_imports/kplug/male/02_60.unity3d",
+    "abdata/anim_imports/kplug/male/02_61.unity3d",
+    "abdata/anim_imports/kplug/male/02_62.unity3d",
+    "abdata/anim_imports/kplug/male/02_63.unity3d",
+    "abdata/anim_imports/kplug/male/02_64.unity3d",
+    "abdata/anim_imports/kplug/male/02_65.unity3d",
+    "abdata/anim_imports/kplug/male/02_66.unity3d",
+    "abdata/anim_imports/kplug/male/04_01.unity3d",
+    "abdata/anim_imports/kplug/male/04_02.unity3d",
+    "abdata/anim_imports/kplug/male/04_03.unity3d",
+    "abdata/anim_imports/kplug/male/04_04.unity3d",
+    "abdata/anim_imports/kplug/male/04_05.unity3d",
+    "abdata/anim_imports/kplug/male/04_06.unity3d",
+    "abdata/anim_imports/kplug/male/04_07.unity3d",
+    "abdata/anim_imports/kplug/male/04_08.unity3d",
+    "abdata/anim_imports/kplug/male/04_09.unity3d",
+    "abdata/anim_imports/kplug/male/06_01.unity3d",
+    "abdata/anim_imports/kplug/male/07_01.unity3d"
+   ]
+  },
+  "0db409506c1a5411": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 A.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 A.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_40.unity3d",
+    "abdata/anim_imports/kplug/female/01_41.unity3d",
+    "abdata/anim_imports/kplug/female/01_42.unity3d",
+    "abdata/anim_imports/kplug/female/01_43.unity3d",
+    "abdata/anim_imports/kplug/female/01_44.unity3d",
+    "abdata/anim_imports/kplug/female/01_45.unity3d",
+    "abdata/anim_imports/kplug/female/01_46.unity3d",
+    "abdata/anim_imports/kplug/female/01_47.unity3d",
+    "abdata/anim_imports/kplug/female/01_48.unity3d",
+    "abdata/anim_imports/kplug/female/01_49.unity3d",
+    "abdata/anim_imports/kplug/female/01_50.unity3d",
+    "abdata/anim_imports/kplug/female/01_51.unity3d",
+    "abdata/anim_imports/kplug/female/01_52.unity3d",
+    "abdata/anim_imports/kplug/female/01_53.unity3d",
+    "abdata/anim_imports/kplug/female/01_54.unity3d",
+    "abdata/anim_imports/kplug/female/01_55.unity3d",
+    "abdata/anim_imports/kplug/female/01_56.unity3d",
+    "abdata/anim_imports/kplug/female/01_57.unity3d",
+    "abdata/anim_imports/kplug/female/01_58.unity3d",
+    "abdata/anim_imports/kplug/female/01_59.unity3d",
+    "abdata/anim_imports/kplug/male/01_40.unity3d",
+    "abdata/anim_imports/kplug/male/01_41.unity3d",
+    "abdata/anim_imports/kplug/male/01_42.unity3d",
+    "abdata/anim_imports/kplug/male/01_43.unity3d",
+    "abdata/anim_imports/kplug/male/01_44.unity3d",
+    "abdata/anim_imports/kplug/male/01_45.unity3d",
+    "abdata/anim_imports/kplug/male/01_46.unity3d",
+    "abdata/anim_imports/kplug/male/01_47.unity3d",
+    "abdata/anim_imports/kplug/male/01_48.unity3d",
+    "abdata/anim_imports/kplug/male/01_49.unity3d",
+    "abdata/anim_imports/kplug/male/01_50.unity3d",
+    "abdata/anim_imports/kplug/male/01_51.unity3d",
+    "abdata/anim_imports/kplug/male/01_52.unity3d",
+    "abdata/anim_imports/kplug/male/01_53.unity3d",
+    "abdata/anim_imports/kplug/male/01_54.unity3d",
+    "abdata/anim_imports/kplug/male/01_55.unity3d",
+    "abdata/anim_imports/kplug/male/01_56.unity3d",
+    "abdata/anim_imports/kplug/male/01_57.unity3d",
+    "abdata/anim_imports/kplug/male/01_58.unity3d",
+    "abdata/anim_imports/kplug/male/01_59.unity3d"
+   ]
+  },
+  "1c5ffb31fcd485bf": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 B.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 B.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_60.unity3d",
+    "abdata/anim_imports/kplug/female/01_61.unity3d",
+    "abdata/anim_imports/kplug/female/01_62.unity3d",
+    "abdata/anim_imports/kplug/female/01_63.unity3d",
+    "abdata/anim_imports/kplug/female/01_64.unity3d",
+    "abdata/anim_imports/kplug/female/01_65.unity3d",
+    "abdata/anim_imports/kplug/female/01_66.unity3d",
+    "abdata/anim_imports/kplug/female/01_67.unity3d",
+    "abdata/anim_imports/kplug/female/01_68.unity3d",
+    "abdata/anim_imports/kplug/female/01_69.unity3d",
+    "abdata/anim_imports/kplug/female/01_70.unity3d",
+    "abdata/anim_imports/kplug/female/01_71.unity3d",
+    "abdata/anim_imports/kplug/female/01_72.unity3d",
+    "abdata/anim_imports/kplug/female/01_73.unity3d",
+    "abdata/anim_imports/kplug/female/01_74.unity3d",
+    "abdata/anim_imports/kplug/female/01_75.unity3d",
+    "abdata/anim_imports/kplug/female/01_76.unity3d",
+    "abdata/anim_imports/kplug/female/01_77.unity3d",
+    "abdata/anim_imports/kplug/female/01_78.unity3d",
+    "abdata/anim_imports/kplug/female/01_79.unity3d",
+    "abdata/anim_imports/kplug/male/01_60.unity3d",
+    "abdata/anim_imports/kplug/male/01_61.unity3d",
+    "abdata/anim_imports/kplug/male/01_62.unity3d",
+    "abdata/anim_imports/kplug/male/01_63.unity3d",
+    "abdata/anim_imports/kplug/male/01_64.unity3d",
+    "abdata/anim_imports/kplug/male/01_65.unity3d",
+    "abdata/anim_imports/kplug/male/01_66.unity3d",
+    "abdata/anim_imports/kplug/male/01_67.unity3d",
+    "abdata/anim_imports/kplug/male/01_68.unity3d",
+    "abdata/anim_imports/kplug/male/01_69.unity3d",
+    "abdata/anim_imports/kplug/male/01_70.unity3d",
+    "abdata/anim_imports/kplug/male/01_71.unity3d",
+    "abdata/anim_imports/kplug/male/01_72.unity3d",
+    "abdata/anim_imports/kplug/male/01_73.unity3d",
+    "abdata/anim_imports/kplug/male/01_74.unity3d",
+    "abdata/anim_imports/kplug/male/01_75.unity3d",
+    "abdata/anim_imports/kplug/male/01_76.unity3d",
+    "abdata/anim_imports/kplug/male/01_77.unity3d",
+    "abdata/anim_imports/kplug/male/01_78.unity3d",
+    "abdata/anim_imports/kplug/male/01_79.unity3d"
+   ]
+  },
+  "92261d807c6da0a8": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 C.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 C.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_40.unity3d",
+    "abdata/anim_imports/kplug/female/02_41.unity3d",
+    "abdata/anim_imports/kplug/female/02_42.unity3d",
+    "abdata/anim_imports/kplug/female/02_43.unity3d",
+    "abdata/anim_imports/kplug/female/02_44.unity3d",
+    "abdata/anim_imports/kplug/male/02_40.unity3d",
+    "abdata/anim_imports/kplug/male/02_41.unity3d",
+    "abdata/anim_imports/kplug/male/02_42.unity3d",
+    "abdata/anim_imports/kplug/male/02_43.unity3d",
+    "abdata/anim_imports/kplug/male/02_44.unity3d"
+   ]
+  },
+  "4d2897090dacfc32": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 E.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 E.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_50.unity3d",
+    "abdata/anim_imports/kplug/female/02_51.unity3d",
+    "abdata/anim_imports/kplug/female/02_52.unity3d",
+    "abdata/anim_imports/kplug/female/02_53.unity3d",
+    "abdata/anim_imports/kplug/female/02_54.unity3d",
+    "abdata/anim_imports/kplug/male/02_50.unity3d",
+    "abdata/anim_imports/kplug/male/02_51.unity3d",
+    "abdata/anim_imports/kplug/male/02_52.unity3d",
+    "abdata/anim_imports/kplug/male/02_53.unity3d",
+    "abdata/anim_imports/kplug/male/02_54.unity3d"
+   ]
+  },
+  "d7778b0d9c22e937": {
+   "label": "[KKS][Female]EV_MuscleBody.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_UncensorSelector/[KKS][Female]EV_MuscleBody.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_musclef.unity3d",
+    "abdata/chara/oo_base_musclef2.unity3d",
+    "abdata/chara/oo_base_muscleM.unity3d",
+    "abdata/chara/oo_base_muscleSFF.unity3d"
+   ]
+  },
+  "5b657e884b3276fe": {
+   "label": "[HeldMesin]Wings v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/[HeldMesin]Wings v1.0.zipmod",
+   "entries": [
+    "abdata/chara/hld/accessory_body_wing01_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing01_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing02_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing02_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing03_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing03_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing04_a.unity3d",
+    "abdata/chara/hld/accessory_body_wing04_b.unity3d",
+    "abdata/chara/hld/accessory_body_wing05_b.unity3d"
+   ]
+  },
+  "5ea232a6e7bd1c5d": {
+   "label": "[Sugu] Rangiku Hair v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/Sugu/[Sugu] Rangiku Hair v1.0.zipmod",
+   "entries": [
+    "abdata/rangikuhair.unity3d"
+   ]
+  },
+  "76fdd06d668e9548": {
+   "label": "[GaryuX] JKO_mod + Jack-O hair Strive v1.1.zipmod",
+   "archive": "mods/Sideloader Modpack/GaryuX/[GaryuX] JKO_mod + Jack-O hair Strive v1.1.zipmod",
+   "entries": [
+    "abdata/chara/JKO mask.unity3d"
+   ]
+  },
+  "e23f939bbf0a04e3": {
+   "label": "[GaryuX] Ram_mod v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/GaryuX/[GaryuX] Ram_mod v1.0.zipmod",
+   "entries": [
+    "abdata/chara/RAM_accs.unity3d"
+   ]
+  },
+  "d93ed630b73b2961": {
+   "label": "[GaryuX] KOS-MOS Rework.zipmod",
+   "archive": "mods/Sideloader Modpack/GaryuX/[GaryuX] KOS-MOS Rework.zipmod",
+   "entries": [
+    "abdata/chara/ethercanon_new.unity3d"
+   ]
+  },
+  "35350c29a81de561": {
+   "label": "[MrDelegado] RenamonTail v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/MrDelegado/[MrDelegado] RenamonTail v1.0.zipmod",
+   "entries": [
+    "abdata/chara/mrdelegado/renamon_tail.unity3d"
+   ]
+  },
+  "9d1a7d25bcbe56da": {
+   "label": "[MrDelegado]Rosalina Luma v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/MrDelegado/[MrDelegado]Rosalina Luma v1.0.zipmod",
+   "entries": [
+    "abdata/chara/mrdelegado/rosalina_luma.unity3d"
+   ]
+  },
+  "91327f6e4ddc850f": {
+   "label": "[Noble_kale]  Dynamic Extra eye v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Dynamic Extra eye v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/dneye.unity3d"
+   ]
+  },
+  "752c94410a0f63b4": {
+   "label": "[Noble_kale]  Altair Assets Pack v1.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Altair Assets Pack v1.zipmod",
+   "entries": [
+    "abdata/studio/nk/altairweapons.unity3d"
+   ]
+  },
+  "7435941a3426d4ea": {
+   "label": "[Noble_kale]  Animated Poro v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Animated Poro v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/animporo.unity3d",
+    "abdata/chara/noblekale/animvelkoz.unity3d"
+   ]
+  },
+  "5e4c0b95f00f3692": {
+   "label": "[Noble_kale]  Altair Bundle 1 v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale]  Altair Bundle 1 v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/altairpack.unity3d"
+   ]
+  },
+  "18a69472b372784e": {
+   "label": "[Noble_kale] Fox Ears Animated Convert v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_kale] Fox Ears Animated Convert v1.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/nkconvertion.unity3d"
+   ]
+  },
+  "b901a282c5dea4a3": {
+   "label": "[Noble_Kale] Saiyan Tail animated v2.00.zipmod",
+   "archive": "mods/Sideloader Modpack/Noble_Kale/[Noble_Kale] Saiyan Tail animated v2.00.zipmod",
+   "entries": [
+    "abdata/chara/noblekale/sjanim.unity3d"
+   ]
+  },
+  "69d8c1edaca40d92": {
+   "label": "[LeiseHG] Emden v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack/LeiseHG/[LeiseHG] Emden v1.0.zipmod",
+   "entries": [
+    "abdata/chara/emden_demon_wings.unity3d",
+    "abdata/chara/emden_wings.unity3d"
+   ]
+  },
+  "c296bda4db963a04": {
+   "label": "[koikoi]AI Items v0.9.zipmod",
+   "archive": "mods/Sideloader Modpack/koikoi/[koikoi]AI Items v0.9.zipmod",
+   "entries": [
+    "abdata/chara/koikoi/ao_body_07.unity3d"
+   ]
+  },
+  "0aed21670f0c28c7": {
+   "label": "[RCL_circuit]Fox Ears with Animation.zipmod",
+   "archive": "mods/Sideloader Modpack/RCL_circuit/[RCL_circuit]Fox Ears with Animation.zipmod",
+   "entries": [
+    "abdata/chara/mod/mod_sample_rcl_00.unity3d"
+   ]
+  },
+  "a766edf7b7d9f729": {
+   "label": "[RCL_circuit]Eden Venus Blood Lagoon.zipmod",
+   "archive": "mods/Sideloader Modpack/RCL_circuit/[RCL_circuit]Eden Venus Blood Lagoon.zipmod",
+   "entries": [
+    "abdata/chara/mod/mod_eden_vb.unity3d"
+   ]
+  },
+  "e4616999d85a9d52": {
+   "label": "[RCL_circuit]Ranrin-Yuiki Amayui Castle Meister.zipmod",
+   "archive": "mods/Sideloader Modpack/RCL_circuit/[RCL_circuit]Ranrin-Yuiki Amayui Castle Meister.zipmod",
+   "entries": [
+    "abdata/chara/mod/mod_ranrin_acm.unity3d"
+   ]
+  },
+  "59bd340a0df44e47": {
+   "label": "[Ω-F13]White Carol 2019.zipmod",
+   "archive": "mods/Sideloader Modpack/Omega/[Ω-F13]White Carol 2019.zipmod",
+   "entries": [
+    "abdata/chara/White_Carol_2019.unity3d"
+   ]
+  },
+  "4c9d437dbf367a13": {
+   "label": "[ubin]Gundam Set.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/[ubin]Gundam Set.zipmod",
+   "entries": [
+    "abdata/studio/ubin_nugundam.unity3d",
+    "abdata/studio/ubin_RX-78-2.unity3d",
+    "abdata/studio/ubin_sazabi.unity3d",
+    "abdata/studio/ubin_Zaku_ii.unity3d",
+    "abdata/studio/ubin_Zaku_ii_Char_Custom.unity3d"
+   ]
+  },
+  "79e2ecd8d39eee91": {
+   "label": "[Ω-R10]Relic No.0699.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/[Ω-R10]Relic No.0699.zipmod",
+   "entries": [
+    "abdata/chara/The_0699_Confinement(Studio).unity3d",
+    "abdata/chara/The_0699_Confinement.unity3d"
+   ]
+  },
+  "1e8879a0e6be66c0": {
+   "label": "[Petardo]Maps 2.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/[Petardo]Maps 2.zipmod",
+   "entries": [
+    "abdata/studio/pool2day.unity3d",
+    "abdata/studio/pool2night.unity3d"
+   ]
+  },
+  "b73771bb4c44958c": {
+   "label": "[ubin]Gundam Weapons.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/[ubin]Gundam Weapons.zipmod",
+   "entries": [
+    "abdata/studio/ubin_Nu_gundam_weapons.unity3d",
+    "abdata/studio/ubin_RX-78-2_weapons.unity3d",
+    "abdata/studio/ubin_Sazabi_weapons.unity3d",
+    "abdata/studio/ubin_Zaku_weapons.unity3d"
+   ]
+  },
+  "daf060289cf5ce83": {
+   "label": "[DeathWeasel][KK]Musumakeup Characters v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/DeathWeasel/[DeathWeasel][KK]Musumakeup Characters v1.0.zipmod",
+   "entries": [
+    "abdata/studio/deathweasel/musumakeup_chara.unity3d"
+   ]
+  },
+  "f9155f3f941aa61f": {
+   "label": "[DeathWeasel]Musumakeup Maps v5.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/DeathWeasel/[DeathWeasel]Musumakeup Maps v5.1.zipmod",
+   "entries": [
+    "abdata/studio/deathweasel/musumakeup_map.unity3d"
+   ]
+  },
+  "c052a5443eab9d38": {
+   "label": "[Thatdude]Manjuu v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Thatdude/[Thatdude]Manjuu v1.0.zipmod",
+   "entries": [
+    "abdata/studio/illusionmods/manjuu.unity3d"
+   ]
+  },
+  "ac43232dd6e55d5c": {
+   "label": "[Ticklefist][KK]Wings v2.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Ticklefist/[Ticklefist][KK]Wings v2.0.zipmod",
+   "entries": [
+    "abdata/studio/illusionmods/hollywings.unity3d"
+   ]
+  },
+  "864fc3bd5a4fe02b": {
+   "label": "[AgiShark] 2021 Christmas Bonus animations for CharaStudio v1.2.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/AgiShark/[AgiShark] 2021 Christmas Bonus animations for CharaStudio v1.2.1.zipmod",
+   "entries": [
+    "abdata/studio/anime/2021christmas_bonus.unity3d"
+   ]
+  },
+  "bb3b328b3859f366": {
+   "label": "[JR] Big_Head v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/JR/[JR] Big_Head v1.0.zipmod",
+   "entries": [
+    "abdata/studio/JR/big_head.unity3d"
+   ]
+  },
+  "6927102f4d23d0ae": {
+   "label": "[DarkSoldier27] Trials of Cold Steel Studio Items v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/DarkSoldier27/[DarkSoldier27] Trials of Cold Steel Studio Items v1.0.zipmod",
+   "entries": [
+    "abdata/studio/wid_t10.unity3d"
+   ]
+  },
+  "e7860fa7756b9b2b": {
+   "label": "[DarkSoldier27] Vanilla_Maps v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/DarkSoldier27/[DarkSoldier27] Vanilla_Maps v1.0.zipmod",
+   "entries": [
+    "abdata/studio/vanilla_map_02.unity3d",
+    "abdata/studio/vanilla_map_06.unity3d",
+    "abdata/studio/vanilla_map_09.unity3d",
+    "abdata/studio/vanilla_map_29.unity3d",
+    "abdata/studio/vanilla_map_34.unity3d"
+   ]
+  },
+  "3edcf9c871058a0d": {
+   "label": "[earthship]4K Jumping Horse.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/earthship/[earthship]4K Jumping Horse.zipmod",
+   "entries": [
+    "abdata/studio/earthshiphorse.unity3d"
+   ]
+  },
+  "19af4a1fc7507ae3": {
+   "label": "[Pineapple] RoboticArmVol2 v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Pineapple/[Pineapple] RoboticArmVol2 v1.0.zipmod",
+   "entries": [
+    "abdata/studio/roboticarmvol2.unity3d"
+   ]
+  },
+  "1bb400f61df115e2": {
+   "label": "[Pineapple] RoboticArm v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Pineapple/[Pineapple] RoboticArm v1.0.zipmod",
+   "entries": [
+    "abdata/studio/roboticarm.unity3d"
+   ]
+  },
+  "ae4e3b492491b172": {
+   "label": "[ConQ] Monster Set 5 v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/ConQ/[ConQ] Monster Set 5 v1.0.zipmod",
+   "entries": [
+    "abdata/conq_monsters_monsterset5_bundles/conq_monsters_monsterset5/data_prefab_000.unity3d"
+   ]
+  },
+  "48118f477501779a": {
+   "label": "[[Omega]] Animation_ft_studio v1.0.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Omega/[[Omega]] Animation_ft_studio v1.0.0.zipmod",
+   "entries": [
+    "abdata/action/Animations_ft_Studio.unity3d"
+   ]
+  },
+  "6aead1ca06f7fa91": {
+   "label": "[Conquestus] BDSM Set 10 v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Conquestus/[Conquestus] BDSM Set 10 v1.00.zipmod",
+   "entries": [
+    "abdata/conq/bdsmset10.unity3d"
+   ]
+  },
+  "a52dd597378ba397": {
+   "label": "[Conquestus] Animals Set 1 v1.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Conquestus/[Conquestus] Animals Set 1 v1.1.zipmod",
+   "entries": [
+    "abdata/ConQ/animalsset1.unity3d"
+   ]
+  },
+  "db5e2a17754df25d": {
+   "label": "[Conquestus] Drones Set 1 v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Conquestus/[Conquestus] Drones Set 1 v1.0.zipmod",
+   "entries": [
+    "abdata/conq_bots_dronesset1_bundles/conq_bots_dronesset1/data_prefab_000.unity3d"
+   ]
+  },
+  "9caf93f1924c7168": {
+   "label": "[Conquestus] Packages Pack 2 v1.00.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Conquestus/[Conquestus] Packages Pack 2 v1.00.zipmod",
+   "entries": [
+    "abdata/conq_packages_packagespack2_bundles/conq_packages_packagespack2/data_prefab_000.unity3d"
+   ]
+  },
+  "0f10d1f7c2b16070": {
+   "label": "[Conquestus] Weapons Pack 5 v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Conquestus/[Conquestus] Weapons Pack 5 v1.0.zipmod",
+   "entries": [
+    "abdata/conq_weapons_weaponspack5_bundles/conq_weapons_weaponspack5/data_prefab_000.unity3d"
+   ]
+  },
+  "7f1baf8b15a011d5": {
+   "label": "[Eijineer] Casual VFX v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/Eijineer/[Eijineer] Casual VFX v1.0.zipmod",
+   "entries": [
+    "abdata/studio/casual.unity3d"
+   ]
+  },
+  "e6224e24985f7692": {
+   "label": "[nashi]Studio Effect Etc.zipmod",
+   "archive": "mods/Sideloader Modpack - Studio/nashi/[nashi]Studio Effect Etc.zipmod",
+   "entries": [
+    "abdata/studio/ns_studio_Effect_Etc.unity3d"
+   ]
+  },
+  "497f6f5f60d0fb0a": {
+   "label": "kkstub.sideways.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.sideways.zipmod",
+   "entries": [
+    "abdata/h/anim/female/custom_911_1.unity3d",
+    "abdata/h/anim/male/custom_911_1.unity3d"
+   ]
+  },
+  "76b926a5d27c6f32": {
+   "label": "[johnbbob_la_petite]Custom Animations.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/[johnbbob_la_petite]Custom Animations.zipmod",
+   "entries": [
+    "abdata/studio/anime/crap/female.unity3d",
+    "abdata/studio/anime/crap/male.unity3d",
+    "abdata/studio/anime/crap/un-human.unity3d"
+   ]
+  },
+  "d3401f67ef5dd98d": {
+   "label": "kkstub.stickbug.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.stickbug.zipmod",
+   "entries": [
+    "abdata/h/anim/female/stickbug.unity3d"
+   ]
+  },
+  "c957777e90010fdd": {
+   "label": "kkstub.behind.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.behind.zipmod",
+   "entries": [
+    "abdata/h/anim/female/custom_911_3.unity3d",
+    "abdata/h/anim/male/custom_911_3.unity3d"
+   ]
+  },
+  "c8bd79ff5bd0f52f": {
+   "label": "kkstub.grind.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/kkstub.grind.zipmod",
+   "entries": [
+    "abdata/h/anim/female/custom_911_0.unity3d",
+    "abdata/h/anim/male/custom_911_0.unity3d"
+   ]
+  },
+  "5d49326d1ade583e": {
+   "label": "[katarsys] KPlug Animation Bundles 3.2-1.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.2-1.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_73.unity3d",
+    "abdata/anim_imports/kplug/male/02_73.unity3d"
+   ]
+  },
+  "83a073e5a8621e55": {
+   "label": "[katarsys] KPlug Animation Bundles 3.3 K.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.3 K.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/05_01.unity3d",
+    "abdata/anim_imports/kplug/female/05_02.unity3d",
+    "abdata/anim_imports/kplug/female/05_03.unity3d",
+    "abdata/anim_imports/kplug/female/05_04.unity3d",
+    "abdata/anim_imports/kplug/female/06_01.unity3d",
+    "abdata/anim_imports/kplug/female/07_01.unity3d",
+    "abdata/anim_imports/kplug/male/06_01.unity3d",
+    "abdata/anim_imports/kplug/male/07_01.unity3d"
+   ]
+  },
+  "a2ba3bb0f6ecc63c": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 H.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 H.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_65.unity3d",
+    "abdata/anim_imports/kplug/female/02_66.unity3d",
+    "abdata/anim_imports/kplug/female/02_67.unity3d",
+    "abdata/anim_imports/kplug/female/02_68.unity3d",
+    "abdata/anim_imports/kplug/female/02_69.unity3d",
+    "abdata/anim_imports/kplug/male/02_65.unity3d",
+    "abdata/anim_imports/kplug/male/02_66.unity3d",
+    "abdata/anim_imports/kplug/male/02_67.unity3d",
+    "abdata/anim_imports/kplug/male/02_68.unity3d",
+    "abdata/anim_imports/kplug/male/02_69.unity3d"
+   ]
+  },
+  "8f7c4cdae10bacb1": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 I.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 I.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/03_01.unity3d",
+    "abdata/anim_imports/kplug/female/03_02.unity3d",
+    "abdata/anim_imports/kplug/female/04_01.unity3d",
+    "abdata/anim_imports/kplug/female/04_02.unity3d",
+    "abdata/anim_imports/kplug/female/04_03.unity3d",
+    "abdata/anim_imports/kplug/male/04_01.unity3d",
+    "abdata/anim_imports/kplug/male/04_02.unity3d",
+    "abdata/anim_imports/kplug/male/04_03.unity3d"
+   ]
+  },
+  "7e5a9f3714f3d249": {
+   "label": "[katarsys] KPlug Animation Bundles 3.2-3.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.2-3.1.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_82.unity3d",
+    "abdata/anim_imports/kplug/female/07_02.unity3d",
+    "abdata/anim_imports/kplug/male/01_82.unity3d",
+    "abdata/anim_imports/kplug/male/07_02.unity3d"
+   ]
+  },
+  "6d3eb765128fe01d": {
+   "label": "[katarsys] KPlug Animation Bundles 3.3-1.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.3-1.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_83.unity3d",
+    "abdata/anim_imports/kplug/female/01_84.unity3d",
+    "abdata/anim_imports/kplug/female/01_85.unity3d",
+    "abdata/anim_imports/kplug/male/01_83.unity3d",
+    "abdata/anim_imports/kplug/male/01_84.unity3d",
+    "abdata/anim_imports/kplug/male/01_85.unity3d"
+   ]
+  },
+  "83fce8178a307ead": {
+   "label": "[katarsys] KPlug Animation Bundles 3.2-2.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.2-2.1.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_74.unity3d",
+    "abdata/anim_imports/kplug/male/02_74.unity3d"
+   ]
+  },
+  "c8bb3a7d646bf5cb": {
+   "label": "[katarsys] KPlug Animation Bundles 3.1 F.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.1 F.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_55.unity3d",
+    "abdata/anim_imports/kplug/female/02_56.unity3d",
+    "abdata/anim_imports/kplug/female/02_57.unity3d",
+    "abdata/anim_imports/kplug/female/02_58.unity3d",
+    "abdata/anim_imports/kplug/female/02_59.unity3d",
+    "abdata/anim_imports/kplug/male/02_55.unity3d",
+    "abdata/anim_imports/kplug/male/02_56.unity3d",
+    "abdata/anim_imports/kplug/male/02_57.unity3d",
+    "abdata/anim_imports/kplug/male/02_58.unity3d",
+    "abdata/anim_imports/kplug/male/02_59.unity3d"
+   ]
+  },
+  "e817961cb66c6f09": {
+   "label": "[katarsys] KPlug Animation Bundles 3.3 D.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.3 D.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_45.unity3d",
+    "abdata/anim_imports/kplug/female/02_46.unity3d",
+    "abdata/anim_imports/kplug/female/02_47.unity3d",
+    "abdata/anim_imports/kplug/female/02_48.unity3d",
+    "abdata/anim_imports/kplug/female/02_49.unity3d",
+    "abdata/anim_imports/kplug/male/02_45.unity3d",
+    "abdata/anim_imports/kplug/male/02_46.unity3d",
+    "abdata/anim_imports/kplug/male/02_47.unity3d",
+    "abdata/anim_imports/kplug/male/02_48.unity3d",
+    "abdata/anim_imports/kplug/male/02_49.unity3d"
+   ]
+  },
+  "fef6984d9a597b00": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 J.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 J.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/04_04.unity3d",
+    "abdata/anim_imports/kplug/female/04_05.unity3d",
+    "abdata/anim_imports/kplug/female/04_06.unity3d",
+    "abdata/anim_imports/kplug/female/04_07.unity3d",
+    "abdata/anim_imports/kplug/female/04_08.unity3d",
+    "abdata/anim_imports/kplug/female/04_09.unity3d",
+    "abdata/anim_imports/kplug/female/04_10.unity3d",
+    "abdata/anim_imports/kplug/female/04_11.unity3d",
+    "abdata/anim_imports/kplug/male/04_04.unity3d",
+    "abdata/anim_imports/kplug/male/04_05.unity3d",
+    "abdata/anim_imports/kplug/male/04_06.unity3d",
+    "abdata/anim_imports/kplug/male/04_07.unity3d",
+    "abdata/anim_imports/kplug/male/04_08.unity3d",
+    "abdata/anim_imports/kplug/male/04_09.unity3d",
+    "abdata/anim_imports/kplug/male/04_10.unity3d",
+    "abdata/anim_imports/kplug/male/04_11.unity3d"
+   ]
+  },
+  "155787b778235164": {
+   "label": "[katarsys] KPlug Animation Bundles 3.0 G.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.0 G.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_60.unity3d",
+    "abdata/anim_imports/kplug/female/02_61.unity3d",
+    "abdata/anim_imports/kplug/female/02_62.unity3d",
+    "abdata/anim_imports/kplug/female/02_63.unity3d",
+    "abdata/anim_imports/kplug/female/02_64.unity3d",
+    "abdata/anim_imports/kplug/male/02_60.unity3d",
+    "abdata/anim_imports/kplug/male/02_61.unity3d",
+    "abdata/anim_imports/kplug/male/02_62.unity3d",
+    "abdata/anim_imports/kplug/male/02_63.unity3d",
+    "abdata/anim_imports/kplug/male/02_64.unity3d"
+   ]
+  },
+  "2841f38d026fcc7e": {
+   "label": "[katarsys] KPlug Animation Bundles 3.3-2.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.3-2.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_86.unity3d",
+    "abdata/anim_imports/kplug/male/01_86.unity3d"
+   ]
+  },
+  "70b7ad054649f4c1": {
+   "label": "[katarsys] KPlug Animation Bundles 3.1-2.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.1-2.1.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/02_71.unity3d",
+    "abdata/anim_imports/kplug/female/02_72.unity3d",
+    "abdata/anim_imports/kplug/male/02_71.unity3d",
+    "abdata/anim_imports/kplug/male/02_72.unity3d"
+   ]
+  },
+  "93269761f156ff39": {
+   "label": "[katarsys] KPlug Animation Bundles 3.1-1.2.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Katarsys/[katarsys] KPlug Animation Bundles 3.1-1.2.zipmod",
+   "entries": [
+    "abdata/anim_imports/kplug/female/01_80.unity3d",
+    "abdata/anim_imports/kplug/female/01_81.unity3d",
+    "abdata/anim_imports/kplug/female/02_70.unity3d",
+    "abdata/anim_imports/kplug/male/01_80.unity3d",
+    "abdata/anim_imports/kplug/male/01_81.unity3d",
+    "abdata/anim_imports/kplug/male/02_70.unity3d"
+   ]
+  },
+  "fecbdb92b988c61d": {
+   "label": "[AgiShark] Mixamo animations for CharaStudio v3.1.2.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/AgiShark/[AgiShark] Mixamo animations for CharaStudio v3.1.2.zipmod",
+   "entries": [
+    "abdata/studio/anime/mixamo_action_part1.unity3d",
+    "abdata/studio/anime/mixamo_action_part2.unity3d",
+    "abdata/studio/anime/mixamo_action_part3.unity3d",
+    "abdata/studio/anime/mixamo_action_part4.unity3d",
+    "abdata/studio/anime/mixamo_action_part5.unity3d",
+    "abdata/studio/anime/mixamo_action_part6.unity3d",
+    "abdata/studio/anime/mixamo_capoeira_part1.unity3d",
+    "abdata/studio/anime/mixamo_communication_part1.unity3d",
+    "abdata/studio/anime/mixamo_communication_part2.unity3d",
+    "abdata/studio/anime/mixamo_communication_part3.unity3d",
+    "abdata/studio/anime/mixamo_dance_part1.unity3d",
+    "abdata/studio/anime/mixamo_dance_part2.unity3d",
+    "abdata/studio/anime/mixamo_dance_part3.unity3d",
+    "abdata/studio/anime/mixamo_excercise_part1.unity3d",
+    "abdata/studio/anime/mixamo_fight_part1.unity3d",
+    "abdata/studio/anime/mixamo_fight_part2.unity3d",
+    "abdata/studio/anime/mixamo_fight_part3.unity3d",
+    "abdata/studio/anime/mixamo_gun_part1.unity3d",
+    "abdata/studio/anime/mixamo_gun_part2.unity3d",
+    "abdata/studio/anime/mixamo_gun_part3.unity3d",
+    "abdata/studio/anime/mixamo_idle_part1.unity3d",
+    "abdata/studio/anime/mixamo_jump_part1.unity3d",
+    "abdata/studio/anime/mixamo_pose_part1.unity3d",
+    "abdata/studio/anime/mixamo_soccer_part1.unity3d",
+    "abdata/studio/anime/mixamo_sports_part1.unity3d",
+    "abdata/studio/anime/mixamo_torch_part1.unity3d",
+    "abdata/studio/anime/mixamo_walknrun_part1.unity3d",
+    "abdata/studio/anime/mixamo_walknrun_part2.unity3d",
+    "abdata/studio/anime/mixamo_walknrun_part3.unity3d",
+    "abdata/studio/anime/mixamo_walknrun_part4.unity3d",
+    "abdata/studio/anime/mixamo_walknrun_part5.unity3d",
+    "abdata/studio/anime/mixamo_weapon_part1.unity3d",
+    "abdata/studio/anime/mixamo_wizard_part1.unity3d",
+    "abdata/studio/anime/mixamo_zombie_part1.unity3d"
+   ]
+  },
+  "94141aecc7e3f529": {
+   "label": "[[ΩMEGA]] Demo_H_Animations v1.0.8.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/[ΩMEGA]/[[ΩMEGA]] Demo_H_Animations v1.0.8.zipmod",
+   "entries": [
+    "abdata/h/anim/female/Pose_1_F.unity3d",
+    "abdata/h/anim/female/Pose_2_F.unity3d",
+    "abdata/h/anim/female/Pose_3_F.unity3d",
+    "abdata/h/anim/female/Pose_4_F.unity3d",
+    "abdata/h/anim/female/Pose_5_F.unity3d",
+    "abdata/h/anim/female/Pose_6_F.unity3d",
+    "abdata/h/anim/male/Pose_1_M.unity3d",
+    "abdata/h/anim/male/Pose_2_M.unity3d",
+    "abdata/h/anim/male/Pose_3_M.unity3d",
+    "abdata/h/anim/male/Pose_4_M.unity3d",
+    "abdata/h/anim/male/Pose_5_M.unity3d",
+    "abdata/h/anim/male/Pose_6_M.unity3d"
+   ]
+  },
+  "967dbc60b16723e3": {
+   "label": "[Omega] Free_H_Animations_Lists v1.1.1.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Omega/[Omega] Free_H_Animations_Lists v1.1.1.zipmod",
+   "entries": [
+    "abdata/studio/V_shell_F_Studio.unity3d"
+   ]
+  },
+  "eb5208fb92705295": {
+   "label": "[Omega] Free_H_Animations_Bundles v1.1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - Animations/Omega/[Omega] Free_H_Animations_Bundles v1.1.0.zipmod",
+   "entries": [
+    "abdata/h/anim/female/Armpitjob_F.unity3d",
+    "abdata/h/anim/female/Cowgirl_leaning_F.unity3d",
+    "abdata/h/anim/female/Footjob_sitting_F.unity3d",
+    "abdata/h/anim/female/Forward_bending_F.unity3d",
+    "abdata/h/anim/female/Horizon_F.unity3d",
+    "abdata/h/anim/female/Leg_hold_F.unity3d",
+    "abdata/h/anim/female/Loop_halloween_F.unity3d",
+    "abdata/h/anim/female/Reverse_cowgirl_F.unity3d",
+    "abdata/h/anim/female/Reverse_lift_F.unity3d",
+    "abdata/h/anim/female/V_shell_F.unity3d",
+    "abdata/h/anim/male/Armpitjob_M.unity3d",
+    "abdata/h/anim/male/Cowgirl_leaning_M.unity3d",
+    "abdata/h/anim/male/Footjob_sitting_M.unity3d",
+    "abdata/h/anim/male/Forward_bending_M.unity3d",
+    "abdata/h/anim/male/Horizon_M.unity3d",
+    "abdata/h/anim/male/Leg_hold_M.unity3d",
+    "abdata/h/anim/male/Loop_halloween_M.unity3d",
+    "abdata/h/anim/male/Reverse_cowgirl_M.unity3d",
+    "abdata/h/anim/male/Reverse_lift_M.unity3d",
+    "abdata/h/anim/male/V_shell_M.unity3d"
+   ]
+  },
+  "5d12b916f9457158": {
+   "label": "[Ruine02] [KKS] TrailblazerRoom v1.1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/Ruine02/[Ruine02] [KKS] TrailblazerRoom v1.1.zipmod",
+   "entries": [
+    "abdata/h/common/trailblazerroom.unity3d",
+    "abdata/map/scene/trailblazerroom.unity3d",
+    "abdata/vr/common/trailblazerroom.unity3d"
+   ]
+  },
+  "40c1539a62ad74d5": {
+   "label": "[DeathWeasel][KKS] Map - Sakura's Room v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Map - Sakura's Room v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/sakuraroom.unity3d",
+    "abdata/map/scene/sakuraroom.unity3d",
+    "abdata/vr/common/sakuraroom.unity3d"
+   ]
+  },
+  "24c8a3b34264a065": {
+   "label": "[DeathWeasel][KKS] Musumakeup Map - House 01 v1.1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Musumakeup Map - House 01 v1.1.zipmod",
+   "entries": [
+    "abdata/h/common/mmhouse01.unity3d",
+    "abdata/vr/common/mmhouse01.unity3d"
+   ]
+  },
+  "e099753a5ce5df8d": {
+   "label": "[DeathWeasel][KKS] Musumakeup Map - Bath v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Musumakeup Map - Bath v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/mmbath.unity3d",
+    "abdata/vr/common/mmbath.unity3d"
+   ]
+  },
+  "65b2a69b9af49741": {
+   "label": "[DeathWeasel][KKS] Honey Select 2 Map - Suite v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Honey Select 2 Map - Suite v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/hs2suite.unity3d",
+    "abdata/map/scene/hs2suite.unity3d",
+    "abdata/vr/common/h2suite.unity3d"
+   ]
+  },
+  "c0cc281d43f468c2": {
+   "label": "[DeathWeasel][KKS] Map - Pool v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DeathWeasel/[DeathWeasel][KKS] Map - Pool v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/poolmap.unity3d",
+    "abdata/vr/common/poolmap.unity3d"
+   ]
+  },
+  "0637cbd443704d11": {
+   "label": "[DarkSoldier27] Project Diva H-Maps Collection v1.2.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27] Project Diva H-Maps Collection v1.2.zipmod",
+   "entries": [
+    "abdata/h/common/PDHM001.unity3d",
+    "abdata/h/common/PDHM002.unity3d",
+    "abdata/h/common/PDHM003.unity3d",
+    "abdata/h/common/PDHM004.unity3d",
+    "abdata/h/common/PDHM005.unity3d",
+    "abdata/h/common/PDHM006.unity3d",
+    "abdata/h/common/PDHM007.unity3d",
+    "abdata/h/common/PDHM008.unity3d",
+    "abdata/h/common/PDHM009.unity3d",
+    "abdata/h/common/PDHM010.unity3d",
+    "abdata/h/common/PDHM011.unity3d",
+    "abdata/h/common/PDHM012.unity3d",
+    "abdata/h/common/PDHM013.unity3d",
+    "abdata/h/common/PDHM014.unity3d",
+    "abdata/h/common/PDHM015.unity3d",
+    "abdata/h/common/PDHM016.unity3d",
+    "abdata/h/common/PDHM017.unity3d",
+    "abdata/h/common/PDHM018.unity3d",
+    "abdata/h/common/PDHM019.unity3d",
+    "abdata/h/common/PDHM020.unity3d",
+    "abdata/h/common/PDHM021.unity3d",
+    "abdata/h/common/PDHM022.unity3d",
+    "abdata/h/common/PDHM023.unity3d",
+    "abdata/h/common/PDHM024.unity3d",
+    "abdata/h/common/pdhm025.unity3d",
+    "abdata/h/common/pdhm026.unity3d",
+    "abdata/h/common/pdhm027.unity3d",
+    "abdata/h/common/pdhm028.unity3d",
+    "abdata/h/common/pdhm029.unity3d",
+    "abdata/h/common/pdhm030.unity3d",
+    "abdata/h/common/pdhm031.unity3d",
+    "abdata/h/common/pdhm032.unity3d",
+    "abdata/h/common/pdhm033.unity3d",
+    "abdata/h/common/pdhm035.unity3d",
+    "abdata/h/common/pdhm036.unity3d",
+    "abdata/h/common/pdhm037.unity3d",
+    "abdata/h/common/pdhm038.unity3d",
+    "abdata/h/common/pdhm039.unity3d",
+    "abdata/map/scene/PDHM001.unity3d",
+    "abdata/map/scene/PDHM004.unity3d",
+    "abdata/map/scene/PDHM006.unity3d",
+    "abdata/map/scene/PDHM010.unity3d",
+    "abdata/map/scene/PDHM013.unity3d",
+    "abdata/map/scene/PDHM014.unity3d",
+    "abdata/map/scene/PDHM016.unity3d",
+    "abdata/map/scene/PDHM017.unity3d",
+    "abdata/map/scene/PDHM022.unity3d",
+    "abdata/map/scene/pdhm026.unity3d",
+    "abdata/map/scene/pdhm029.unity3d",
+    "abdata/map/scene/pdhm032.unity3d",
+    "abdata/map/scene/pdhm033.unity3d",
+    "abdata/map/scene/pdhm036.unity3d",
+    "abdata/vr/common/pdhm001.unity3d",
+    "abdata/vr/common/pdhm002.unity3d",
+    "abdata/vr/common/pdhm003.unity3d",
+    "abdata/vr/common/pdhm004.unity3d",
+    "abdata/vr/common/pdhm005.unity3d",
+    "abdata/vr/common/pdhm006.unity3d",
+    "abdata/vr/common/pdhm007.unity3d",
+    "abdata/vr/common/pdhm008.unity3d",
+    "abdata/vr/common/pdhm009.unity3d",
+    "abdata/vr/common/pdhm010.unity3d",
+    "abdata/vr/common/pdhm011.unity3d",
+    "abdata/vr/common/pdhm012.unity3d",
+    "abdata/vr/common/pdhm013.unity3d",
+    "abdata/vr/common/pdhm014.unity3d",
+    "abdata/vr/common/pdhm015.unity3d",
+    "abdata/vr/common/pdhm016.unity3d",
+    "abdata/vr/common/pdhm017.unity3d",
+    "abdata/vr/common/pdhm018.unity3d",
+    "abdata/vr/common/pdhm019.unity3d",
+    "abdata/vr/common/pdhm020.unity3d",
+    "abdata/vr/common/pdhm021.unity3d",
+    "abdata/vr/common/pdhm022.unity3d",
+    "abdata/vr/common/pdhm023.unity3d",
+    "abdata/vr/common/pdhm024.unity3d",
+    "abdata/vr/common/pdhm025.unity3d",
+    "abdata/vr/common/pdhm026.unity3d",
+    "abdata/vr/common/pdhm027.unity3d",
+    "abdata/vr/common/pdhm028.unity3d",
+    "abdata/vr/common/pdhm029.unity3d",
+    "abdata/vr/common/pdhm030.unity3d",
+    "abdata/vr/common/pdhm031.unity3d",
+    "abdata/vr/common/pdhm032.unity3d",
+    "abdata/vr/common/pdhm033.unity3d",
+    "abdata/vr/common/pdhm035.unity3d",
+    "abdata/vr/common/pdhm036.unity3d",
+    "abdata/vr/common/pdhm037.unity3d"
+   ]
+  },
+  "270f6f229c42d872": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 1.zipmod",
+   "entries": [
+    "abdata/h/common/rhm001.unity3d",
+    "abdata/h/common/rhm002.unity3d",
+    "abdata/h/common/rhm003.unity3d"
+   ]
+  },
+  "20bdcbf613b02ec9": {
+   "label": "[DarkSoldier27][KKS]MiSide H-Map Pack 3.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]MiSide H-Map Pack 3.zipmod",
+   "entries": [
+    "abdata/h/common/miside007.unity3d",
+    "abdata/h/common/miside008.unity3d",
+    "abdata/h/common/miside009.unity3d",
+    "abdata/h/common/miside010.unity3d",
+    "abdata/map/scene/miside007.unity3d",
+    "abdata/map/scene/miside008.unity3d",
+    "abdata/map/scene/miside009.unity3d",
+    "abdata/map/scene/miside010.unity3d"
+   ]
+  },
+  "e81f0e2b694c0954": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 3.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 3.zipmod",
+   "entries": [
+    "abdata/h/common/rhm008.unity3d",
+    "abdata/h/common/rhm009.unity3d",
+    "abdata/h/common/rhm010.unity3d",
+    "abdata/map/scene/rhm009.unity3d"
+   ]
+  },
+  "051c78fd34da03ea": {
+   "label": "[DarkSoldier27][KKS]MiSide H-Map Pack 4.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]MiSide H-Map Pack 4.zipmod",
+   "entries": [
+    "abdata/h/common/miside011.unity3d",
+    "abdata/h/common/miside012.unity3d",
+    "abdata/h/common/miside013.unity3d",
+    "abdata/h/common/miside014.unity3d",
+    "abdata/map/scene/miside011.unity3d",
+    "abdata/map/scene/miside012.unity3d",
+    "abdata/map/scene/miside013.unity3d",
+    "abdata/map/scene/miside014.unity3d"
+   ]
+  },
+  "c63b61696aa655a9": {
+   "label": "[DarkSoldier27][KKS]JRPG H-Maps v1.8.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]JRPG H-Maps v1.8.zipmod",
+   "entries": [
+    "abdata/h/common/jrpghm001.unity3d",
+    "abdata/h/common/jrpghm002.unity3d",
+    "abdata/h/common/jrpghm003.unity3d",
+    "abdata/h/common/jrpghm004.unity3d",
+    "abdata/h/common/jrpghm005.unity3d",
+    "abdata/h/common/jrpghm006.unity3d",
+    "abdata/h/common/jrpghm008.unity3d",
+    "abdata/h/common/jrpghm009.unity3d",
+    "abdata/h/common/jrpghm010.unity3d",
+    "abdata/h/common/jrpghm011.unity3d",
+    "abdata/h/common/jrpghm012.unity3d",
+    "abdata/h/common/jrpghm013.unity3d",
+    "abdata/h/common/jrpghm014.unity3d",
+    "abdata/h/common/jrpghm015.unity3d",
+    "abdata/h/common/jrpghm016.unity3d",
+    "abdata/h/common/jrpghm017.unity3d",
+    "abdata/h/common/jrpghm018.unity3d",
+    "abdata/h/common/jrpghm019.unity3d",
+    "abdata/h/common/jrpghm020.unity3d",
+    "abdata/h/common/jrpghm021.unity3d",
+    "abdata/h/common/jrpghm022.unity3d",
+    "abdata/h/common/jrpghm023.unity3d",
+    "abdata/h/common/jrpghm024.unity3d",
+    "abdata/h/common/jrpghm025.unity3d",
+    "abdata/h/common/jrpghm026.unity3d",
+    "abdata/h/common/jrpghm027.unity3d",
+    "abdata/h/common/jrpghm028.unity3d",
+    "abdata/h/common/jrpghm029.unity3d",
+    "abdata/h/common/jrpghm030.unity3d",
+    "abdata/h/common/jrpghm031.unity3d",
+    "abdata/h/common/jrpghm032.unity3d",
+    "abdata/h/common/jrpghm033.unity3d",
+    "abdata/map/scene/jrpghm002.unity3d",
+    "abdata/map/scene/jrpghm003.unity3d",
+    "abdata/map/scene/jrpghm004.unity3d",
+    "abdata/map/scene/jrpghm006.unity3d",
+    "abdata/map/scene/jrpghm007.unity3d",
+    "abdata/map/scene/jrpghm008.unity3d",
+    "abdata/map/scene/jrpghm009.unity3d",
+    "abdata/map/scene/jrpghm010.unity3d",
+    "abdata/map/scene/jrpghm013.unity3d",
+    "abdata/map/scene/jrpghm028.unity3d",
+    "abdata/map/scene/jrpghm029.unity3d",
+    "abdata/map/scene/jrpghm033.unity3d"
+   ]
+  },
+  "e204e33e517abb1b": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 4.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 4.zipmod",
+   "entries": [
+    "abdata/h/common/rhm011.unity3d",
+    "abdata/h/common/rhm012.unity3d",
+    "abdata/h/common/rhm013.unity3d"
+   ]
+  },
+  "b23dc2e15ae4bf7a": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 7.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 7.zipmod",
+   "entries": [
+    "abdata/h/common/rhm020.unity3d",
+    "abdata/h/common/rhm021.unity3d",
+    "abdata/h/common/rhm022.unity3d",
+    "abdata/h/common/rhm023.unity3d",
+    "abdata/h/common/rhm024.unity3d",
+    "abdata/h/common/rhm025.unity3d"
+   ]
+  },
+  "f8bf71a06613f748": {
+   "label": "[DarkSoldier27][KKS]MiSide H-Map Pack 1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]MiSide H-Map Pack 1.zipmod",
+   "entries": [
+    "abdata/h/common/miside001.unity3d",
+    "abdata/h/common/miside002.unity3d",
+    "abdata/h/common/miside002b.unity3d",
+    "abdata/map/scene/miside002.unity3d",
+    "abdata/map/scene/miside002b.unity3d"
+   ]
+  },
+  "54da4705eaa6d083": {
+   "label": "[DarkSoldier27][KKS]Project DIVA H-Map Extend 2.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Project DIVA H-Map Extend 2.zipmod",
+   "entries": [
+    "abdata/h/common/pdhmex005.unity3d",
+    "abdata/h/common/pdhmex006.unity3d",
+    "abdata/h/common/pdhmex007.unity3d"
+   ]
+  },
+  "6ad22132a4e9c235": {
+   "label": "[DarkSoldier27][KKS]MiSide H-Map Pack 2.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]MiSide H-Map Pack 2.zipmod",
+   "entries": [
+    "abdata/h/common/miside003.unity3d",
+    "abdata/h/common/miside004.unity3d",
+    "abdata/h/common/miside006.unity3d",
+    "abdata/map/scene/miside003.unity3d",
+    "abdata/map/scene/miside004.unity3d",
+    "abdata/map/scene/miside005.unity3d",
+    "abdata/map/scene/miside006.unity3d"
+   ]
+  },
+  "083a19fc8a568ad1": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 6.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 6.zipmod",
+   "entries": [
+    "abdata/h/common/rhm017.unity3d",
+    "abdata/h/common/rhm018.unity3d",
+    "abdata/h/common/rhm019.unity3d"
+   ]
+  },
+  "f12ab9916365e179": {
+   "label": "[DarkSoldier27][KKS]More H-Maps v1.4.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]More H-Maps v1.4.zipmod",
+   "entries": [
+    "abdata/h/common/mhm001.unity3d",
+    "abdata/h/common/mhm002.unity3d",
+    "abdata/h/common/mhm003.unity3d",
+    "abdata/h/common/mhm004.unity3d",
+    "abdata/h/common/mhm005.unity3d",
+    "abdata/h/common/mhm006.unity3d",
+    "abdata/h/common/mhm007.unity3d",
+    "abdata/h/common/mhm008.unity3d",
+    "abdata/h/common/mhm009.unity3d",
+    "abdata/h/common/mhm010.unity3d",
+    "abdata/h/common/mhm011.unity3d",
+    "abdata/h/common/mhm012.unity3d",
+    "abdata/h/common/mhm013.unity3d",
+    "abdata/h/common/mhm014.unity3d",
+    "abdata/h/common/mhm015.unity3d",
+    "abdata/h/common/mhm016.unity3d",
+    "abdata/h/common/mhm017.unity3d",
+    "abdata/h/common/mhm018.unity3d",
+    "abdata/h/common/mhm019.unity3d",
+    "abdata/h/common/mhm020.unity3d",
+    "abdata/h/common/mhm021.unity3d",
+    "abdata/h/common/mhm022.unity3d",
+    "abdata/h/common/mhm023.unity3d",
+    "abdata/h/common/mhm024.unity3d",
+    "abdata/h/common/mhm025.unity3d",
+    "abdata/h/common/mhm026.unity3d",
+    "abdata/h/common/mhm027.unity3d",
+    "abdata/h/common/mhm028.unity3d",
+    "abdata/h/common/mhm029.unity3d",
+    "abdata/h/common/mhm030.unity3d",
+    "abdata/h/common/mhm031.unity3d",
+    "abdata/h/common/mhm032.unity3d",
+    "abdata/h/common/mhm033.unity3d",
+    "abdata/h/common/mhm034.unity3d",
+    "abdata/h/common/mhm035.unity3d",
+    "abdata/h/common/mhm036.unity3d",
+    "abdata/h/common/mhm037.unity3d",
+    "abdata/h/common/mhm038.unity3d",
+    "abdata/h/common/mhm039.unity3d",
+    "abdata/h/common/mhm040.unity3d",
+    "abdata/h/common/mhm041.unity3d",
+    "abdata/h/common/mhm042.unity3d",
+    "abdata/h/common/mhm043.unity3d",
+    "abdata/h/common/mhm044.unity3d",
+    "abdata/h/common/mhm045.unity3d",
+    "abdata/h/common/mhm046.unity3d",
+    "abdata/map/scene/mhm001.unity3d",
+    "abdata/map/scene/mhm025.unity3d",
+    "abdata/map/scene/mhm026.unity3d",
+    "abdata/map/scene/mhm028.unity3d",
+    "abdata/map/scene/mhm030.unity3d"
+   ]
+  },
+  "ae7dd4e74ec36e89": {
+   "label": "[DarkSoldier27][KKS]Project DIVA H-Map Extend 1.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Project DIVA H-Map Extend 1.zipmod",
+   "entries": [
+    "abdata/h/common/pdhmex001.unity3d",
+    "abdata/h/common/pdhmex002.unity3d",
+    "abdata/h/common/pdhmex003.unity3d",
+    "abdata/h/common/pdhmex004.unity3d"
+   ]
+  },
+  "5dd9096ede204b63": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 2.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 2.zipmod",
+   "entries": [
+    "abdata/h/common/rhm004.unity3d",
+    "abdata/h/common/rhm005.unity3d",
+    "abdata/h/common/rhm006.unity3d",
+    "abdata/h/common/rhm007.unity3d"
+   ]
+  },
+  "868390771fd95e86": {
+   "label": "[DarkSoldier27][KKS]Random H-Map Pack 5.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/DarkSoldier27/[DarkSoldier27][KKS]Random H-Map Pack 5.zipmod",
+   "entries": [
+    "abdata/h/common/rhm014.unity3d",
+    "abdata/h/common/rhm015.unity3d",
+    "abdata/h/common/rhm016.unity3d"
+   ]
+  },
+  "b75dbf2eb127ea09": {
+   "label": "[Reverie][KKS] BFW Apartment 1 v1.3.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/Reverie/[Reverie][KKS] BFW Apartment 1 v1.3.zipmod",
+   "entries": [
+    "abdata/map/scene/bfwapartment1.unity3d",
+    "abdata/h/common/bfwapartment1.unity3d"
+   ]
+  },
+  "056ed94137e92bd7": {
+   "label": "[deadshark] World is mine v1.0.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_Maps/deadshark/[deadshark] World is mine v1.0.zipmod",
+   "entries": [
+    "abdata/h/common/worldismine.unity3d",
+    "abdata/map/scene/worldismine.unity3d",
+    "abdata/vr/common/worldismine.unity3d"
+   ]
+  },
+  "f107fb9929457000": {
+   "label": "[SAC] Uncensor Selector Pack v0.9.2.zipmod",
+   "archive": "mods/Sideloader Modpack - KKS_UncensorSelector/[SAC] Uncensor Selector Pack v0.9.2.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_sacclit.unity3d",
+    "abdata/chara/oo_base_sacclit2.unity3d",
+    "abdata/chara/oo_base_sacgash.unity3d",
+    "abdata/chara/oo_base_sacgash2.unity3d",
+    "abdata/chara/oo_base_sacinnie.unity3d",
+    "abdata/chara/oo_base_sacinnie2.unity3d",
+    "abdata/chara/oo_base_sackupaa.unity3d",
+    "abdata/chara/oo_base_sacmeaty.unity3d",
+    "abdata/chara/oo_base_sacmeaty2.unity3d",
+    "abdata/chara/oo_base_sacpuffy.unity3d",
+    "abdata/chara/oo_base_sacroastie.unity3d",
+    "abdata/chara/oo_base_sacroastie2.unity3d",
+    "abdata/chara/oo_base_sacroastie3.unity3d",
+    "abdata/chara/oo_base_sacslit.unity3d"
+   ]
+  },
+  "608c232d0f0c9977": {
+   "label": "[KK][Female]EV_Gardevoir.zipmod",
+   "archive": "mods/Sideloader Modpack - Exclusive KK/Evaan/[KK][Female]EV_Gardevoir.zipmod",
+   "entries": [
+    "abdata/chara/oo_base_gardevoir.unity3d"
+   ]
+  }
+ }
+}

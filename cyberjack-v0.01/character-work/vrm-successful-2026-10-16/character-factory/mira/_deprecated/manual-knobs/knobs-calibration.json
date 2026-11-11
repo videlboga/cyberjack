@@ -1,0 +1,216 @@
+{
+ "base": {
+  "calf": 0.1787,
+  "thigh": 0.1789,
+  "hips": 0.218,
+  "waist": 0.2209,
+  "shoulder": 0.1194,
+  "bust": 0.1841,
+  "height": 1.436
+ },
+ "calibration": {
+  "hips": {
+   "at_0.9": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.1987,
+    "waist": 0.2209,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "at_1.1": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.2373,
+    "waist": 0.2209,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "slope": {
+    "calf": 0.0,
+    "thigh": 0.0,
+    "hips": 0.1928,
+    "waist": 0.0,
+    "shoulder": 0.0,
+    "bust": 0.0,
+    "height": 0.0
+   }
+  },
+  "waist": {
+   "at_0.9": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.2131,
+    "waist": 0.205,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "at_1.1": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.2228,
+    "waist": 0.2229,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "slope": {
+    "calf": 0.0,
+    "thigh": 0.0,
+    "hips": 0.0484,
+    "waist": 0.0893,
+    "shoulder": 0.0,
+    "bust": 0.0,
+    "height": 0.0
+   }
+  },
+  "shoulder": {
+   "at_0.9": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1082,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "at_1.1": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1306,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "slope": {
+    "calf": 0.0,
+    "thigh": 0.0,
+    "hips": 0.0,
+    "waist": 0.0,
+    "shoulder": 0.1122,
+    "bust": 0.0,
+    "height": 0.0
+   }
+  },
+  "bust": {
+   "at_0.9": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1165,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "at_1.1": {
+    "calf": 0.1787,
+    "thigh": 0.1789,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1226,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "slope": {
+    "calf": 0.0,
+    "thigh": 0.0,
+    "hips": 0.0,
+    "waist": 0.0,
+    "shoulder": 0.0305,
+    "bust": 0.0,
+    "height": 0.0
+   }
+  },
+  "legs": {
+   "at_0.9": {
+    "calf": 0.1794,
+    "thigh": 0.1796,
+    "hips": 0.2188,
+    "waist": 0.2217,
+    "shoulder": 0.1199,
+    "bust": 0.1841,
+    "height": 1.4305
+   },
+   "at_1.1": {
+    "calf": 0.1776,
+    "thigh": 0.1782,
+    "hips": 0.2171,
+    "waist": 0.22,
+    "shoulder": 0.1189,
+    "bust": 0.1852,
+    "height": 1.4417
+   },
+   "slope": {
+    "calf": -0.0092,
+    "thigh": -0.007,
+    "hips": -0.0085,
+    "waist": -0.0086,
+    "shoulder": -0.0047,
+    "bust": 0.0055,
+    "height": 0.0559
+   }
+  },
+  "thigh": {
+   "at_0.9": {
+    "calf": 0.1787,
+    "thigh": 0.1625,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "at_1.1": {
+    "calf": 0.1787,
+    "thigh": 0.1954,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "slope": {
+    "calf": 0.0,
+    "thigh": 0.1644,
+    "hips": 0.0,
+    "waist": 0.0,
+    "shoulder": 0.0,
+    "bust": 0.0,
+    "height": 0.0
+   }
+  },
+  "calf": {
+   "at_0.9": {
+    "calf": 0.162,
+    "thigh": 0.1789,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "at_1.1": {
+    "calf": 0.1955,
+    "thigh": 0.1789,
+    "hips": 0.218,
+    "waist": 0.2209,
+    "shoulder": 0.1194,
+    "bust": 0.1841,
+    "height": 1.436
+   },
+   "slope": {
+    "calf": 0.1675,
+    "thigh": 0.0,
+    "hips": 0.0,
+    "waist": 0.0,
+    "shoulder": 0.0,
+    "bust": 0.0,
+    "height": 0.0
+   }
+  }
+ }
+}

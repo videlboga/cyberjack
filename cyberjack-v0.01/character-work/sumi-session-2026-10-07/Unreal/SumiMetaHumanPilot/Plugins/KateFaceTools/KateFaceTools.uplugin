@@ -1,0 +1,33 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "Kate Face Tools",
+  "CanContainContent": false,
+  "Modules": [
+    {
+      "Name": "KateFaceTools",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "KateHairRuntime",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "MetaHumanCharacter",
+      "Enabled": true
+    },
+    {
+      "Name": "CurveExpression",
+      "Enabled": true
+    },
+    {
+      "Name": "HairStrands",
+      "Enabled": true
+    }
+  ]
+}

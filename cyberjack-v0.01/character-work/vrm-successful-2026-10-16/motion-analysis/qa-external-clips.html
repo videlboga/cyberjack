@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Внешние клипы · пилот</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#111318;color:#e8e8ea;font:13px/1.3 system-ui,sans-serif}
+  #grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}
+  figure{margin:0;background:#181b22;border-radius:8px;overflow:hidden}
+  figcaption{padding:6px 8px;color:#aab;font-size:12px}
+  canvas{display:block;width:100%;height:auto}
+  #status{padding:8px;color:#8ab}
+</style>
+</head>
+<body>
+<div id="status">загрузка…</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+
+const W = 480, H = 640;
+const status = document.getElementById('status');
+const grid = document.getElementById('grid');
+const IDENT = new THREE.Quaternion();
+
+// Unity-имена из bone-map → ключи VRM 1.0 humanoid (три-vrm отдаёт по ним реальные кости скелета).
+const VRM_KEY = {
+  'Hips':'hips','Spine':'spine','Chest':'chest','Upper Chest':'upperChest','Neck':'neck','Head':'head',
+  'Left shoulder':'leftShoulder','Left arm':'leftUpperArm','Left elbow':'leftLowerArm','Left wrist':'leftHand',
+  'Right shoulder':'rightShoulder','Right arm':'rightUpperArm','Right elbow':'rightLowerArm','Right wrist':'rightHand',
+  'Left leg':'leftUpperLeg','Left knee':'leftLowerLeg','Left ankle':'leftFoot','Left toe':'leftToes',
+  'Right leg':'rightUpperLeg','Right knee':'rightLowerLeg','Right ankle':'rightFoot','Right toe':'rightToes',
+  'Left Eye':'leftEye','Right Eye':'rightEye',
+};
+const FINGERS = {'Thumb':['ThumbMetacarpal','ThumbProximal','ThumbDistal'],
+  'IndexFinger':['IndexProximal','IndexIntermediate','IndexDistal'],
+  'MiddleFinger':['MiddleProximal','MiddleIntermediate','MiddleDistal'],
+  'RingFinger':['RingProximal','RingIntermediate','RingDistal'],
+  'LittleFinger':['LittleProximal','LittleIntermediate','LittleDistal']};
+function vrmKey(unityName) {
+  if (VRM_KEY[unityName]) return VRM_KEY[unityName];
+  const m = /^(.+?)(\d)_([LR])$/.exec(unityName);
+  if (m && FINGERS[m[1]]) {
+    const side = m[3] === 'L' ? 'left' : 'right';
+    const idx = Number(m[2]) - 1;
+    return side + FINGERS[m[1]][idx];
+  }
+  return null;
+}
+const mirrored = q => new THREE.Quaternion(q.x, -q.y, -q.z, q.w);
+
+const [rigDoc, clipsDoc, boneMap] = await Promise.all([
+  fetch('../animations/source_rigs.json').then(r => r.json()),
+  fetch(new URLSearchParams(location.search).get('src') || './data/external-pilot.json').then(r => r.json()),
+  fetch('../viewer/vrm_studio_assets/bone-map.json').then(r => r.json()),
+]);
+const rigBones = rigDoc.rigs.find(r => r.name === 'p_cf_body_bone').bones;
+
+// rest-скелет источника: локальные повороты + мировые
+const srcByName = new Map(rigBones.map(b => [b.name, b]));
+const srcOrder = [];
+const seen = new Set();
+function addSrc(name) {
+  if (!name || seen.has(name)) return;
+  const b = srcByName.get(name);
+  if (!b) return;
+  seen.add(name);
+  if (b.parent) addSrc(b.parent);
+  srcOrder.push(b);
+}
+for (const b of rigBones) addSrc(b.name);
+const restWorld = new Map();
+for (const b of srcOrder) {
+  const q = new THREE.Quaternion().fromArray(b.rotation);
+  const pw = b.parent ? restWorld.get(b.parent) : IDENT.clone();
+  restWorld.set(b.name, pw.clone().multiply(q));
+}
+
+const panels = [];
+for (const clip of clipsDoc.clips) {
+  const fig = document.createElement('figure');
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const cap = document.createElement('figcaption');
+  cap.textContent = clip.label;
+  fig.append(canvas, cap);
+  grid.append(fig);
+  panels.push({clip, canvas, cap});
+}
+status.textContent = 'загрузка моделей…';
+
+const loader = new GLTFLoader();
+loader.register(parser => new VRMLoaderPlugin(parser));
+
+for (const panel of panels) {
+  const gltf = await loader.loadAsync('../characters/mira/Mira_outfit_00.vrm');
+  const vrmModel = gltf.userData.vrm;
+  const vrm = vrmModel.scene;
+  VRMUtils.removeUnnecessaryVertices(vrm);
+  VRMUtils.combineSkeletons(vrm);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x181b22);
+  scene.add(vrm);
+  const renderer = new THREE.WebGLRenderer({canvas: panel.canvas, antialias: true, preserveDrawingBuffer: true});
+  renderer.setSize(W, H, false);
+  renderer.setPixelRatio(1);
+  const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 20);
+  camera.position.set(1.5, 1.05, 2.6);
+  camera.lookAt(0, 0.95, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+  const key = new THREE.DirectionalLight(0xffffff, 2.0);
+  key.position.set(1.4, 2.4, 2.2);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0x88aaff, 0.8);
+  rim.position.set(-2, 1.5, -1.5);
+  scene.add(rim);
+  scene.updateMatrixWorld(true);
+
+  const bindings = [];
+  for (const [srcName, vrmName] of Object.entries(boneMap)) {
+    const key = vrmKey(vrmName);
+    const node = key ? vrmModel.humanoid.getRawBoneNode(key) : null;
+    if (!node || !restWorld.has(srcName)) continue;
+    const sw = mirrored(restWorld.get(srcName));
+    bindings.push({
+      srcName, node,
+      sourceRestInverse: sw.invert(),
+      targetRestWorld: node.getWorldQuaternion(new THREE.Quaternion()),
+    });
+  }
+  const tracks = new Map(panel.clip.tracks.map(t => [t.bone, t]));
+  panel.vrm = vrm; panel.scene = scene; panel.renderer = renderer; panel.camera = camera;
+  panel.bindings = bindings; panel.tracks = tracks;
+  panel.worlds = new Map();
+  panel.label = panel.clip.label;
+}
+
+function seek(t) {
+  for (const p of panels) {
+    const times = p.clip.tracks[0].times;
+    const f = Math.max(0, Math.min(times.length - 1, t * p.clip.fps));
+    const i0 = Math.floor(f), i1 = Math.min(times.length - 1, i0 + 1), a = f - i0;
+    // локальные повороты источника на кадр
+    for (const b of srcOrder) {
+      const tr = p.tracks.get(b.name);
+      let q;
+      if (tr) {
+        q = new THREE.Quaternion().fromArray(tr.rotations, i0 * 4);
+        if (i1 !== i0) q.slerp(new THREE.Quaternion().fromArray(tr.rotations, i1 * 4), a);
+      } else {
+        q = new THREE.Quaternion().fromArray(b.rotation);
+      }
+      const pw = b.parent ? p.worlds.get(b.parent) : IDENT;
+      p.worlds.set(b.name, pw.clone().multiply(q));
+    }
+    for (const bind of p.bindings) {
+      const world = p.worlds.get(bind.srcName);
+      const target = mirrored(world).multiply(bind.sourceRestInverse).multiply(bind.targetRestWorld);
+      const parentWorld = bind.node.parent ? bind.node.parent.getWorldQuaternion(new THREE.Quaternion()) : IDENT;
+      bind.node.quaternion.copy(parentWorld.invert().multiply(target));
+      bind.node.updateMatrixWorld(true);
+    }
+    p.scene.updateMatrixWorld(true);
+    p.renderer.render(p.scene, p.camera);
+  }
+}
+
+const durations = panels.map(p => p.clip.duration);
+window.__clips = {
+  ready: true,
+  panels,
+  probe(i = 0, t = 0.5) {
+    const p = panels[i];
+    seek(t);
+    const get = name => {
+      const b = p.bindings.find(x => x.node.name === name);
+      if (!b) return null;
+      p.scene.updateMatrixWorld(true);
+      const v = new THREE.Vector3().setFromMatrixPosition(b.node.matrixWorld);
+      return {q: b.node.quaternion.toArray().map(v => +v.toFixed(3)), qw: b.node.getWorldQuaternion(new THREE.Quaternion()).toArray().map(v => +v.toFixed(3)), pos: v.toArray().map(v => +v.toFixed(3))};
+    };
+    return {thigh: get('Left leg'), knee: get('Left knee'), ankle: get('Left ankle'), restWorldSample: [...p.worlds.keys()].length};
+  },
+  duration: Math.max(...durations),
+  labels: panels.map(p => p.label),
+  bones: panels[0].bindings.length,
+  seek,
+};
+status.textContent = `готово · ${panels.length} клипа · ${panels[0].bindings.length} костей на VRM`;
+seek(0);
+</script>
+</body>
+</html>

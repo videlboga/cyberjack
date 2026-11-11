@@ -1,0 +1,30 @@
+{
+  "result": "passed",
+  "input_character": "Mira outfit 00",
+  "blender": "5.2.1",
+  "generic_label": "MiraSmoke",
+  "skip_baseline": true,
+  "artifacts": [
+    "MiraSmoke_manga_study.blend",
+    "MiraSmoke_face_before.png",
+    "MiraSmoke_face_manga.png",
+    "MiraSmoke_manga_blender.png",
+    "materials.json"
+  ],
+  "images": {
+    "MiraSmoke_face_manga.png": [
+      1100,
+      1100
+    ],
+    "MiraSmoke_manga_blender.png": [
+      850,
+      1100
+    ],
+    "MiraSmoke_face_before.png": [
+      1100,
+      1100
+    ]
+  },
+  "styled_materials": 15,
+  "note": "Generic script smoke-tested on Mira; other characters need visual acceptance."
+}

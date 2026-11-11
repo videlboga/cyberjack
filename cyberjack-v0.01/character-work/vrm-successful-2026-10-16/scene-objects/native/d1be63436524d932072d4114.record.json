@@ -1,0 +1,12 @@
+{
+  "id": "d1be63436524d932072d4114",
+  "name": "move_chair04",
+  "kind": "furniture",
+  "source": "map/scene/harbor.unity3d",
+  "sourceIdentity": "BuildPlayer-Harbor:473",
+  "native": "native/d1be63436524d932072d4114.json.gz",
+  "nodes": 5,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/move_chair04-d1be63436524d932072d4114.glb"
+}

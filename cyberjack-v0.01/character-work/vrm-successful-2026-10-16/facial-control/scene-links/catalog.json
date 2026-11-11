@@ -1,0 +1,266 @@
+{
+  "format": "koikatsu-scene-face-v1",
+  "profiles": {
+    "rin": {
+      "personality": 8,
+      "key": "c08",
+      "characterSource": "inputs/exports/rin-four-outfits/KK_CharacterInfoData.json",
+      "asset": "rin.json.gz"
+    },
+    "mira": {
+      "personality": 40,
+      "key": "c40",
+      "characterSource": "inputs/exports/mira/KK_CharacterInfoData.json",
+      "asset": "mira.json.gz"
+    }
+  },
+  "rules": "rules.json.gz",
+  "aliases": "aliases.json.gz",
+  "raw": [
+    {
+      "name": "breath_06_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_06_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_02",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_02.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_04",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_04.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_01",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_01.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_07",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_07.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_02_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_02_00.json.gz"
+    },
+    {
+      "name": "breath_03_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_03_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_05",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_05.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_03",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_03.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_01",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_01.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_06",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_06.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_03",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_03.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_07",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_07.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_00.json.gz"
+    },
+    {
+      "name": "personality_breath_c08",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-personality_breath_c08.json.gz"
+    },
+    {
+      "name": "breath_02_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_02_00.json.gz"
+    },
+    {
+      "name": "breath_04_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_04_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_04",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_04.json.gz"
+    },
+    {
+      "name": "breath_05_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_05_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_00_05",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_00_05.json.gz"
+    },
+    {
+      "name": "breath_00_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_00_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_06",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_06.json.gz"
+    },
+    {
+      "name": "breath_07_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_07_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_08",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_08.json.gz"
+    },
+    {
+      "name": "breath_01_00",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-breath_01_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c08_01_02",
+      "source": "h/list/01.unity3d",
+      "asset": "raw/01-HFaceList_c08_01_02.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_07",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_07.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_06",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_06.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_01",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_01.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_00",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_03",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_03.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_02",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_02.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_04",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_04.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_01",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_01.json.gz"
+    },
+    {
+      "name": "breath_02_00",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-breath_02_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_05",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_05.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_04",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_04.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_05",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_05.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_03",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_03.json.gz"
+    },
+    {
+      "name": "breath_01_00",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-breath_01_00.json.gz"
+    },
+    {
+      "name": "personality_breath_c40",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-personality_breath_c40.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_06",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_06.json.gz"
+    },
+    {
+      "name": "breath_06_00",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-breath_06_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_00",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_00.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_01_08",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_01_08.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_02",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_02.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_00_07",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_00_07.json.gz"
+    },
+    {
+      "name": "HFaceList_c40_02_00",
+      "source": "h/list/71.unity3d",
+      "asset": "raw/71-HFaceList_c40_02_00.json.gz"
+    }
+  ]
+}

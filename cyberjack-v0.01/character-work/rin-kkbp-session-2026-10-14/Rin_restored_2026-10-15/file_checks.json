@@ -1,0 +1,11 @@
+{
+  "bytes": 74971512,
+  "sha256": "12789f050c403cf44d8a904f045c1a2213ae1022f0c43da8739ace4014c47b4b",
+  "spring_chains": 12,
+  "spring_nodes": 44,
+  "colliders": 37,
+  "embedded_images": 53,
+  "materials": 23,
+  "chain_hierarchy_valid": true,
+  "standard_expressions_bound": true
+}

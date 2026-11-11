@@ -1,0 +1,12 @@
+{
+  "id": "5d1df019ed86bc7978f4b2de",
+  "name": "p_o_kois_ei_tabletennis_ball (1)",
+  "kind": "furniture",
+  "source": "map/scene/gassyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuLobby:444",
+  "native": "native/5d1df019ed86bc7978f4b2de.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_o_kois_ei_tabletennis_ball_1_-5d1df019ed86bc7978f4b2de.glb"
+}

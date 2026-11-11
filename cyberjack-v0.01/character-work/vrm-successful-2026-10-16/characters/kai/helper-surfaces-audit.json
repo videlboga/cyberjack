@@ -1,0 +1,30 @@
+[
+  {
+    "file": "Kai_outfit_00.vrm",
+    "removed_render_helpers": [
+      "KK c_m_shadowcast 7920",
+      "KK c_m_silhouette 7970"
+    ]
+  },
+  {
+    "file": "Kai_outfit_01.vrm",
+    "removed_render_helpers": [
+      "KK c_m_shadowcast 7921",
+      "KK c_m_silhouette 7971"
+    ]
+  },
+  {
+    "file": "Kai_outfit_02.vrm",
+    "removed_render_helpers": [
+      "KK c_m_shadowcast 7922",
+      "KK c_m_silhouette 7972"
+    ]
+  },
+  {
+    "file": "Kai_outfit_03.vrm",
+    "removed_render_helpers": [
+      "KK c_m_shadowcast 7923",
+      "KK c_m_silhouette 7973"
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "before": {
+    "pose": "d2896be6c8a65a948001cd60",
+    "clipTime": 2,
+    "playing": false,
+    "physicsEnabled": true,
+    "collisionsEnabled": true,
+    "bindings": 138
+  },
+  "after": {
+    "state": {
+      "pose": "d2896be6c8a65a948001cd60",
+      "clipTime": 2,
+      "playing": false,
+      "physicsEnabled": true,
+      "collisionsEnabled": true,
+      "bindings": 151
+    },
+    "bad": []
+  },
+  "errors": [],
+  "ok": true
+}

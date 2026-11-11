@@ -1,0 +1,12 @@
+{
+  "id": "b2cd4be004a4d7ecb111cb05",
+  "name": "p_ks_r06_bench00",
+  "kind": "furniture",
+  "source": "map/scene/hotelkouisitu.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelKouisitu:144",
+  "native": "native/b2cd4be004a4d7ecb111cb05.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r06_bench00-b2cd4be004a4d7ecb111cb05.glb"
+}

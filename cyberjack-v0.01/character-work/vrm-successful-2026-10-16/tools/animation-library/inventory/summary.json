@@ -1,0 +1,45 @@
+{
+  "root": "/home/cyberkitty/Projects/[PL] [ScrewThisNoise] Koikatsu Sunshine BetterRepack/[ScrewThisNoise] Koikatsu Sunshine EX BetterRepack R6/abdata",
+  "bundles": 1393,
+  "bytes": 18748236409,
+  "clips": 30137,
+  "clipBundles": 103,
+  "bundleErrors": [],
+  "clipErrors": [],
+  "categories": {
+    "action": 1015,
+    "adv": 216,
+    "chara": 7,
+    "custom": 74,
+    "esthetic": 12,
+    "h": 23279,
+    "map": 96,
+    "studio": 5434,
+    "vr": 4
+  },
+  "bindingKinds": {
+    "4:1": 9817449,
+    "4:2": 9818213,
+    "4:3": 9823089,
+    "212:0": 7,
+    "4:4": 391,
+    "114:2015549526": 6,
+    "114:304273561": 6,
+    "137:1371680834": 1,
+    "137:3368772088": 1,
+    "137:3217838446": 1,
+    "1:2086281974": 7,
+    "23:1218664834": 1,
+    "23:1487100290": 1,
+    "23:1755535746": 1,
+    "23:2023971202": 1,
+    "23:2319263387": 14,
+    "108:898800009": 1,
+    "114:1406091054": 1
+  },
+  "legacy": {
+    "False": 30128,
+    "True": 9
+  },
+  "seconds": 2063.006271123886
+}

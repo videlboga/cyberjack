@@ -1,0 +1,25 @@
+{
+ "id": "kk-collar",
+ "slot": "neck",
+ "mesh": "o_top_maid_01_a",
+ "vrm": "Mira_outfit_03.vrm",
+ "jointCount": 971,
+ "jointMap": {
+  "cf_s_neck": "cf_s_neck",
+  "cf_s_head": "cf_s_head",
+  "cf_s_spine03": "cf_s_spine03",
+  "cf_s_shoulder02_R": "cf_s_shoulder02_R",
+  "cf_s_shoulder02_L": "cf_s_shoulder02_L",
+  "cf_s_spine02": "cf_s_spine02",
+  "cf_s_bust01_L": "cf_s_bust01_L",
+  "cf_s_bust01_R": "cf_s_bust01_R",
+  "cf_s_bust02_L": "cf_s_bust02_L",
+  "cf_s_arm01_L": "cf_s_arm01_L",
+  "cf_s_bust02_R": "cf_s_bust02_R",
+  "cf_s_arm01_R": "cf_s_arm01_R"
+ },
+ "substitutes": [],
+ "missing": [],
+ "heelHeight": 0.0,
+ "bake": "v_body = Σ w·(W_rig·B)·v, W по rest-скелету source_rigs.json"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "ab750cd88db70384ff9cacf0",
+  "name": "p_ks_r06_chair00",
+  "kind": "furniture",
+  "source": "map/scene/showerroom.unity3d",
+  "sourceIdentity": "BuildPlayer-ShowerRoom:140",
+  "native": "native/ab750cd88db70384ff9cacf0.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r06_chair00-ab750cd88db70384ff9cacf0.glb"
+}

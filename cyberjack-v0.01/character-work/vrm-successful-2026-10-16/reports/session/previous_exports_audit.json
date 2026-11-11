@@ -1,0 +1,324 @@
+[
+  {
+    "file": "Rin_Hybrid_v10.vrm",
+    "bytes": 382005308,
+    "images": 20,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v10_final.vrm",
+    "bytes": 31862416,
+    "images": 20,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v11.vrm",
+    "bytes": 35623200,
+    "images": 25,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v12.vrm",
+    "bytes": 35624540,
+    "images": 25,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v13.vrm",
+    "bytes": 35624376,
+    "images": 25,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v14.vrm",
+    "bytes": 35846588,
+    "images": 29,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v15.vrm",
+    "bytes": 39449996,
+    "images": 27,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_Hybrid_v9.vrm",
+    "bytes": 143838744,
+    "images": 20,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v1.vrm",
+    "bytes": 138685184,
+    "images": 0,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v2.vrm",
+    "bytes": 149302516,
+    "images": 16,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v26.vrm",
+    "bytes": 149828828,
+    "images": 26,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v27.vrm",
+    "bytes": 149217020,
+    "images": 26,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v28.vrm",
+    "bytes": 149214324,
+    "images": 26,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v29.vrm",
+    "bytes": 115738720,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v3.vrm",
+    "bytes": 150546960,
+    "images": 27,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v30.vrm",
+    "bytes": 115736148,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v31.vrm",
+    "bytes": 115736148,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v32.vrm",
+    "bytes": 115736148,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v33.vrm",
+    "bytes": 115736148,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v34.vrm",
+    "bytes": 116080448,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v35.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v36.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v37.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v38.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v4.vrm",
+    "bytes": 149223564,
+    "images": 26,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v40.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v41.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v42.vrm",
+    "bytes": 116074888,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v44.vrm",
+    "bytes": 115730492,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v45.vrm",
+    "bytes": 115730492,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v46.vrm",
+    "bytes": 112068020,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v47.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v48.vrm",
+    "bytes": 115743608,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v49.vrm",
+    "bytes": 115739116,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v50.vrm",
+    "bytes": 115735632,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v51.vrm",
+    "bytes": 115114052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v52.vrm",
+    "bytes": 118468028,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v55.vrm",
+    "bytes": 118406808,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v56.vrm",
+    "bytes": 118406808,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v57.vrm",
+    "bytes": 115052832,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_KKBP_v5_final.vrm",
+    "bytes": 149224124,
+    "images": 26,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_MMD_v5.vrm",
+    "bytes": 381985792,
+    "images": 20,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_MMD_v6.vrm",
+    "bytes": 32560676,
+    "images": 30,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_MMD_v7.vrm",
+    "bytes": 31843964,
+    "images": 20,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_MMD_v8.vrm",
+    "bytes": 31843964,
+    "images": 20,
+    "springs": 0,
+    "colliders": 0
+  },
+  {
+    "file": "Rin_final_v43.vrm",
+    "bytes": 115736052,
+    "images": 22,
+    "springs": 0,
+    "colliders": 0
+  }
+]

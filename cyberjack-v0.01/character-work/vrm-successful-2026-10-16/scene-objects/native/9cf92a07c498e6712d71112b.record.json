@@ -1,0 +1,11 @@
+{
+  "id": "9cf92a07c498e6712d71112b",
+  "name": "senasi_isu_00_kind (1)",
+  "kind": "furniture",
+  "source": "map/scene/beachkouisitu.unity3d",
+  "sourceIdentity": "BuildPlayer-BeachKouisitu:3",
+  "native": "native/9cf92a07c498e6712d71112b.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

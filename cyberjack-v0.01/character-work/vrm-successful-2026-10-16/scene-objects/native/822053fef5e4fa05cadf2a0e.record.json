@@ -1,0 +1,12 @@
+{
+  "id": "822053fef5e4fa05cadf2a0e",
+  "name": "move_chair11",
+  "kind": "furniture",
+  "source": "map/scene/hotellobby.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelLobby:250",
+  "native": "native/822053fef5e4fa05cadf2a0e.json.gz",
+  "nodes": 3,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/move_chair11-822053fef5e4fa05cadf2a0e.glb"
+}

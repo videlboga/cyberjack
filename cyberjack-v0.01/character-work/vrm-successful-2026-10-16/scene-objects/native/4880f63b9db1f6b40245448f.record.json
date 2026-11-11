@@ -1,0 +1,12 @@
+{
+  "id": "4880f63b9db1f6b40245448f",
+  "name": "o_ks_m06_bench00_00 (1)",
+  "kind": "furniture",
+  "source": "map/scene/lighthouse.unity3d",
+  "sourceIdentity": "BuildPlayer-LightHouse:517",
+  "native": "native/4880f63b9db1f6b40245448f.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/o_ks_m06_bench00_00_1_-4880f63b9db1f6b40245448f.glb"
+}

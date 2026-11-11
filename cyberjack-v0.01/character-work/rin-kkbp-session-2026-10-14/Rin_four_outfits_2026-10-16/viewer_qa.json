@@ -1,0 +1,164 @@
+{
+  "errors": [],
+  "report": [
+    {
+      "model": "Rin_outfit_00.vrm",
+      "outfit": "0",
+      "finite": true,
+      "meshes": [
+        "model",
+        "model_1",
+        "model_2",
+        "model_3",
+        "model_4",
+        "model_5",
+        "model_6",
+        "model_7",
+        "model_8",
+        "model_9",
+        "model_10",
+        "model006",
+        "model006_1",
+        "model006_2",
+        "model006_3",
+        "model006_4",
+        "model001",
+        "model001_1",
+        "model001_2",
+        "model001_3",
+        "model001_4",
+        "model001_5",
+        "model001_6"
+      ],
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "model": "Rin_outfit_01.vrm",
+      "outfit": "1",
+      "finite": true,
+      "meshes": [
+        "model",
+        "model_1",
+        "model_2",
+        "model_3",
+        "model_4",
+        "model_5",
+        "model_6",
+        "model_7",
+        "model_8",
+        "model_9",
+        "model_10",
+        "model007",
+        "model007_1",
+        "model007_2",
+        "model007_3",
+        "model007_4",
+        "model003",
+        "model003_1"
+      ],
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "model": "Rin_outfit_02.vrm",
+      "outfit": "2",
+      "finite": true,
+      "meshes": [
+        "model",
+        "model_1",
+        "model_2",
+        "model_3",
+        "model_4",
+        "model_5",
+        "model_6",
+        "model_7",
+        "model_8",
+        "model_9",
+        "model_10",
+        "model008",
+        "model008_1",
+        "model008_2",
+        "model008_3",
+        "model008_4",
+        "model004",
+        "model004_1",
+        "model004_2"
+      ],
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "model": "Rin_outfit_03.vrm",
+      "outfit": "3",
+      "finite": true,
+      "meshes": [
+        "model",
+        "model_1",
+        "model_2",
+        "model_3",
+        "model_4",
+        "model_5",
+        "model_6",
+        "model_7",
+        "model_8",
+        "model_9",
+        "model_10",
+        "model009",
+        "model009_1",
+        "model009_2",
+        "model009_3",
+        "model009_4"
+      ],
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "state": {
+        "pose": "Stand_00_00",
+        "clipTime": 0,
+        "playing": false,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      }
+    },
+    {
+      "legacyOutfitsDisabled": true
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "models": [
+    {
+      "file": "characters/rin/outfits/Rin_outfit_00.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/rin/outfits/Rin_outfit_01.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/rin/outfits/Rin_outfit_03.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/rin/outfits/Rin_outfit_02.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/mira/Mira_outfit_03.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/mira/Mira_outfit_01.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/mira/Mira_outfit_00.vrm",
+      "unchanged": true
+    },
+    {
+      "file": "characters/mira/Mira_outfit_02.vrm",
+      "unchanged": true
+    }
+  ],
+  "allUnchanged": true
+}

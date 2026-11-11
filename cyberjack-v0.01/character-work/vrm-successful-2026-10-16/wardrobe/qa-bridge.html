@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Мост через кости: туфли</title>
+<script type="importmap">{"imports":{"three":"../viewer/node_modules/three/build/three.module.js","three/addons/":"../viewer/node_modules/three/examples/jsm/"}}</script>
+<style>body{margin:0;background:#0b0d11;color:#ddd;font:13px system-ui}#g{display:flex;gap:12px;padding:12px}figure{margin:0;background:#141821;border-radius:10px;padding-bottom:8px}figcaption{padding:8px 10px;color:#9fd}canvas{display:block}#st{padding:10px 12px;color:#7a9;white-space:pre-wrap;font:12px ui-monospace}</style>
+</head><body><div id="st">…</div><div id="g"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+import {applyBoneBridge, applyHeelPose} from './bones-bridge.js';
+
+const W=620,H=560;
+const loader=new GLTFLoader(); loader.register(p=>new VRMLoaderPlugin(p));
+const gltf=await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm');
+const vrm=gltf.userData.vrm; VRMUtils.removeUnnecessaryVertices(vrm.scene);
+vrm.scene.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});
+const body=vrm.scene.getObjectByProperty('isSkinnedMesh',true);
+const sidecar=await (await fetch('./items/kk/kk-strappy-heels.bones.json')).json();
+const shoeGltf=await new GLTFLoader().loadAsync('./items/kk/kk-strappy-heels.glb');
+const shoe=shoeGltf.scene.getObjectByProperty('isSkinnedMesh',true);
+shoe.frustumCulled=false;
+const map=shoe.material.map;
+shoe.material=new THREE.MeshStandardMaterial({map,roughness:0.45,metalness:0.4,side:THREE.DoubleSide});
+
+const log=[];
+const modes=[
+  {label:'как было: кости стопы слиты на голеностоп', bridge:false, heel:0},
+  {label:'мост: подстановочные суставы стопы', bridge:true, heel:0},
+  {label:'мост + поза каблука 73 мм', bridge:true, heel:0.073},
+];
+for (const m of modes){
+  // возвращаем скелет в исходное состояние перед каждым вариантом
+  const g=await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm');
+  const v=g.userData.vrm; VRMUtils.removeUnnecessaryVertices(v.scene);
+  v.scene.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});
+  const b=v.scene.getObjectByProperty('isSkinnedMesh',true);
+  let info={};
+  if (m.bridge){
+    const r=applyBoneBridge(v, sidecar);
+    info.applied=r.applied;
+    shoe.skeleton=r.skeleton;
+    shoe.bindMatrix.copy(b.bindMatrix); shoe.bindMatrixInverse.copy(b.bindMatrixInverse);
+  } else {
+    // эмуляция старого поведения: подстановочные индексы схлопываем на родителя
+    const remap=new Map();
+    for (const sub of sidecar.substitutes){
+      const pi=b.skeleton.bones.findIndex(x=>x.name===sub.parent);
+      remap.set(sub.index, pi>=0?pi:0);
+    }
+    const ja=shoe.geometry.attributes.skinIndex;
+    const arr=ja.array;
+    for (let i=0;i<arr.length;i++) if (remap.has(arr[i])) arr[i]=remap.get(arr[i]);
+    ja.needsUpdate=true;
+    shoe.skeleton=b.skeleton;
+    shoe.bindMatrix.copy(b.bindMatrix); shoe.bindMatrixInverse.copy(b.bindMatrixInverse);
+  }
+  const angle=applyHeelPose(v, m.heel);
+  v.scene.updateMatrixWorld(true); shoe.updateMatrixWorld(true);
+
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x141821);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,6),new THREE.MeshStandardMaterial({color:0x2b3040,roughness:0.95}));
+  floor.rotation.x=-Math.PI/2; scene.add(floor);
+  scene.add(v.scene); scene.add(shoe);
+  scene.add(new THREE.AmbientLight(0xffffff,1.5));
+  const k=new THREE.DirectionalLight(0xffffff,2.3); k.position.set(1.2,2,1.8); scene.add(k);
+  const f=new THREE.DirectionalLight(0xbfd0ff,1.0); f.position.set(-1.8,1,1.2); scene.add(f);
+  const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
+  const fig=document.createElement('figure'); const cap=document.createElement('figcaption');
+  cap.textContent=m.label; fig.append(canvas,cap); document.getElementById('g').append(fig);
+  const r=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true}); r.setSize(W,H,false);
+  r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.1;
+  const cam=new THREE.PerspectiveCamera(32,W/H,0.02,20); cam.position.set(0.7,0.45,0.95); cam.lookAt(0,0.08,0);
+  r.render(scene,cam);
+  // честный замер: реальные скиннинг-координаты, а не bind-bbox
+  const skinnedMinY=(mesh)=>{
+    const pos=mesh.geometry.attributes.position, v=new THREE.Vector3();
+    let minY=Infinity;
+    const step=Math.max(1,Math.floor(pos.count/1500));
+    for(let i=0;i<pos.count;i+=step){
+      if(mesh.applyBoneTransform){ mesh.applyBoneTransform(i,v); } else { v.fromBufferAttribute(pos,i); }
+      v.applyMatrix4(mesh.matrixWorld);
+      if(v.y<minY) minY=v.y;
+    }
+    return minY;
+  };
+  const shoeMin=skinnedMinY(shoe), bodyMin=skinnedMinY(b);
+  const bb={min:{y:shoeMin}, max:{y:0}};
+  const feet=new THREE.Box3(); let n=0;
+  const tmp=new THREE.Vector3();
+  const pw=b.geometry.attributes.position, sw=b.skeleton;
+  // низ тела: приблизим по костям стопы
+  const lf=v.humanoid.getRawBoneNode('leftFoot'); lf.getWorldPosition(tmp);
+  log.push({mode:m.label, подстановочных:info.applied??0, угол_каблука_рад:+(angle||0).toFixed(3),
+            обувь_низ_скин:+shoeMin.toFixed(3), тело_низ_скин:+bodyMin.toFixed(3),
+            зазор_мм:+((shoeMin-bodyMin)*1000).toFixed(0), стопа_кость_y:+tmp.y.toFixed(3)});
+}
+document.getElementById('st').textContent=JSON.stringify(log,null,1);
+window.__bridge={ready:true,log};
+</script></body></html>

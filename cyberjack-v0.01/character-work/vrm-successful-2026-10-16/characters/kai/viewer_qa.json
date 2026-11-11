@@ -1,0 +1,57 @@
+{
+  "rows": [
+    {
+      "model": "Kai_outfit_00.vrm",
+      "character": "kai",
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "finite": true,
+      "meshes": 18,
+      "physics": 60,
+      "name": "Kai · Outfit 00"
+    },
+    {
+      "model": "Kai_outfit_01.vrm",
+      "character": "kai",
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "finite": true,
+      "meshes": 15,
+      "physics": 26,
+      "name": "Kai · Outfit 01"
+    },
+    {
+      "model": "Kai_outfit_02.vrm",
+      "character": "kai",
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "finite": true,
+      "meshes": 17,
+      "physics": 26,
+      "name": "Kai · Outfit 02"
+    },
+    {
+      "model": "Kai_outfit_03.vrm",
+      "character": "kai",
+      "retarget": {
+        "boundBones": 138,
+        "sourceBones": 565,
+        "coreBound": true
+      },
+      "finite": true,
+      "meshes": 16,
+      "physics": 26,
+      "name": "Kai · Outfit 03"
+    }
+  ],
+  "errors": []
+}

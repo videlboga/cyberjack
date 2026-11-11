@@ -1,0 +1,4 @@
+import fs from'node:fs';import assert from'node:assert/strict';import{planCharacterCommand}from'./command-planner.mjs';
+const dir='artifacts/palm-regression/',request=JSON.parse(fs.readFileSync(dir+'request.json')),before=JSON.parse(fs.readFileSync(dir+'before.json'));
+const intent={summary:before.summary,stages:before.steps.map(s=>({description:s.description,constraints:s.constraints,translation:[0,0],yaw:0,duration:s.duration,semantics:s.semantics||{}}))};
+const result=await planCharacterCommand(request,{interpret:async()=>structuredClone(intent)});fs.writeFileSync(dir+'after.json',JSON.stringify(result));assert.equal(result.status,'ready');for(const s of result.steps){assert(s.armOnly);assert(s.bodyCollisionValidation.penetration<.025);}console.log(result.steps.map(s=>({source:s.source?.name,palm:s.nativeArms?.palm,collision:s.bodyCollisionValidation,projection:s.handContactProjection})));

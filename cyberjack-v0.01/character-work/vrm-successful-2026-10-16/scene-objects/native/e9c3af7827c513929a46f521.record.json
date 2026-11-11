@@ -1,0 +1,12 @@
+{
+  "id": "e9c3af7827c513929a46f521",
+  "name": "o_ks_m13_isu00_00 (6)",
+  "kind": "furniture",
+  "source": "map/scene/bathroom.unity3d",
+  "sourceIdentity": "BuildPlayer-BathRoom:118",
+  "native": "native/e9c3af7827c513929a46f521.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/o_ks_m13_isu00_00_6_-e9c3af7827c513929a46f521.glb"
+}

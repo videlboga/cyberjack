@@ -1,0 +1,82 @@
+{
+  "requested": [
+    "item_khh_f_56",
+    "item_kht_f_05"
+  ],
+  "bundles": [
+    {
+      "source": "h/list/30.unity3d",
+      "sha256": "d82458b3c0e7fae0f1811ef0ed777220596a7149de492cb6a63a1195f61981bb",
+      "itemAssetPaths": []
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "sha256": "50939ccacc64a7e33edc5e65d98d54d8f09ab1c480c02ec58dada1b6e890486d",
+      "itemAssetPaths": [
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_00.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_01.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_02.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_03.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_04.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_05.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_06.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_07.asset",
+        "assets/illusion/assetbundle/h/list/01/aibu_eliminatescale/eliminatescale_aibuitem_08.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_kha_f_10.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khh_f_49.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khh_f_61.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khs3_f_00.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khs3_f_01.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khs_f_n25.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khs_f_n32.asset",
+        "assets/illusion/assetbundle/h/list/01/item/item_khs_f_n33.asset"
+      ]
+    },
+    {
+      "source": "h/list/70.unity3d",
+      "sha256": "8714bd8629cb93822aaa547ea3677abef1514150e60d07a9d1a1389c085adf5a",
+      "itemAssetPaths": []
+    },
+    {
+      "source": "h/list/71.unity3d",
+      "sha256": "cbd4466c9ca5bbe0b7f7f82f57268ad582e73a10521079af6f6978146d3f160d",
+      "itemAssetPaths": [
+        "assets/illusion/assetbundle/h/list/71/aibu_eliminatescale/eliminatescale_aibuitem_09.asset",
+        "assets/illusion/assetbundle/h/list/71/aibu_eliminatescale/eliminatescale_aibuitem_10.asset",
+        "assets/illusion/assetbundle/h/list/71/aibu_eliminatescale/eliminatescale_aibuitem_11.asset",
+        "assets/illusion/assetbundle/h/list/71/aibu_eliminatescale/eliminatescale_aibuitem_12.asset",
+        "assets/illusion/assetbundle/h/list/71/item/item_khs_f_n53.asset",
+        "assets/illusion/assetbundle/h/list/71/item/item_khs_f_n54.asset",
+        "assets/illusion/assetbundle/h/list/71/item/item_khs_f_n55.asset",
+        "assets/illusion/assetbundle/h/list/71/item/item_kht_f_06.asset",
+        "assets/illusion/assetbundle/h/list/71/item/item_kht_f_07.asset"
+      ]
+    },
+    {
+      "source": "h/list/81.unity3d",
+      "sha256": "391647b997d5da0d553d8195ef364089356f3e1d35c891f6ea9cbc0a9f518423",
+      "itemAssetPaths": []
+    },
+    {
+      "source": "h/list/60.unity3d",
+      "sha256": "2bc9ba26f92ba7974b9dda1d458d8a23cc2e09c1be261f3f6a8a6bf6e4e8ea03",
+      "itemAssetPaths": []
+    },
+    {
+      "source": "h/list/91.unity3d",
+      "sha256": "b2c40dacdb61ba98a29bd17db1bacdfa143c17655d2bf6b0405b2777480dd8b3",
+      "itemAssetPaths": []
+    },
+    {
+      "source": "h/list/31.unity3d",
+      "sha256": "8dd75e6120ca01eba6420bb3f88e88ba5dbe3653b4ccb00f6992695ce5cd7728",
+      "itemAssetPaths": []
+    },
+    {
+      "source": "h/list/00.unity3d",
+      "sha256": "1edd9b72231ff1ebcd4314c345399e252a9946c7fcb7f884779cb6280837117c",
+      "itemAssetPaths": []
+    }
+  ],
+  "matches": []
+}

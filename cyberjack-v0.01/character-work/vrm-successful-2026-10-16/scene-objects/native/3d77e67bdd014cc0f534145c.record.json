@@ -1,0 +1,12 @@
+{
+  "id": "3d77e67bdd014cc0f534145c",
+  "name": "HPoint_Add_33",
+  "kind": "placement",
+  "source": "h/common/71.unity3d",
+  "sourceIdentity": "CAB-7d0d7ef6d3a34d95c038c33b2feb87f0:-3297279523366749598",
+  "native": "native/3d77e67bdd014cc0f534145c.json.gz",
+  "nodes": 81,
+  "meshes": 24,
+  "skins": 0,
+  "model": "models/HPoint_Add_33-3d77e67bdd014cc0f534145c.glb"
+}

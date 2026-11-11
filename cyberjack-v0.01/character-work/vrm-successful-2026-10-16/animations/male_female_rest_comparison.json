@@ -1,0 +1,23 @@
+{
+  "commonCfJ": 152,
+  "rotationsOver001deg": 3,
+  "positionsOver001m": 0,
+  "maxAngle": 10.000000709289687,
+  "differentBones": [
+    {
+      "bone": "cf_j_backsk_C_02",
+      "rotationAngleDeg": 10.000000709289687,
+      "positionDistance": 0.0
+    },
+    {
+      "bone": "cf_j_backsk_L_02",
+      "rotationAngleDeg": 9.999999547729718,
+      "positionDistance": 0.0
+    },
+    {
+      "bone": "cf_j_backsk_R_02",
+      "rotationAngleDeg": 10.000000709289539,
+      "positionDistance": 0.0
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "4e9950e4aa8c33356aa140b1",
+  "name": "senasi_isu_00 (1)_kimd",
+  "kind": "furniture",
+  "source": "map/scene/hoteloutside.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelOutside:1373",
+  "native": "native/4e9950e4aa8c33356aa140b1.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

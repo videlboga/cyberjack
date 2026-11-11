@@ -1,0 +1,11 @@
+{
+  "id": "123def5f8fc4be07f5710762",
+  "name": "chair00 (2)_kimd",
+  "kind": "furniture",
+  "source": "map/scene/hoteloutside.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelOutside:660",
+  "native": "native/123def5f8fc4be07f5710762.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

@@ -1,0 +1,18 @@
+// Shared sampled anatomical poses. Face and emotional channels remain independent.
+export function sampleLocomotion(c,time,inPlace=true){
+ const t=Math.max(0,Math.min(c.duration,time)),v=t*c.fps,i=Math.min(Math.floor(v),c.q.length/84-1),j=Math.min(i+1,c.q.length/84-1),a=v-i;
+ const vec=(array,size)=>Array.from({length:size},(_,k)=>array[i*size+k]*(1-a)+array[j*size+k]*a);
+ const q=Array.from({length:21},(_,b)=>{const start=i*84+b*4,end=j*84+b*4;let sign=0;for(let k=0;k<4;k++)sign+=c.q[start+k]*c.q[end+k];const value=Array.from({length:4},(_,k)=>c.q[start+k]*(1-a)+c.q[end+k]*a*(sign<0?-1:1));const n=Math.hypot(...value);return value.map(x=>x/n);});
+ const root=vec(c.root,3),travel=vec(c.travel,3);if(!inPlace)for(let k=0;k<3;k++)root[k]+=travel[k];
+ return {q,root,directions:null,hand_angles_deg:{digits:c.handCurl?Object.fromEntries(['l','r'].flatMap(s=>['thumb','index','middle','ring','pinky'].map(f=>[f+'.'+s,c.handCurl.map(v=>v*(f==='thumb'?.5:1))]))):{}},contacts:vec(c.contacts,2),pose_support:c.support||null};
+}
+export function installLocomotion({select,onPick,getCharacter}){
+ let data,postures,profile=getCharacter()||'nika',inPlace=true;
+ const host=document.createElement('span');host.style.cssText='display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap';
+ const style=document.createElement('select');style.setAttribute('aria-label','Характер пластики');
+ const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=true;label.append(check,' На месте');host.append(style,label);select.after(host);
+ const postureReady=fetch('./assets/posture-library.json?v=104').then(r=>{if(!r.ok)throw Error('Не загружены позы');return r.json();}).then(d=>{postures=d;for(const [category,label]of Object.entries({pose:'Базовые позы',idle:'Idle · опорные положения',crawl:'Перемещения на четвереньках'})){const g=document.createElement('optgroup');g.label=label;for(const c of d.clips.filter(c=>c.category===category))g.append(new Option(c.name,'pose:'+c.id));select.append(g);}});postureReady.catch(e=>{host.textContent=e.message;});
+ const ready=fetch('./assets/locomotion-library.json?v=96').then(r=>{if(!r.ok)throw Error('Не загружены движения');return r.json();}).then(d=>{data=d;for(const p of d.profiles)style.add(new Option(p.label,p.id));if(!d.profiles.some(p=>p.id===profile))profile='nika';style.value=profile;const g=document.createElement('optgroup');g.label='Cyberjack · характерные движения';for(const c of d.clips.filter(c=>c.profile==='nika'))g.append(new Option(c.name,'cj:'+c.motion));select.append(g);});ready.catch(e=>{host.textContent=e.message;});
+ style.onchange=()=>{profile=style.value;if((select.value.startsWith('cj:')||select.value.startsWith('pose:')))onPick();};check.onchange=()=>{inPlace=check.checked;if((select.value.startsWith('cj:')||select.value.startsWith('pose:')))onPick();};
+ return {has:id=>id.startsWith('cj:')||id.startsWith('pose:'),async getClip(id){if(id.startsWith('pose:')){await postureReady;const c=postures.clips.find(c=>c.id===id.slice(5));if(!c)throw Error('Не найдена поза');return {id,name:c.name,duration:c.duration,loop:c.loop&&(inPlace||c.category!=='crawl'),context:c.context,furniture:c.support?.surface||'none',support:c.support,sourceHipHeight:c.sourceHipHeight,sample:t=>sampleLocomotion(c,t,inPlace)};}await ready;const c=data.clips.find(c=>c.id===profile+':'+id.slice(3));if(!c)throw Error('Не найден клип');return {id,name:style.selectedOptions[0].textContent+' · '+c.name,duration:c.duration,loop:c.loop&&inPlace,context:'standing',sourceHipHeight:c.sourceHipHeight,sample:t=>sampleLocomotion(c,t,inPlace)};}};
+}

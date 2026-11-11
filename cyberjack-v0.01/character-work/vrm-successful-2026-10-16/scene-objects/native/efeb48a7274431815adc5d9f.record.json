@@ -1,0 +1,12 @@
+{
+  "id": "efeb48a7274431815adc5d9f",
+  "name": "p_ks_m04_table03_00 (3)",
+  "kind": "furniture",
+  "source": "map/scene/hoteloutside.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelOutside:933",
+  "native": "native/efeb48a7274431815adc5d9f.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m04_table03_00_3_-efeb48a7274431815adc5d9f.glb"
+}

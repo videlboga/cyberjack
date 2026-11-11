@@ -1,0 +1,3 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import {readRetrievalStore,writeRetrievalStore} from './retrieval-store.mjs';
+const kind='test-'+process.pid,value={hands:new Float64Array([1,2,3]),groups:new Map([['clip',[0,2]]]),columns:new Map([['hipHeight',new Float64Array([.2,NaN])]])};
+try{writeRetrievalStore(kind,2,value);assert.deepEqual(readRetrievalStore(kind,2),value);assert.equal(readRetrievalStore(kind,3),null);console.log('PASS precomputed retrieval store preserves Float64 values, NaN, grouping and rejects row-count mismatch');}finally{for(const name of fs.readdirSync('artifacts/planner-cache'))if(name.endsWith('-'+kind+'.bin'))fs.unlinkSync('artifacts/planner-cache/'+name);}

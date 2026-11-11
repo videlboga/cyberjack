@@ -1,0 +1,62 @@
+[
+  {
+    "file": "characters/mira/Mira_outfit_03.vrm",
+    "bytes": 71350376,
+    "images": 34
+  },
+  {
+    "file": "characters/mira/Mira_outfit_01.vrm",
+    "bytes": 74689400,
+    "images": 46
+  },
+  {
+    "file": "characters/mira/Mira_outfit_00.vrm",
+    "bytes": 82748564,
+    "images": 55
+  },
+  {
+    "file": "characters/mira/Mira_outfit_02.vrm",
+    "bytes": 85187528,
+    "images": 40
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_00.vrm",
+    "bytes": 75031532,
+    "images": 53
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_01.vrm",
+    "bytes": 78924108,
+    "images": 41
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_03.vrm",
+    "bytes": 69060616,
+    "images": 35
+  },
+  {
+    "file": "characters/rin/outfits/Rin_outfit_02.vrm",
+    "bytes": 71626596,
+    "images": 44
+  },
+  {
+    "file": "characters/rin/legacy/Rin_restored_v2.vrm",
+    "bytes": 74984848,
+    "images": 53
+  },
+  {
+    "file": "characters/rin/legacy/Rin_restored.vrm",
+    "bytes": 74971512,
+    "images": 53
+  },
+  {
+    "file": "characters/rin/legacy/Rin_restored2.vrm",
+    "bytes": 74981912,
+    "images": 53
+  },
+  {
+    "file": "characters/rin/legacy/Rin_nocollider.vrm",
+    "bytes": 74972464,
+    "images": 53
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "archives": 2987,
+  "unityBundleEntries": 8930,
+  "unityBundleBytes": 22156429745,
+  "archiveErrors": [],
+  "scannedUnityAssets": 9003,
+  "clipBearingSources": 398,
+  "clips": 26841,
+  "errors": [],
+  "coverage": {
+    "mod-archive": 8930,
+    "player-data": 58,
+    "vr-player-data": 15
+  },
+  "completeWorkers": 3
+}

@@ -1,0 +1,631 @@
+{
+  "models": 24,
+  "figureInstancesRemoved": 32,
+  "errors": [],
+  "results": [
+    {
+      "model": "SexMachineModel-065",
+      "fullTriangles": 311788,
+      "cleanTriangles": 278177,
+      "removedTriangles": 33611,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.6386480417789584,
+          0.8951102860240491,
+          -3.539993461103301
+        ],
+        "max": [
+          3.3431468205227155,
+          2.359037309890221,
+          -2.808109131473389
+        ],
+        "size": [
+          1.704498778743757,
+          1.4639270238661717,
+          0.7318843296299118
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-066",
+      "fullTriangles": 61930,
+      "cleanTriangles": 21754,
+      "removedTriangles": 40176,
+      "figureInstances": 2,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          2.6223438089180413,
+          0.8857448223135902,
+          -5.6968607236970605
+        ],
+        "max": [
+          3.8503857491207443,
+          3.0557331220801314,
+          -4.537871769228002
+        ],
+        "size": [
+          1.228041940202703,
+          2.1699882997665414,
+          1.1589889544690584
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-067",
+      "fullTriangles": 224021,
+      "cleanTriangles": 190782,
+      "removedTriangles": 33239,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.5281075370531632,
+          0.021410000913738785,
+          -2.1626635752385255
+        ],
+        "max": [
+          2.02951754452997,
+          1.2103100118637085,
+          -0.8543747864430542
+        ],
+        "size": [
+          1.5014100074768066,
+          1.1889000109499697,
+          1.3082887887954713
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-068",
+      "fullTriangles": 329727,
+      "cleanTriangles": 296632,
+      "removedTriangles": 33095,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.5272111274816917,
+          0.0,
+          -1.5926806578042425
+        ],
+        "max": [
+          1.6639511585235596,
+          1.1319542989935802,
+          -1.0536267706754125
+        ],
+        "size": [
+          1.1367400310418678,
+          1.1319542989935802,
+          0.53905388712883
+        ]
+      },
+      "images": 1
+    },
+    {
+      "model": "SexMachineModel-069",
+      "fullTriangles": 63474,
+      "cleanTriangles": 30918,
+      "removedTriangles": 32556,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.45196736351262157,
+          0.06953967359999981,
+          -1.1526177203972163
+        ],
+        "max": [
+          1.3016673673750025,
+          1.4141085474441744,
+          -0.5258089759834578
+        ],
+        "size": [
+          0.849700003862381,
+          1.3445688738441746,
+          0.6268087444137586
+        ]
+      },
+      "images": 1
+    },
+    {
+      "model": "SexMachineModel-070",
+      "fullTriangles": 50883,
+      "cleanTriangles": 19905,
+      "removedTriangles": 30978,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.5239528896340131,
+          0.0,
+          -2.6699491949983183
+        ],
+        "max": [
+          1.2678441019781819,
+          2.326634638086724,
+          -1.5119527398887007
+        ],
+        "size": [
+          0.7438912123441688,
+          2.326634638086724,
+          1.1579964551096176
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-071",
+      "fullTriangles": 44672,
+      "cleanTriangles": 13493,
+      "removedTriangles": 31179,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.13793353974532288,
+          -0.03225200000000015,
+          -1.4760810964944784
+        ],
+        "max": [
+          1.315868414619743,
+          1.4431523265981918,
+          -1.0952081056337617
+        ],
+        "size": [
+          1.17793487487442,
+          1.475404326598192,
+          0.3808729908607167
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-072",
+      "fullTriangles": 108865,
+      "cleanTriangles": 76406,
+      "removedTriangles": 32459,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.27830821337774425,
+          -0.037314346952438404,
+          -1.2131544871446265
+        ],
+        "max": [
+          1.917187013305984,
+          1.8657165611553195,
+          -0.9386870420476107
+        ],
+        "size": [
+          1.6388787999282397,
+          1.9030309081077579,
+          0.2744674450970158
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-073",
+      "fullTriangles": 48199,
+      "cleanTriangles": 24291,
+      "removedTriangles": 23908,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.6894090000622175,
+          0.0022741212228948537,
+          -1.5544381754258256
+        ],
+        "max": [
+          1.7291489914548206,
+          1.5532693010106582,
+          -0.3389828374612802
+        ],
+        "size": [
+          1.039739991392603,
+          1.5509951797877632,
+          1.2154553379645454
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-074",
+      "fullTriangles": 259329,
+      "cleanTriangles": 33264,
+      "removedTriangles": 226065,
+      "figureInstances": 7,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.8778868721394462,
+          0.2760973,
+          -7.015878808892579
+        ],
+        "max": [
+          1.6914848885938993,
+          2.088309971566011,
+          -0.1357700071021487
+        ],
+        "size": [
+          0.8135980164544532,
+          1.812212671566011,
+          6.88010880179043
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-075",
+      "fullTriangles": 489897,
+      "cleanTriangles": 457543,
+      "removedTriangles": 32354,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          0.7527455992457379,
+          -0.032251999999999795,
+          -0.958724187379565
+        ],
+        "max": [
+          1.9691221812532134,
+          1.416470776045368,
+          -0.5870987870257518
+        ],
+        "size": [
+          1.2163765820074754,
+          1.4487227760453678,
+          0.3716254003538132
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-076",
+      "fullTriangles": 39160,
+      "cleanTriangles": 7348,
+      "removedTriangles": 31812,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.99618862153301,
+          0.8690844653197841,
+          -3.9226053094766953
+        ],
+        "max": [
+          2.307799579045642,
+          2.4121754958043677,
+          -3.1821485953046147
+        ],
+        "size": [
+          0.3116109575126318,
+          1.5430910304845837,
+          0.7404567141720806
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-077",
+      "fullTriangles": 43493,
+      "cleanTriangles": 10779,
+      "removedTriangles": 32714,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          2.013575126459105,
+          0.9467548216782047,
+          -4.2496750517092945
+        ],
+        "max": [
+          2.749103694071276,
+          2.6041147830985025,
+          -3.5366770971643207
+        ],
+        "size": [
+          0.735528567612171,
+          1.6573599614202978,
+          0.7129979545449738
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-078",
+      "fullTriangles": 51791,
+      "cleanTriangles": 18779,
+      "removedTriangles": 33012,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.5356469019562076,
+          0.9562989712603714,
+          -4.617028519679887
+        ],
+        "max": [
+          3.1343432421189203,
+          2.130640156313449,
+          -3.744170303756414
+        ],
+        "size": [
+          1.5986963401627128,
+          1.1743411850530774,
+          0.8728582159234732
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-079",
+      "fullTriangles": 41781,
+      "cleanTriangles": 8388,
+      "removedTriangles": 33393,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.4569024064572564,
+          1.2887848270915028,
+          -4.096640418908419
+        ],
+        "max": [
+          2.9577223503025287,
+          2.6483745136457246,
+          -3.2554182080653025
+        ],
+        "size": [
+          1.5008199438452723,
+          1.3595896865542219,
+          0.8412222108431164
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-080",
+      "fullTriangles": 306329,
+      "cleanTriangles": 272828,
+      "removedTriangles": 33501,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.7171819153347516,
+          0.9939848223135905,
+          -3.7972772953457348
+        ],
+        "max": [
+          2.584488798555425,
+          2.4038748101828538,
+          -3.286762561831288
+        ],
+        "size": [
+          0.8673068832206732,
+          1.4098899878692632,
+          0.5105147335144467
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-081",
+      "fullTriangles": 45865,
+      "cleanTriangles": 12995,
+      "removedTriangles": 32870,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          2.0962157436725937,
+          1.3491698223135908,
+          -4.021963395416881
+        ],
+        "max": [
+          2.5740432943709672,
+          2.3033708649657214,
+          -3.3968788261127156
+        ],
+        "size": [
+          0.47782755069837357,
+          0.9542010426521306,
+          0.6250845693041653
+        ]
+      },
+      "images": 1
+    },
+    {
+      "model": "SexMachineModel-082",
+      "fullTriangles": 402564,
+      "cleanTriangles": 371625,
+      "removedTriangles": 30939,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          -1.7334023917571126,
+          0.9939848223135153,
+          -7.9963654580673
+        ],
+        "max": [
+          5.33346512243101,
+          5.9000653321804215,
+          1.2859790508188909
+        ],
+        "size": [
+          7.0668675141881225,
+          4.906080509866906,
+          9.28234450888619
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-083",
+      "fullTriangles": 38315,
+      "cleanTriangles": 5404,
+      "removedTriangles": 32911,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          -1.0844950445001422,
+          0.33304622041504217,
+          -7.9963654580673
+        ],
+        "max": [
+          5.33346512243101,
+          6.800235332180422,
+          -0.5077006479182318
+        ],
+        "size": [
+          6.417960166931152,
+          6.4671891117653795,
+          7.488664810149068
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-084",
+      "fullTriangles": 978006,
+      "cleanTriangles": 944468,
+      "removedTriangles": 33538,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.6923397873667123,
+          1.2508248118033365,
+          -4.1845138855248685
+        ],
+        "max": [
+          2.6429772220097525,
+          2.188191813785833,
+          -3.555255542906932
+        ],
+        "size": [
+          0.9506374346430402,
+          0.9373670019824967,
+          0.6292583426179363
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-085",
+      "fullTriangles": 43830,
+      "cleanTriangles": 10088,
+      "removedTriangles": 33742,
+      "figureInstances": 2,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.677852749824524,
+          0.8305083513259888,
+          -3.430323600769043
+        ],
+        "max": [
+          3.114926815032959,
+          2.1253623962402344,
+          -2.8181531755742895
+        ],
+        "size": [
+          1.437074065208435,
+          1.2948540449142456,
+          0.6121704251947535
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-086",
+      "fullTriangles": 22094,
+      "cleanTriangles": 6175,
+      "removedTriangles": 15919,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          2.3586553941851296,
+          0.8162983638200789,
+          -4.006996019214253
+        ],
+        "max": [
+          3.4541781352305487,
+          2.24073435721447,
+          -2.8181531755742895
+        ],
+        "size": [
+          1.0955227410454191,
+          1.4244359933943909,
+          1.1888428436399638
+        ]
+      },
+      "images": 1
+    },
+    {
+      "model": "SexMachineModel-087",
+      "fullTriangles": 216385,
+      "cleanTriangles": 184240,
+      "removedTriangles": 32145,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.7518561359857001,
+          0.6860248270533519,
+          -3.1309066863896375
+        ],
+        "max": [
+          2.5402837079666214,
+          1.6185223280384555,
+          -2.3170095096084498
+        ],
+        "size": [
+          0.7884275719809213,
+          0.9324975009851036,
+          0.8138971767811878
+        ]
+      },
+      "images": 0
+    },
+    {
+      "model": "SexMachineModel-088",
+      "fullTriangles": 211170,
+      "cleanTriangles": 187510,
+      "removedTriangles": 23660,
+      "figureInstances": 1,
+      "sourceBoundsErrorMeters": 0.0,
+      "mechanicalBounds": {
+        "min": [
+          1.9365068888278194,
+          0.6645548167727424,
+          -3.843057589741789
+        ],
+        "max": [
+          2.5717068804780663,
+          2.0115319612524942,
+          -2.8181531755742895
+        ],
+        "size": [
+          0.6351999916502469,
+          1.3469771444797518,
+          1.0249044141674997
+        ]
+      },
+      "images": 0
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "63409a62854ac743c058f087",
+  "name": "table",
+  "kind": "furniture",
+  "source": "map/scene/minsyukumyroom.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuMyroom:12",
+  "native": "native/63409a62854ac743c058f087.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/table-63409a62854ac743c058f087.glb"
+}

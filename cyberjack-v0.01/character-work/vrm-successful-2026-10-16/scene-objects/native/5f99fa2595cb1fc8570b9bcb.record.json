@@ -1,0 +1,11 @@
+{
+  "id": "5f99fa2595cb1fc8570b9bcb",
+  "name": "nagaisu_00_kind",
+  "kind": "furniture",
+  "source": "map/scene/omiyageya.unity3d",
+  "sourceIdentity": "BuildPlayer-Omiyageya:130",
+  "native": "native/5f99fa2595cb1fc8570b9bcb.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

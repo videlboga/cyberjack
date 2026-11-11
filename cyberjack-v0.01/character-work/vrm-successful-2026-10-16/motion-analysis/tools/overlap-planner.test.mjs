@@ -1,0 +1,5 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import{planCharacterCommand}from'./command-planner.mjs';
+const fixture=JSON.parse(fs.readFileSync('artifacts/rise-preparation/recorded-rise.json')),state=fixture.initial;state.profile={...state.profile,recordedRisePilot:true,externalLocomotion:true,overlapRiseWalk:true};
+const cs=[{feature:'hipHeight',min:.50,max:.85},{feature:'torsoInclination',max:30},...['left','right'].map(s=>({feature:s+'Knee',max:30}))],stage={description:'Встать',constraints:cs,translation:[0,0],yaw:0,duration:3,semantics:{query:'natural unarmed stand up'}};
+const plan=await planCharacterCommand({text:'Встать и пройти два метра вперёд',state},{interpret:async()=>({summary:'Встать и пройти',stages:[stage,{...stage,description:'Пройти два метра',translation:[0,2],semantics:{query:'natural unarmed walk'}}]})});
+assert.equal(plan.status,'ready');assert.equal(plan.steps.length,2);assert(plan.steps[1].overlap);assert.deepEqual(plan.steps[1].rootTarget,[0,2]);console.log('PASS command planner composes native rise and gait with overlap');

@@ -1,0 +1,47 @@
+{
+ "id": "mira",
+ "source": "public/character-images/rendered/mira/tpose__nude__none__neutral.png",
+ "palette": {
+  "skin": "#F0E4E4",
+  "skin_shade": "#D8CCCC",
+  "hair": "#484848",
+  "hair_tip": "#F0A8B4",
+  "eyes": "#5DAFD8"
+ },
+ "body_keys": {
+  "B": 0.85,
+  "BreastsSize": 0.0,
+  "BreastsDiameter": 0.0,
+  "BreastsImplants": 0.0,
+  "BreastsCleavage": 0.0,
+  "BreastShape08": 0.0,
+  "HipSize": 0.3,
+  "GlutesSize": 0.25,
+  "ThighsSize": 0.25,
+  "ShinsSize": 0.2,
+  "Abs": 0.35,
+  "Neck Fix": 0.0,
+  "Thigh Choke": 0.0,
+  "Voluptuous": 0.0
+ },
+ "built": {
+  "height_scene": 1.542,
+  "camera_ortho": 1.665,
+  "applied_keys": {
+   "B": 0.85,
+   "BreastsSize": 0.0,
+   "BreastsDiameter": 0.0,
+   "BreastsImplants": 0.0,
+   "BreastsCleavage": 0.0,
+   "BreastShape08": 0.0,
+   "HipSize": 0.3,
+   "GlutesSize": 0.25,
+   "ThighsSize": 0.25,
+   "ShinsSize": 0.2,
+   "Abs": 0.35,
+   "Neck Fix": 0.0,
+   "Thigh Choke": 0.0,
+   "Voluptuous": 0.0
+  }
+ }
+}

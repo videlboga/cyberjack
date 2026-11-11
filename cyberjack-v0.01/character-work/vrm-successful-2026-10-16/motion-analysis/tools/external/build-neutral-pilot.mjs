@@ -1,0 +1,13 @@
+import fs from 'node:fs';import {poseTools,pack} from '../../review/command-pose.mjs';
+const root=new URL('../../',import.meta.url),bank=JSON.parse(fs.readFileSync(new URL('data/mix-bank.json',root))),t=poseTools(bank),clips=JSON.parse(fs.readFileSync(new URL('external-library/clips/100style.json',root))).clips;
+const selected=clips.filter(c=>['100style-neutral-fw','100style-neutral-id'].includes(c.id)),result={format:'external-neutral-pilot-v1',style:'Neutral',license:'CC BY 4.0',attribution:'Mason I. et al., 100STYLE (2022)',clips:{}};
+const rms=(a,b)=>Math.sqrt(selected[0].tracks.reduce((sum,tr)=>{const i=t.m.index.get(tr.bone);return sum+a[i].q.angleTo(b[i].q)**2},0)/21)*180/Math.PI;
+for(const c of selected){const source=[];for(let f=0;f<c.tracks[0].times.length;f++){const p=t.m.makePose();for(const tr of c.tracks){const i=t.m.index.get(tr.bone);if(i!==undefined)p[i].q.fromArray(tr.rotations.slice(f*4,f*4+4)).normalize();}t.orient(p);source.push(p);}
+ let start=0,end=source.length-1,best=Infinity;const walk=c.tags.movement==='FW';if(walk)for(let i=0;i<source.length-24;i++)for(let j=i+24;j<Math.min(source.length,i+49);j++){const shape=rms(source[i],source[j]);let speed=0;for(const tr of c.tracks){const k=t.m.index.get(tr.bone);speed+=Math.abs(source[i][k].q.angleTo(source[i+1][k].q)-source[j-1][k].q.angleTo(source[j][k].q));}const score=shape+speed*180/Math.PI/21;if(score<best){best=score;start=i;end=j;}}
+ const frames=source.slice(start,end+1).map(p=>t.unpack(pack(p))),before=rms(frames[0],frames.at(-1)),n=frames.length;
+ // Close a small seam over the last 20% of the selected cycle; preserve the measured source span.
+ const width=Math.min(8,Math.floor(n/5));for(let f=n-width;f<n;f++){const x=(f-(n-width))/(width-1),w=x*x*(3-2*x);const target=t.interpolate(frames[f],frames[0],w);frames[f]=target;}
+ const footZ=['L','R'].map(s=>frames.map(p=>t.point(p,'foot_'+s).z));const stride=Math.max(.3,Math.min(1.5,footZ.reduce((sum,a)=>sum+Math.max(...a)-Math.min(...a),0)));
+ result.clips[walk?'walk':'idle']={id:c.id,name:c.label,frames:frames.map(pack),duration:(end-start)/30,loop:true,stride,provenance:{...c.provenance,source:c.source,sourceRange:[start/30,end/30],processing:'phase selection + short seam blend; root in-place, per-frame floor normalization'},metrics:{rawSeamRmsDeg:before,seamRmsDeg:rms(frames[0],frames.at(-1)),seamBlendFrames:width,frames:n},coverage:c.tracks.map(tr=>tr.bone)};
+}
+fs.writeFileSync(new URL('data/external-neutral-pilot.json',root),JSON.stringify(result));console.log(JSON.stringify(Object.fromEntries(Object.entries(result.clips).map(([k,c])=>[k,{duration:c.duration,stride:c.stride,...c.metrics}]))));

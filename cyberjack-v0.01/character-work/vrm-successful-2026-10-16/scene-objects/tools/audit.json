@@ -1,0 +1,1198 @@
+{
+  "scope": "267 preserved scene variants; counts are table rows, not deduplicated actions",
+  "counts": {
+    "scenes": 267,
+    "chairScenes": 42,
+    "deskScenes": 14,
+    "itemScenes": 21,
+    "itemTables": 13,
+    "itemRows": 24,
+    "uniquePrefabReferences": 22,
+    "prefabsFound": 22
+  },
+  "objects": [
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_item_hand",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_item_hand.prefab"
+      ],
+      "components": {
+        "Transform": 5,
+        "Animator": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_item_bananabort",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_item_bananabort.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1,
+        "MonoBehaviour": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_null",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_null.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "Animator": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_pen01",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_pen01.prefab"
+      ],
+      "components": {
+        "Transform": 1,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1,
+        "MonoBehaviour": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book01",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book01.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book02",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book02.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book03",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book03.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book04",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book04.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book05",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book05.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book06",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book06.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book07",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book07.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book08",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book08.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book09",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book09.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_aibu_book10",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_aibu_book10.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "MeshCollider": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_item_kibako",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_item_kibako.prefab"
+      ],
+      "components": {
+        "Transform": 15,
+        "MeshCollider": 3,
+        "MonoBehaviour": 3,
+        "MeshFilter": 10,
+        "MeshRenderer": 10,
+        "Tree": 1,
+        "LODGroup": 1
+      }
+    },
+    {
+      "bundle": "h/common/01.unity3d",
+      "name": "p_item_onaho",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/01/item/p_item_onaho.prefab"
+      ],
+      "components": {
+        "Transform": 8,
+        "SkinnedMeshRenderer": 1,
+        "Animator": 1,
+        "MonoBehaviour": 1
+      }
+    },
+    {
+      "bundle": "h/common/71.unity3d",
+      "name": "p_item_ukiwa",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/71/item/p_item_ukiwa.prefab"
+      ],
+      "components": {
+        "Transform": 10,
+        "MeshCollider": 1,
+        "MonoBehaviour": 1,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "Animator": 1
+      }
+    },
+    {
+      "bundle": "h/common/71.unity3d",
+      "name": "p_item_dan_kotei",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/71/item/p_item_dan_kotei.prefab"
+      ],
+      "components": {
+        "Transform": 2,
+        "Animator": 1
+      }
+    },
+    {
+      "bundle": "h/common/71.unity3d",
+      "name": "p_item_rotor_L",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/71/item/p_item_rotor_l.prefab"
+      ],
+      "components": {
+        "Transform": 4,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "Animator": 1,
+        "MonoBehaviour": 1
+      }
+    },
+    {
+      "bundle": "h/common/71.unity3d",
+      "name": "p_item_rotor_R",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/71/item/p_item_rotor_r.prefab"
+      ],
+      "components": {
+        "Transform": 4,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "Animator": 1,
+        "MonoBehaviour": 1
+      }
+    },
+    {
+      "bundle": "h/common/71.unity3d",
+      "name": "p_item_beach_ball",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/71/item/p_item_beach_ball.prefab"
+      ],
+      "components": {
+        "Transform": 12,
+        "MeshFilter": 1,
+        "MeshRenderer": 1,
+        "Animator": 1
+      }
+    },
+    {
+      "bundle": "h/common/71.unity3d",
+      "name": "p_item_dildo",
+      "found": true,
+      "assetPaths": [
+        "assets/illusion/assetbundle/h/common/71/item/p_item_dildo.prefab"
+      ],
+      "components": {
+        "Transform": 12,
+        "MonoBehaviour": 2,
+        "SkinnedMeshRenderer": 1,
+        "Animator": 1
+      }
+    }
+  ],
+  "tables": [
+    {
+      "source": "h/list/71.unity3d",
+      "pathId": "-7468971604291867380",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs_f_n54",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add71",
+            "pathAssetObject": "h/common/71.unity3d",
+            "nameObject": "p_item_ukiwa",
+            "pathAssetAnimator": "h/anim/female/02_71_00.unity3d",
+            "nameAnimator": "khs_p_n54",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "7402108325511812266",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs3_f_01",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_item_hand",
+            "pathAssetAnimator": "h/anim/female/07_01_00.unity3d",
+            "nameAnimator": "khs3_p_00",
+            "lstParent": [
+              {
+                "numToWhomParent": 11,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/71.unity3d",
+      "pathId": "-8391168015389845272",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs_f_n55",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add71",
+            "pathAssetObject": "h/common/71.unity3d",
+            "nameObject": "p_item_dan_kotei",
+            "pathAssetAnimator": "h/anim/female/02_71_00.unity3d",
+            "nameAnimator": "khs_p_n55",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "-7957594822816518271",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs_f_n32",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_item_bananabort",
+            "pathAssetAnimator": "h/anim/female/02_01_00.unity3d",
+            "nameAnimator": "",
+            "lstParent": []
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "-6810245905628044536",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khh_f_61",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_null",
+            "pathAssetAnimator": "h/anim/female/01_01_00.unity3d",
+            "nameAnimator": "khh_p_61",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "1699942154389217387",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_kha_f_10",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_pen01",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "k_f_handR_00",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          },
+          {
+            "id": 1,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book01",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 2,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book02",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 3,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book03",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 4,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book04",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 5,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book05",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 6,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book06",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 7,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book07",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 8,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book08",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 9,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book09",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          },
+          {
+            "id": 10,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_aibu_book10",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "-8803849140302660166",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs_f_n25",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_item_kibako",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": []
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/71.unity3d",
+      "pathId": "1004632939456517165",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_kht_f_07",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add71",
+            "pathAssetObject": "h/common/71.unity3d",
+            "nameObject": "p_item_rotor_L",
+            "pathAssetAnimator": "h/anim/female/03_71_00.unity3d",
+            "nameAnimator": "kht_pL_07",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "k_f_handL_00",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          },
+          {
+            "id": 1,
+            "manifest": "add71",
+            "pathAssetObject": "h/common/71.unity3d",
+            "nameObject": "p_item_rotor_R",
+            "pathAssetAnimator": "h/anim/female/03_71_00.unity3d",
+            "nameAnimator": "kht_pR_07",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "k_f_handR_00",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/71.unity3d",
+      "pathId": "-8724704986555348718",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs_f_n53",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add71",
+            "pathAssetObject": "h/common/71.unity3d",
+            "nameObject": "p_item_beach_ball",
+            "pathAssetAnimator": "h/anim/female/02_71_00.unity3d",
+            "nameAnimator": "khs_p_n53",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "-8034398109196776201",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs3_f_00",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_item_hand",
+            "pathAssetAnimator": "h/anim/female/07_01_00.unity3d",
+            "nameAnimator": "khs3_p_00",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "6332336026009848389",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khs_f_n33",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_item_bananabort",
+            "pathAssetAnimator": "h/anim/female/02_01_00.unity3d",
+            "nameAnimator": "",
+            "lstParent": []
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/01.unity3d",
+      "pathId": "-8082017007862253625",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_khh_f_49",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add01",
+            "pathAssetObject": "h/common/01.unity3d",
+            "nameObject": "p_item_onaho",
+            "pathAssetAnimator": "",
+            "nameAnimator": "",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "k_f_handR_00",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source": "h/list/71.unity3d",
+      "pathId": "-576635357550944258",
+      "data": {
+        "m_GameObject": {
+          "m_FileID": 0,
+          "m_PathID": 0
+        },
+        "m_Enabled": 1,
+        "m_Script": {
+          "m_FileID": 0,
+          "m_PathID": -7542883782331587850
+        },
+        "m_Name": "item_kht_f_06",
+        "param": [
+          {
+            "id": 0,
+            "manifest": "add71",
+            "pathAssetObject": "h/common/71.unity3d",
+            "nameObject": "p_item_dildo",
+            "pathAssetAnimator": "h/anim/female/03_71_00.unity3d",
+            "nameAnimator": "kht_p_06",
+            "lstParent": [
+              {
+                "numToWhomParent": 1,
+                "nameParent": "cf_j_root",
+                "nameSelf": "",
+                "kindSetParent": 0
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "furnitureScenes": [
+    {
+      "id": "227cc8b9df1fb2b55da00338:3",
+      "name": "椅子座り愛撫",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "227cc8b9df1fb2b55da00338:4",
+      "name": "椅子バック愛撫",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "227cc8b9df1fb2b55da00338:5",
+      "name": "机バック愛撫",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "227cc8b9df1fb2b55da00338:8",
+      "name": "机しゃがみ愛撫",
+      "chairs": 0,
+      "desks": 2
+    },
+    {
+      "id": "227cc8b9df1fb2b55da00338:10",
+      "name": "いたずら愛撫",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:16",
+      "name": "椅子亀頭いじり",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:17",
+      "name": "椅子片手コキ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:21",
+      "name": "椅子先舐め＋竿舐め",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:22",
+      "name": "椅子ノーハンド先舐め",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:24",
+      "name": "椅子両手フェラ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:27",
+      "name": "椅子パイズリ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:28",
+      "name": "椅子腕はさみパイズリ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:30",
+      "name": "椅子パイズリ+舐め",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:31",
+      "name": "椅子パイズリ+咥え",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:55",
+      "name": "椅子足コキ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:61",
+      "name": "椅子乳首舐め手コキ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "afb4105e9c2f7facfd224839:64",
+      "name": "椅子乳首舐めパイズリ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "f5779cf02c19c764ad9072c9:0",
+      "name": "角オナニー",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "f5779cf02c19c764ad9072c9:1",
+      "name": "椅子オナニー",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "99b933ffc2c3eff89aa5eff8:1",
+      "name": "椅子クンニ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:9",
+      "name": "椅子対面",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:10",
+      "name": "椅子背面",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:11",
+      "name": "椅子バック",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:12",
+      "name": "腕引っ張り椅子バック",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:13",
+      "name": "机寝位",
+      "chairs": 0,
+      "desks": 2
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:14",
+      "name": "机バック",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:15",
+      "name": "腕引っ張り机バック",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "ea0453b3ae64355e225b4edd:16",
+      "name": "机側位",
+      "chairs": 0,
+      "desks": 2
+    },
+    {
+      "id": "220781804b4135b7f8372e51:16",
+      "name": "椅子亀頭いじり",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:17",
+      "name": "椅子片手コキ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:21",
+      "name": "椅子先舐め＋竿舐め",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:22",
+      "name": "椅子ノーハンド先舐め",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:24",
+      "name": "椅子両手フェラ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:27",
+      "name": "椅子パイズリ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:28",
+      "name": "椅子腕はさみパイズリ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:30",
+      "name": "椅子パイズリ+舐め",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:31",
+      "name": "椅子パイズリ+咥え",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:55",
+      "name": "椅子足コキ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:61",
+      "name": "椅子乳首舐め手コキ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "220781804b4135b7f8372e51:64",
+      "name": "椅子乳首舐めパイズリ",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "edead90f87a64c732933cb7d:3",
+      "name": "椅子座り愛撫",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "edead90f87a64c732933cb7d:4",
+      "name": "椅子バック愛撫",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "edead90f87a64c732933cb7d:5",
+      "name": "机バック愛撫",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "edead90f87a64c732933cb7d:8",
+      "name": "机しゃがみ愛撫",
+      "chairs": 0,
+      "desks": 2
+    },
+    {
+      "id": "edead90f87a64c732933cb7d:10",
+      "name": "いたずら愛撫",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "93b6cfdc97db66c622a53573:0",
+      "name": "角オナニー",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "93b6cfdc97db66c622a53573:1",
+      "name": "椅子オナニー",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "93b6cfdc97db66c622a53573:8",
+      "name": "ディルドオナニー",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:9",
+      "name": "椅子対面",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:10",
+      "name": "椅子背面",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:11",
+      "name": "椅子バック",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:12",
+      "name": "腕引っ張り椅子バック",
+      "chairs": 1,
+      "desks": 0
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:13",
+      "name": "机寝位",
+      "chairs": 0,
+      "desks": 2
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:14",
+      "name": "机バック",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:15",
+      "name": "腕引っ張り机バック",
+      "chairs": 0,
+      "desks": 1
+    },
+    {
+      "id": "0b6b01b6a1d1c42001cd6f15:16",
+      "name": "机側位",
+      "chairs": 0,
+      "desks": 2
+    }
+  ],
+  "limitations": [
+    "Furniture comes from map/HPoint context, not a unique prefab reference in each scene.",
+    "Object geometry, animation and bindings are not yet rendered by the viewer.",
+    "fileHitObject is not a list of visible props."
+  ]
+}

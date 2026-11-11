@@ -1,0 +1,12 @@
+{
+  "id": "2b40ed95ff9e2fcfcbc46808",
+  "name": "p_ks_m23_chair00_00 (7)",
+  "kind": "furniture",
+  "source": "map/scene/gassyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuLobby:588",
+  "native": "native/2b40ed95ff9e2fcfcbc46808.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m23_chair00_00_7_-2b40ed95ff9e2fcfcbc46808.glb"
+}

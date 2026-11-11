@@ -1,0 +1,76 @@
+{
+  "first": {
+    "state": {
+      "Eye": 0,
+      "Eyebrow": 0,
+      "Mouth": 0,
+      "eyesOpen": 1,
+      "mouthOpen": 0,
+      "browStrength": 1,
+      "enabled": true,
+      "blink": false,
+      "character": "mira",
+      "meshes": 11
+    },
+    "meshShapes": []
+  },
+  "checks": {
+    "checked": 261,
+    "missing": [],
+    "bad": []
+  },
+  "dynamics": {
+    "blinkMin": 0,
+    "blinkMax": 1,
+    "half": {
+      "neutral": 0.5,
+      "happy": 0.5
+    },
+    "end": {
+      "neutral": 0,
+      "happy": 1
+    },
+    "geometric": {
+      "Eye 両目閉じ": true,
+      "Mouth あ　大": true,
+      "Eyebrow 怒り": true
+    }
+  },
+  "before": {
+    "Eye": 2,
+    "Eyebrow": 0,
+    "Mouth": 2,
+    "eyesOpen": 1,
+    "mouthOpen": 0,
+    "browStrength": 1,
+    "enabled": true,
+    "blink": false,
+    "character": "mira",
+    "meshes": 11
+  },
+  "after": {
+    "Eye": 2,
+    "Eyebrow": 0,
+    "Mouth": 2,
+    "eyesOpen": 1,
+    "mouthOpen": 0,
+    "browStrength": 1,
+    "enabled": true,
+    "blink": false,
+    "character": "mira",
+    "meshes": 11
+  },
+  "rin": {
+    "Eye": 2,
+    "Eyebrow": 0,
+    "Mouth": 0,
+    "eyesOpen": 1,
+    "mouthOpen": 0.5,
+    "browStrength": 1,
+    "enabled": true,
+    "blink": false,
+    "character": "rin",
+    "meshes": 11
+  },
+  "errors": []
+}

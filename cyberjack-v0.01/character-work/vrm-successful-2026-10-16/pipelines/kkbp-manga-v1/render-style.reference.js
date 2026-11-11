@@ -1,0 +1,77 @@
+import {createLibraryMotion} from './library-motion.js';
+import {createPostureLayer} from './posture-layer.js?v=2';
+import {createPresence} from './presence-state.js?v=2';
+import {createBodyStage} from './body-stage.js?v=2';
+import {createRenderStyle} from './render-style.js?v=11';
+import {reactions,chooseReaction,applyReactionLayer} from './impact-reactions.js?v=1';
+import {createFloorContact} from './floor-contact.js?v=2';
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin,VRMUtils} from './vendor/three-vrm.module.js';
+import {createFacialControl} from './vendor/facial-control.js?v=unique-morphs-1';
+const $=s=>document.querySelector(s),stage=$('#stage');
+const character=new URLSearchParams(location.search).get('character')||'mira';if(!['mira','rin','kai'].includes(character))throw Error('Unknown character');
+const outfit=new URLSearchParams(location.search).get('outfit')||'00';if(!/^0[0-3]$/.test(outfit))throw Error('Unknown outfit');
+let state={reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches},talkUntil=0,returnAt=0;
+const send=(type,extra={})=>parent.postMessage({type,character,...extra},location.origin);
+window.addEventListener('error',e=>send('cyberjack-vrm-error',{message:e.message}));
+const scene=new THREE.Scene();scene.background=null;scene.fog=new THREE.Fog('#ffffff',7,15);
+const camera=new THREE.PerspectiveCamera(30,1,.05,40);camera.position.set(.15,.95,3.6);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;stage.append(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.86,0);controls.enableDamping=true;controls.enablePan=false;controls.minDistance=.45;controls.maxDistance=5;controls.maxPolarAngle=Math.PI*.58;controls.minPolarAngle=Math.PI*.25;
+const hemisphere=new THREE.HemisphereLight(0xffffff,0xaab6a1,1.5);scene.add(hemisphere);const light=new THREE.DirectionalLight(0xfff7e9,2.1);light.position.set(-2,4,3);light.castShadow=true;light.shadow.mapSize.set(1024,1024);scene.add(light);const fill=new THREE.DirectionalLight(0xe4efff,.6);fill.position.set(3,2,-2);scene.add(fill);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshStandardMaterial({color:0xffffff,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=0;floor.receiveShadow=true;scene.add(floor);
+const posture=createPostureLayer(()=>vrm);const presence=createPresence(()=>vrm);let bodyStage=null;let renderStyle=null;let reaction=null;let grounding=null;let accumulator=0;let vrm,bank,map,face,clip,clipTime=0,sourceNodes=[],bindings=[],rests=[],restsPos=[],bindByBone=new Map(),hipScale=.9,blend=null,clock=0,last=performance.now(),active=null,queue=[],cameraGoal=null,ready=false,voiceStarted=false;
+
+const mirror=(q,out=new THREE.Quaternion())=>out.set(q.x,-q.y,-q.z,q.w);
+const sourceMap=new Map();
+const libraryMotion=createLibraryMotion(status=>send('cyberjack-vrm-motion',{status}),()=>bank);
+function postureLayerCapture(){posture.captureRest()}
+function bind(){
+ for(const n of bank.sourceRig)sourceMap.set(n.name,{...n,local:new THREE.Quaternion().fromArray(n.rotation),world:new THREE.Quaternion(),restWorld:new THREE.Quaternion()});
+ function order(n){if(n.done)return;const p=sourceMap.get(n.parent);if(p)order(p);n.restWorld.copy(p?p.restWorld:new THREE.Quaternion()).multiply(n.local);n.world.copy(n.restWorld);n.done=true;sourceNodes.push(n)}for(const n of sourceMap.values())order(n);
+ vrm.scene.updateMatrixWorld(true);const target=new Map();vrm.scene.traverse(n=>{if(n.name)target.set(n.name,n)});const simulated=new Set([...vrm.springBoneManager?.joints||[]].map(j=>j.bone));
+ const posture=new Set([...Object.keys(map),'cf_j_waist02','cf_j_leg03_L','cf_j_leg03_R',...bank.clips.flatMap(c=>c.tracks.map(t=>t.bone)).filter(n=>n.startsWith('cf_')&&!/sk_|hair/.test(n))]);for(const s of sourceNodes){if(s.name==='cf_j_root'||!posture.has(s.name))continue;const name=map[s.name]||s.name;const n=target.get(name)||target.get(THREE.PropertyBinding.sanitizeNodeName(name));if(!n||simulated.has(n))continue;let depth=0;for(let p=n.parent;p;p=p.parent)depth++;bindings.push({s,n,inv:mirror(s.restWorld).invert(),world:n.getWorldQuaternion(new THREE.Quaternion()),depth})}bindings.sort((a,b)=>a.depth-b.depth);
+ postureLayerCapture();for(const b of bindings){rests.push({n:b.n,q:b.n.quaternion.clone()});restsPos.push({n:b.n,p:b.n.position.clone()});b.p=b.n.position.clone();bindByBone.set(b.s.name,b)}
+ // Vertical scale for position offsets: the avatar's own hip height at rest.
+ const hipsBinding=bindByBone.get('cf_j_hips');if(hipsBinding&&hipsBinding.p.y>0.2)hipScale=hipsBinding.p.y;
+}
+function sample(tr,t){let i=0;const a=tr.times;while(i<a.length-2&&a[i+1]<t)i++;if(a.length===1)return new THREE.Quaternion().fromArray(tr.rotations);const f=THREE.MathUtils.clamp((t-a[i])/(a[i+1]-a[i]||1),0,1);return new THREE.Quaternion().fromArray(tr.rotations,i*4).slerp(new THREE.Quaternion().fromArray(tr.rotations,(i+1)*4),f)}
+function sampleVec(tr,t){const a=tr.times;let i=0;while(i<a.length-2&&a[i+1]<t)i++;if(a.length===1)return new THREE.Vector3().fromArray(tr.points);const f=THREE.MathUtils.clamp((t-a[i])/(a[i+1]-a[i]||1),0,1),x=i*3,y=(i+1)*3;return new THREE.Vector3(tr.points[x]+(tr.points[y]-tr.points[x])*f,tr.points[x+1]+(tr.points[y+1]-tr.points[x+1])*f,tr.points[x+2]+(tr.points[y+2]-tr.points[x+2])*f)}
+// Contact depends on the pose clip: knees, knees+hands, back, or the soles by default.
+function applyContact(c){const s=c?.support||'';grounding?.setContact(s==='floor-knees'?'knees':s==='floor-hands-knees'?'hands-knees':s==='floor-back'?'back':s==='floor-ground-seat'?'seat':'soles')}
+function setClip(id){if(!ready)return;id=posture.baseClip||id;if(clip?.id===id)return;const next=bank.clips.find(c=>c.id===id);if(!next)throw Error('Клип не найден: '+id);blend={at:clock,from:new Map(bindings.map(b=>[b.n,b.n.quaternion.clone()])),fromPos:new Map(restsPos.map(r=>[r.n,r.n.position.clone()]))};clip=next;clipTime=0;applyContact(next);$('#body-state').textContent=id}
+function pose(dt){
+ clipTime=(clipTime+dt)%clip.duration;for(const r of rests)r.n.quaternion.copy(r.q);for(const s of sourceNodes)s.local.fromArray(s.rotation);for(const tr of clip.tracks){const s=sourceMap.get(tr.bone);if(s)s.local.copy(sample(tr,(clip.id==='Base_sitting'||posture.holdsUpperBody&&/^cf_(j_(hips|spine|neck|head|waist)|n_height)/.test(tr.bone)||posture.holdsArms&&/^cf_(j|d|dd|pv)_(shoulder|arm|forearm|hand)/.test(tr.bone))?0:clipTime))}libraryMotion.apply(dt,sourceMap);for(const s of sourceNodes){const p=sourceMap.get(s.parent);s.world.copy(p?p.world:new THREE.Quaternion()).multiply(s.local)}
+ const cache=new Map();function world(n){if(!n)return new THREE.Quaternion();if(cache.has(n))return cache.get(n);const q=world(n.parent).clone().multiply(n.quaternion);cache.set(n,q);return q}
+ const a=blend?THREE.MathUtils.smoothstep(clock-blend.at,0,.45):1;for(const b of bindings){const parent=world(b.n.parent);const q=mirror(b.s.world).multiply(b.inv).multiply(b.world).premultiply(parent.clone().invert());b.n.quaternion.copy(q);if(a<1)b.n.quaternion.copy(blend.from.get(b.n)).slerp(q,a);cache.set(b.n,parent.clone().multiply(b.n.quaternion))}if(a===1)blend=null;
+ // Optional position tracks (clip.positions): offsets from the source rest pose in reference-height units,
+ // mapped with the same X-180 mirror as rotations and scaled to this avatar's hip height.
+ for(const r of restsPos)r.n.position.copy(r.p);
+ for(const tr of clip.positions||[]){const b=bindByBone.get(tr.bone);if(!b)continue;
+  const holdBody=clip.id==='Base_sitting'||posture.holdsUpperBody&&/^cf_(j_(hips|spine|neck|head|waist)|n_height)/.test(tr.bone);
+  const v=sampleVec(tr,holdBody?0:clipTime);
+  b.n.position.set(b.p.x+v.x*hipScale,b.p.y-v.y*hipScale,b.p.z-v.z*hipScale);
+  if(a<1&&blend?.fromPos){const from=blend.fromPos.get(b.n);if(from)b.n.position.lerpVectors(from,b.n.position,a)}
+ }
+ // Small additive listening gestures; all are applied after the source body clip.
+ if(!state.reducedMotion&&!posture.holdsUpperBody){const head=vrm.humanoid.getRawBoneNode('head');if(head){const elapsed=active?clock-active.at:0;head.rotateY(Math.sin(clock*.65)*.028);if(active?.kind==='hello'&&elapsed<1.6)head.rotateX(Math.sin(elapsed/1.6*Math.PI*2)*.09);if(active?.kind==='question')head.rotateZ(Math.sin(Math.min(elapsed,1.2)/1.2*Math.PI/2)*.06)}}
+}
+
+function startReaction(kind,strength=1){if(!reactions[kind])return;const profile=reactions[kind];reaction={kind,strength:Math.min(1.3,Math.max(.25,Number(strength)||1)),at:clock};active=null;returnAt=0;setClip(state.reducedMotion?'Idle_00_00':profile.clip);expression(profile.emotion);send('cyberjack-vrm-reaction',{kind,label:profile.label});}
+function stopReaction(forceIdle=false){if(forceIdle)talkUntil=clock;reaction=null;active=null;returnAt=0;expression(lastEmotion||'neutral');setClip(clock<talkUntil?'Stand_03_00':presence.idle);send('cyberjack-vrm-reaction',{kind:null,label:''});}
+const faceNames={pleasure:'Улыбка',blush:'Улыбка',shy:'Улыбка',smug:'Улыбка',bored:'Грусть',sleepy:'Грусть',mixed:'Грусть',mixed_overload:'Грусть',receptive:'Улыбка',afterglow:'Улыбка',guarded:'Грусть',exhausted:'Грусть',crying:'Грусть',pain:'Грусть',high_negative:'Злость',disgust:'Злость',smile:'Улыбка',excited:'Улыбка',high_positive:'Улыбка',curious:'Нейтрально',surprise:'Удивление',fear:'Удивление',angry:'Злость',defiant:'Злость',sad:'Грусть',distressed:'Грусть'};
+let lastEmotion='',replyId='',actionId='';
+function expression(emotion){if(!face)return;face.reset();face.set({blink:true});const name=faceNames[emotion];if(name&&name!=='Нейтрально')[...face.section.querySelectorAll('.face-presets button')].find(b=>b.textContent===name)?.click()}
+function applyState(next){state={...state,...next};if(!ready)return;const previousBase=posture.baseClip;posture.set(next.postureContexts||[]);libraryMotion.set(posture.state);if(previousBase!==posture.baseClip)setClip(posture.baseClip||'Idle_00_00');grounding?.setMode(posture.baseClip?'body':'feet');applyContact(clip);presence.set(next.condition||{});bodyStage?.configure({...next.interaction,reduced:state.reducedMotion});const emotion=String(next.emotion||'neutral');if(emotion!==lastEmotion){lastEmotion=emotion;expression(emotion);if(!state.reducedMotion){setClip(['smile','excited','high_positive'].includes(emotion)?'Stand_Joy_01':'Stand_00_00');returnAt=clock+3.5}}
+ const event=next.eventId;if(event!==undefined&&event!==null&&String(event)!==actionId){actionId=String(event);startReaction(chooseReaction({emotion,...next.impact}),.45+.65*Math.min(1,Math.max(0,Number(next.impact?.intensity??.5))));if(next.impact?.intensity>.7||next.impact?.result==='overload'||next.impact?.discharge)bodyStage?.cinematic(clock)}
+ const reply=next.reply;if(reply&&typeof reply.id==='string'&&reply.id!==replyId&&typeof reply.text==='string'){if(reaction){expression(emotion);send('cyberjack-vrm-reaction',{kind:null,label:''})}reaction=null;replyId=reply.id;talkUntil=clock+Math.min(12,Math.max(1.8,reply.text.length/15));active={kind:'question',at:clock};if(!state.reducedMotion)setClip('Stand_03_00');returnAt=talkUntil+.4}
+ if(state.reducedMotion&&clip.id!=='Idle_00_00')setClip('Idle_00_00');
+}
+window.addEventListener('message',e=>{if(e.source!==parent||e.origin!==location.origin||e.data?.character!==character)return;if(e.data.type==='cyberjack-vrm-focus'){bodyStage?.focus(e.data.pointId||'systemic');return}if(e.data.type==='cyberjack-vrm-style'){renderStyle?.set(e.data.preset,e.data.strength);return}if(e.data.type==='cyberjack-vrm-preview'){if(!ready)return;if(e.data.kind==='idle')stopReaction(true);else startReaction(e.data.kind,e.data.strength);return}if(e.data.type==='cyberjack-vrm-state')applyState(e.data)});
+new ResizeObserver(()=>{const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix()}).observe(stage);
+function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;return}const dt=Math.max(0,Math.min((now-last)/1000,.075));last=now;clock+=dt;if(ready){pose(dt);if(reaction){const age=clock-reaction.at;if(age>=reactions[reaction.kind].duration)stopReaction();else if(!state.reducedMotion)applyReactionLayer(vrm,reaction.kind,age,reaction.strength)}presence.update(dt,face,Boolean(reaction)||clock<talkUntil,state.reducedMotion,posture.holdsUpperBody);if(!reaction&&clock>=talkUntil&&!returnAt&&!state.reducedMotion&&clip.id!==(posture.baseClip||presence.idle))setClip(presence.idle);posture.update(dt,state.reducedMotion,libraryMotion.activeArms);grounding?.update();renderStyle?.update();accumulator=Math.min(accumulator+dt,.075);while(accumulator>=1/60){vrm.update(1/60);accumulator-=1/60}face.setMouthDriver(clock<talkUntil?.15+.4*Math.abs(Math.sin(clock*13)):null);face.apply(dt);if(returnAt&&clock>returnAt){returnAt=0;active=null;setClip(state.reducedMotion?'Idle_00_00':presence.idle)}}bodyStage?.update(dt,clock);controls.update();renderer.render(scene,camera)}requestAnimationFrame(frame);
+try{const loader=new GLTFLoader();loader.register(p=>new VRMLoaderPlugin(p));const [gltf,data,mapping,postureData]=await Promise.all([loader.loadAsync('./assets/'+character+'-outfit-'+outfit+'.vrm'),fetch('./assets/idles.json').then(r=>r.json()),fetch('./assets/bone-map.json').then(r=>r.json()),fetch('./assets/postures.json').then(r=>r.json())]);vrm=gltf.userData.vrm;if(!vrm)throw Error('Файл не содержит VRM');bank=data;bank.clips.push(...postureData.clips);map=mapping;VRMUtils.combineSkeletons(vrm.scene);vrm.humanoid.autoUpdateHumanBones=false;if(vrm.lookAt)vrm.lookAt.autoUpdate=false;vrm.scene.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true}});scene.add(vrm.scene);vrm.update(0);bind();face=await createFacialControl({getVrm:()=>vrm,getCharacter:()=>character,host:$('#face-host'),base:'./assets/face/'});face.section.hidden=true;renderStyle=createRenderStyle({vrm,renderer,scene,light,fill,hemisphere,floor});renderStyle.set('blender',1);bodyStage=createBodyStage({vrm,camera,controls,renderer,send});ready=true;setClip('Idle_00_00');expression('neutral');pose(0);grounding=createFloorContact(vrm,{floorY:floor.position.y});grounding.update();vrm.springBoneManager?.reset();for(let i=0;i<45;i++){pose(1/60);grounding.update();vrm.update(1/60);face.apply(1/60)}applyState(state);send('cyberjack-vrm-ready');window.__gameVrm={get state(){return {character,outfit,ready,style:renderStyle?.state,presence:presence.state,posture:posture.state,library:libraryMotion.state,camera:bodyStage?.state,clip:clip?.id,emotion:lastEmotion,replyId,talking:clock<talkUntil,boundBones:bindings.length,grounding:grounding?.state,reaction:reaction?.kind||null}},vrm,renderer,grounding,bodyStage,presence,posture};}catch(e){send('cyberjack-vrm-error',{message:e.message});console.error(e)}
+renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();send('cyberjack-vrm-error',{message:'WebGL-контекст потерян'})});
+window.addEventListener('pagehide',()=>{renderer.dispose();if(vrm)VRMUtils.deepDispose(vrm.scene)});

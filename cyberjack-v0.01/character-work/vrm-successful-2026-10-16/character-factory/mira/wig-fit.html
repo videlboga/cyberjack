@@ -1,0 +1,285 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Примерка парика</title>
+<style>
+  :root{--fg:#e8ecf3;--bg:#14161c;--line:#2a2f3a;--acc:#5aa9ff}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:13px/1.35 system-ui,sans-serif}
+  #app{display:flex;height:100%}
+  #stage{flex:1;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%}
+  #panel{width:320px;border-left:1px solid var(--line);padding:10px 12px;overflow:auto}
+  h1{font-size:13px;margin:0 0 2px}
+  .sub{color:#8f9bb0;font-size:11px;margin-bottom:10px}
+  .row{margin:9px 0}
+  .row .top{display:flex;justify-content:space-between;font-size:11.5px;color:#c7d1e2}
+  .row .val{color:#7fb2ff;font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--acc)}
+  button{background:#1b2029;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;margin:4px 4px 0 0}
+  button.on{border-color:var(--acc);color:var(--acc)}
+  #out{width:100%;margin-top:10px;background:#0f1116;color:#9fd0ff;border:1px solid var(--line);border-radius:6px;padding:7px;font:11.5px/1.4 ui-monospace,monospace;resize:vertical;min-height:52px;box-sizing:border-box}
+  #hint{position:absolute;left:10px;bottom:8px;color:#6f7a8d;font-size:11px}
+  #err{position:absolute;inset:0;display:none;place-items:center;color:#ff8b8b;padding:20px;text-align:center}
+</style>
+<div id="app">
+  <div id="stage"><canvas id="c"></canvas>
+    <div id="hint">ЛКМ — вращение · колесо — масштаб вида · ПКМ/Shift — сдвиг</div>
+    <div id="err"></div>
+  </div>
+  <div id="panel">
+    <h1>Примерка парика</h1>
+    <div class="sub" id="stat">загрузка…</div>
+    <div class="sub" id="dbg" style="word-break:break-all"></div>
+
+    <div class="row"><div class="top"><span>Размер</span><span class="val" id="v_s">1.00</span></div>
+      <input type="range" id="s" min="0.80" max="1.25" step="0.005" value="1"></div>
+    <div class="row"><div class="top"><span>Вперёд/назад (Y)</span><span class="val" id="v_z">0</span></div>
+      <input type="range" id="z" min="-60" max="60" step="1" value="0"></div>
+    <div class="row"><div class="top"><span>Высота (вверх/вниз, Z)</span><span class="val" id="v_y">60</span></div>
+      <input type="range" id="y" min="-100" max="300" step="1" value="60"></div>
+    <div class="row"><div class="top"><span>Влево/вправо (X)</span><span class="val" id="v_x">0</span></div>
+      <input type="range" id="x" min="-40" max="40" step="1" value="0"></div>
+    <div class="row"><div class="top"><span>Поворот вокруг оси</span><span class="val" id="v_r">0</span></div>
+      <input type="range" id="r" min="-30" max="30" step="1" value="0"></div>
+    <div class="row"><div class="top"><span>Наклон вперёд</span><span class="val" id="v_t">0</span></div>
+      <input type="range" id="t" min="-25" max="25" step="1" value="0"></div>
+
+    <button id="cap">Колпак: выкл</button>
+    <button id="ghost">Парик прозрачный</button>
+    <button id="pick">Клик по модели</button>
+    <button id="front">Вид спереди</button>
+    <button id="side">Вид сбоку</button>
+    <button id="reset">Сброс</button>
+    <button id="save">Скопировать значения</button>
+    <textarea id="out" readonly></textarea>
+  </div>
+</div>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from './vendor/three/controls/OrbitControls.js';
+import {GLTFLoader} from './vendor/three/loaders/GLTFLoader.js';
+
+const err = document.getElementById('err');
+window.addEventListener('error', e => { err.style.display='grid'; err.textContent = 'Ошибка: ' + e.message; });
+
+const cvs = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas: cvs, antialias: true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14161c);
+const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 40);
+camera.position.set(0.55, 1.42, 0.95);
+const controls = new OrbitControls(camera, cvs);
+const raycaster = new THREE.Raycaster();
+let pickMode = false;
+controls.target.set(0, 1.36, 0);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x2a3040, 1.1));
+const dl = new THREE.DirectionalLight(0xffffff, 1.5); dl.position.set(1.2, 2.4, 1.6); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x9fb8ff, 0.5); dl2.position.set(-1.6, 1.2, -1.2); scene.add(dl2);
+
+const HAIR = new THREE.MeshStandardMaterial({color: 0x22232a, roughness: 0.45, metalness: 0.05, side: THREE.DoubleSide});
+const SKIN = new THREE.MeshStandardMaterial({color: 0xd9d3d3, roughness: 0.8, metalness: 0.0});
+
+const P = {s: 1.0, x: 0, y: 60, z: 0, r: 0, t: 0, cap: false};
+
+const loader = new GLTFLoader();
+let bodyRoot = null, wig = null, capMesh = null;
+const headInfo = {top: 1.462, skullX: 0, skullY: 0.02, radius: 0.077};
+const wigRest = {zmax: 0, cx: 0, cy: 0, size: null};
+
+// --- тело
+loader.load('./hair-test.glb', g => {
+  bodyRoot = g.scene;
+  bodyRoot.traverse(o => {
+    if (o.isMesh || o.isSkinnedMesh) {
+      if (/hair/i.test(o.name)) { o.visible = false; return; }
+      o.material = SKIN; o.frustumCulled = false;
+    }
+    if (o.isBone && o.name === 'head') {
+      const p = new THREE.Vector3(); o.getWorldPosition(p);
+      headInfo.skullX = p.x; headInfo.skullY = p.z;      // z модели → глубина
+      headInfo.top = p.y + 0.075;
+    }
+  });
+  scene.add(bodyRoot);
+  bodyRoot.updateMatrixWorld(true);
+  // фактический верх меша (кость заканчивается ниже макушки)
+  const bb = new THREE.Box3();
+  let hasBody = false;
+  bodyRoot.traverse(o => {
+    if (o.isMesh && !/hair|face/i.test(o.name)) { bb.expandByObject(o); hasBody = true; }
+  });
+  if (!hasBody) bb.setFromObject(bodyRoot);
+  headInfo.top = bb.max.y + 0.004;
+  headInfo.skullX = (bb.min.x + bb.max.x) / 2;
+  headInfo.skullY = (bb.min.z + bb.max.z) / 2;
+  console.log('верх меша', headInfo.top.toFixed(3));
+  // колпак-эллипсоид по своду черепа
+  const capGeo = new THREE.SphereGeometry(1, 48, 28, 0, Math.PI * 2, 0, Math.PI * 0.66);
+  capMesh = new THREE.Mesh(capGeo, HAIR);
+  capMesh.scale.set(0.079, 0.081, 0.089);
+  capMesh.position.set(headInfo.skullX, headInfo.top - 0.079, headInfo.skullY + 0.004);
+  capMesh.frustumCulled = false;
+  capMesh.visible = false;
+  scene.add(capMesh);
+  loadWig();
+}, undefined, e => { err.style.display='grid'; err.textContent = 'тело: ' + e; });
+
+// --- парик
+function loadWig() {
+  loader.load('./wig2-low.glb', g => {
+    wig = g.scene;
+    wig.traverse(o => {
+      if (o.isMesh) {
+        o.frustumCulled = false;
+        if (o.material) { o.material.side = THREE.DoubleSide; o.material.needsUpdate = true; }
+      }
+    });
+    const box = new THREE.Box3().setFromObject(wig);
+    wigRest.size = box.getSize(new THREE.Vector3());
+    wigRest.zmax = box.max.y;                       // в three Y — вверх
+    wigRest.cx = (box.min.x + box.max.x) / 2;
+    wigRest.cy = (box.min.z + box.max.z) / 2;
+    scene.add(wig);
+    apply();
+    const dbg = `верх головы ${headInfo.top.toFixed(3)} | колпак Y ${capMesh.position.y.toFixed(3)} r ${capMesh.scale.x.toFixed(3)} | парик верх ${wig.position.y + wigRest.size.y * wig.scale.y}`;
+    document.getElementById('stat').textContent = dbg;
+    document.getElementById('out').value = document.getElementById('out').value + '\n' + dbg;
+  }, undefined, e => { err.style.display='grid'; err.textContent = 'парик: ' + e; });
+}
+
+function apply() {
+  if (!wig || !wigRest.size) return;
+  const s = P.s;
+  wig.scale.setScalar(s);
+  const baseY = (headInfo.top + P.y / 1000) - wigRest.zmax * s;
+  wig.position.set(
+    headInfo.skullX - wigRest.cx * s + P.x / 1000,
+    baseY,
+    headInfo.skullY - wigRest.cy * s + P.z / 1000
+  );
+  wig.rotation.set(THREE.MathUtils.degToRad(P.t), THREE.MathUtils.degToRad(P.r), 0);
+  if (capMesh) capMesh.visible = !!P.cap;
+  wig.updateMatrixWorld(true);
+  const m = wig.matrixWorld.elements.map(v => v.toFixed(5)).join(',');
+  const txt = `s=${P.s.toFixed(3)} dx=${P.x} dz=${P.z} dy=${P.y} rot=${P.r} tilt=${P.t}`;
+  const mtx = 'M=' + m;
+  document.getElementById('out').value = txt + '\n' + mtx;
+  document.getElementById('dbg').textContent = mtx;
+  history.replaceState(null, '', '#' + txt.replace(/ /g, '&'));
+}
+
+// --- интерфейс
+const bind = (id, key, out, unit = 1) => {
+  const el = document.getElementById(id), lab = document.getElementById(out);
+  const upd = () => { P[key] = parseFloat(el.value) * unit; lab.textContent = el.value; apply(); };
+  el.addEventListener('input', upd);
+  lab.textContent = el.value;
+};
+bind('s', 's', 'v_s');
+bind('x', 'x', 'v_x');
+bind('y', 'y', 'v_y');
+bind('z', 'z', 'v_z');
+bind('r', 'r', 'v_r');
+bind('t', 't', 'v_t');
+
+document.getElementById('cap').onclick = e => {
+  P.cap = !P.cap;
+  e.target.classList.toggle('on', P.cap);
+  e.target.textContent = 'Колпак: ' + (P.cap ? 'вкл' : 'выкл');
+  apply();
+};
+document.getElementById('ghost').onclick = e => {
+  const on = HAIR.transparent !== true;
+  HAIR.transparent = on; HAIR.opacity = on ? 0.55 : 1.0; HAIR.needsUpdate = true;
+  e.target.classList.toggle('on', on);
+  e.target.textContent = on ? 'Парик непрозрачный' : 'Парик прозрачный';
+};
+document.getElementById('pick').onclick = e => {
+  pickMode = !pickMode;
+  e.target.classList.toggle('on', pickMode);
+  e.target.textContent = pickMode ? 'Клик по модели: вкл' : 'Клик по модели';
+};
+cvs.addEventListener('click', ev => {
+  if (!pickMode) return;
+  const r = cvs.getBoundingClientRect();
+  const m = new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(m, camera);
+  const targets = [];
+  scene.traverse(o => { if (o.isMesh && o.visible) targets.push(o); });
+  const hit = raycaster.intersectObjects(targets, false)[0];
+  if (!hit) { document.getElementById('dbg').textContent = 'промах'; return; }
+  const p = hit.point;
+  const objName = hit.object.name || (hit.object.parent && hit.object.parent.name) || 'mesh';
+  let col = '';
+  if (hit.face && hit.object.geometry && hit.object.geometry.attributes.uv) {
+    const uvA = hit.object.geometry.attributes.uv;
+    const u = uvA.getX(hit.face.a), v = uvA.getY(hit.face.a);
+    const mat = hit.object.material;
+    if (mat && mat.map && mat.map.image) {
+      const im = mat.map.image;
+      const cx = Math.min(im.width - 1, Math.max(0, Math.floor((u % 1) * im.width)));
+      const cy = Math.min(im.height - 1, Math.max(0, Math.floor((v % 1) * im.height)));
+      const cvs2 = document.createElement('canvas');
+      cvs2.width = im.width; cvs2.height = im.height;
+      const ctx = cvs2.getContext('2d');
+      ctx.drawImage(im, 0, 0);
+      const d = ctx.getImageData(cx, cy, 1, 1).data;
+      col = ` rgb(${d[0]},${d[1]},${d[2]}) uv ${u.toFixed(3)},${v.toFixed(3)}`;
+    }
+  }
+  const local = hit.object.worldToLocal(p.clone());
+  document.getElementById('dbg').textContent =
+    `удар: ${objName} | мир x=${p.x.toFixed(3)} y=${p.y.toFixed(3)} z=${p.z.toFixed(3)}` +
+    ` | ЛОКАЛЬНО x=${local.x.toFixed(3)} y=${local.y.toFixed(3)} z=${local.z.toFixed(3)}${col}`;
+});
+document.getElementById('front').onclick = () => {
+  camera.position.set(0.0, 1.40, 1.05); controls.target.set(0, 1.34, 0); controls.update();
+};
+document.getElementById('side').onclick = () => {
+  camera.position.set(1.05, 1.40, 0.02); controls.target.set(0, 1.34, 0); controls.update();
+};
+document.getElementById('reset').onclick = () => {
+  const def = {s: 1.0, x: 0, y: 60, z: 0, r: 0, t: 0};
+  for (const [k, v] of Object.entries(def)) {
+    P[k] = v;
+    const el = document.getElementById(k);
+    if (el) { el.value = v; const lab = document.getElementById('v_' + k); if (lab) lab.textContent = v; }
+  }
+  apply();
+};
+document.getElementById('save').onclick = async () => {
+  const el = document.getElementById('out');
+  try { await navigator.clipboard.writeText(el.value); } catch (e) {}
+  el.select();
+};
+
+// значения из адреса
+if (location.hash.length > 1) {
+  location.hash.slice(1).split('&').forEach(pair => {
+    let [k, v] = pair.split('=');
+    k = ({dx:'x', dy:'y', dz:'z', rot:'r', tilt:'t'})[k] || k;
+    if (k in P && typeof P[k] === 'number') {
+      P[k] = parseFloat(v);
+      const el = document.getElementById(k);
+      if (el) { el.value = v; const lab = document.getElementById('v_' + k); if (lab) lab.textContent = v; }
+    }
+    if (k === 'cap') P.cap = v !== '0';
+  });
+}
+
+function loop() {
+  controls.update();
+  const w = cvs.clientWidth, h = cvs.clientHeight;
+  if (cvs.width !== Math.floor(w * renderer.getPixelRatio()) || cvs.height !== Math.floor(h * renderer.getPixelRatio())) {
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+loop();
+</script>

@@ -1,0 +1,204 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Пилот VLM · H-клипы Koikatsu</title>
+<style>
+ :root{color-scheme:dark} body{margin:0;background:#0b0d11;color:#e8e8ea;font:14px/1.4 system-ui}
+ header{padding:16px 18px;background:#12161f;border-bottom:1px solid #222a38;position:sticky;top:0;z-index:5}
+ h1{margin:0 0 6px;font-size:18px} header p{margin:0;color:#93a4bb}
+ .grid{display:grid;grid-template-columns:1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto}
+ .card{background:#12161f;border:1px solid #222a38;border-radius:12px;overflow:hidden}
+ .card.good{border-color:#2e5b3a} .card.soft{border-color:#5b502e} .card.bad{border-color:#5b2e2e}
+ .shots{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#0b0d11}
+ .shots figure{margin:0} .shots img{display:block;width:100%;height:auto;cursor:zoom-in}
+ .shots figcaption{padding:4px 8px;color:#7f90a8;font-size:12px}
+ .meta{padding:12px 14px} .meta h3{margin:0 0 8px;font-size:15px;color:#9fe3ff}
+ .dim{color:#7f90a8;font-weight:400;font-size:13px}
+ .row{margin:3px 0;color:#c9d2de} .note{margin:8px 0 4px;color:#ffd9a0} .unc{margin:0;color:#8b98a8;font-size:12px}
+ #zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}
+ #zoom img{max-width:98vw;max-height:96vh}
+</style></head><body>
+<header><h1>Пилот VLM · H-клипы Koikatsu (12 шт: Idle, Insert, SLoop, OLoop, OUT)</h1>
+<p>Отрендерен один персонаж без партнёра · классы H подключены только в этом корпусе · согласие 7 полное / 5 частичное / 0 на ревью</p></header>
+<div class="grid">
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/0fdcb50685a85eec335891d6-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/0fdcb50685a85eec335891d6-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_Idle <span class="dim">· фаза из имени: Idle</span></h3>
+      <p class="row"><b>VLM:</b> lie / pose_hold
+        · <b>поза:</b> lying · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.37 · силуэт 0.07 · экспозиция груди 0.00</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж лежит на спине в статичной позе.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/3a20ab8c471d77b3fd79f734-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/3a20ab8c471d77b3fd79f734-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_M_Idle <span class="dim">· фаза из имени: Idle</span></h3>
+      <p class="row"><b>VLM:</b> pose_hold / pose_hold
+        · <b>поза:</b> lying · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.51 · силуэт 0.24 · экспозиция груди 0.88</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж замер в статичной позе лежа на боку, опираясь на одну руку.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/df179cb6389938a472a311bc-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/df179cb6389938a472a311bc-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>S_M_Idle <span class="dim">· фаза из имени: Idle</span></h3>
+      <p class="row"><b>VLM:</b> idle / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.52 · силуэт 0.56 · экспозиция груди 0.99</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж стоит в статичной позе с легким покачиванием бедер и смещением центра тяжести.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/01b698e6aa250b04eddbe9ab-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/01b698e6aa250b04eddbe9ab-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_OLoop <span class="dim">· фаза из имени: OLoop</span></h3>
+      <p class="row"><b>VLM:</b> oral / pose_hold
+        · <b>поза:</b> lying · <b>согласие:</b> 0.50</p>
+      <p class="row"><b>замеры:</b> закрытость 0.63 · силуэт 0.12 · экспозиция груди 0.06</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж находится в позе на коленях и локтях, имитируя процесс орального секса.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/0cce66ffbd3e0d5a6c20adda-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/0cce66ffbd3e0d5a6c20adda-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_OUT_A <span class="dim">· фаза из имени: OUT</span></h3>
+      <p class="row"><b>VLM:</b> pose_hold / pose_hold
+        · <b>поза:</b> kneeling · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.56 · силуэт 0.22 · экспозиция груди 0.98</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж зафиксирован в позе на коленях с завязанными руками за спиной. Движения между кадрами минимальны.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/06cf2628419e16ed4b4f8663-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/06cf2628419e16ed4b4f8663-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_OUT_Loop <span class="dim">· фаза из имени: OUT</span></h3>
+      <p class="row"><b>VLM:</b> pose_hold / pose_hold
+        · <b>поза:</b> kneeling · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.66 · силуэт 0.28 · экспозиция груди 0.97</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж стоит на коленях, прижимая руки к груди. Поза статична с минимальными колебаниями.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/22fda5605f4be46e3d0bd468-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/22fda5605f4be46e3d0bd468-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_OUT_Start <span class="dim">· фаза из имени: OUT</span></h3>
+      <p class="row"><b>VLM:</b> idle / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.67 · силуэт 0.37 · экспозиция груди 0.00</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж стоит в профиль, слегка покачиваясь, руки прижаты к груди/плечам.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/5c8f2521bf6e2a0b14dd048a-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/5c8f2521bf6e2a0b14dd048a-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_A_Insert <span class="dim">· фаза из имени: Insert</span></h3>
+      <p class="row"><b>VLM:</b> vaginal / vaginal
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.55 · силуэт 0.49 · экспозиция груди 0.00</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж совершает ритмичные движения тазом вперед-назад, имитируя половой акт в положении стоя.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/247bde7b313f245e29d5d303-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/247bde7b313f245e29d5d303-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_A_InsertIdle <span class="dim">· фаза из имени: InsertIdle</span></h3>
+      <p class="row"><b>VLM:</b> pose_hold / pose_hold
+        · <b>поза:</b> kneeling · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.74 · силуэт 0.11 · экспозиция груди 0.05</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж замер в позе на коленях, прижимая руки к телу. Движения между кадрами практически отсутствуют.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/ee6c7a0dbdf12c33816ec450-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/ee6c7a0dbdf12c33816ec450-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_A_M_OUT_A <span class="dim">· фаза из имени: OUT</span></h3>
+      <p class="row"><b>VLM:</b> vaginal / dance
+        · <b>поза:</b> standing · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.74 · силуэт 0.38 · экспозиция груди 0.00</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж совершает ритмичные движения тазом вперед-назад, имитируя половой акт.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/7f391ef869f3e2211de8c5a5-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/7f391ef869f3e2211de8c5a5-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_A_M_OUT_Loop <span class="dim">· фаза из имени: OUT</span></h3>
+      <p class="row"><b>VLM:</b> dance / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.74 · силуэт 0.38 · экспозиция груди 0.00</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж совершает ритмичные покачивания бедрами в положении стоя.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/081929cb49e9e4e68bfbd3ce-pass1.png"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/081929cb49e9e4e68bfbd3ce-pass2.png"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>L_SLoop <span class="dim">· фаза из имени: SLoop</span></h3>
+      <p class="row"><b>VLM:</b> vaginal / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 0.50</p>
+      <p class="row"><b>замеры:</b> закрытость 0.34 · силуэт 0.50 · экспозиция груди 0.99</p>
+      <p class="row"><b>фазы VLM:</b> loop[0-1]</p>
+      <p class="note">Персонаж стоит, слегка прогнувшись в пояснице, имитируя ритмичные движения при половом акте с невидимым партнером.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section></div><div id="zoom"><img></div>
+<script>const z=document.getElementById('zoom'),zi=z.querySelector('img');
+document.querySelectorAll('.shots img').forEach(i=>i.addEventListener('click',()=>{zi.src=i.src;z.style.display='flex';}));
+z.addEventListener('click',()=>z.style.display='none');document.addEventListener('keydown',e=>{if(e.key==='Escape')z.style.display='none';});</script>
+</body></html>

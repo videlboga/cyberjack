@@ -1,0 +1,119 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Фабрика персонажей · VRM 1.0</title>
+<style>
+  :root{--fg:#e8ecf3;--bg:#14161c;--line:#2a2f3a;--acc:#5aa9ff;}
+  html,body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.35 system-ui,-apple-system,sans-serif}
+  #app{display:flex;height:100dvh;width:100%;overflow:hidden}
+  #stage{flex:1;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%;cursor:grab}
+  canvas:active{cursor:grabbing}
+  #panel{width:clamp(300px,28vw,420px);flex-shrink:0;border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+  #head{padding:8px 10px;border-bottom:1px solid var(--line)}
+  #head b{font-size:13px}
+  #head .sub{color:#8f9bb0;font-size:11px;margin-top:2px}
+  input[type=search]{width:100%;margin-top:6px;padding:5px 7px;border-radius:6px;border:1px solid var(--line);
+    background:#0f1116;color:var(--fg);font-size:12px;box-sizing:border-box}
+  #list{overflow:auto;flex:1;padding:6px 10px 16px}
+  .grp{margin:12px 0 4px;font-size:10.5px;letter-spacing:.06em;color:#7c8798;border-top:1px solid var(--line);padding-top:8px}
+  .grp:first-child{border-top:0;margin-top:2px}
+  .row .sub2{font-size:10px;color:#6d788a;margin:1px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.weak .nm{color:#79839a}
+  .row.weak .sub2{color:#5a6478}
+  .chk{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:11.5px;color:#9aa6b8;cursor:pointer}
+  .row{margin:6px 0}
+  .row .top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:#c7d1e2}
+  .row .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .val{color:#7fb2ff;font-variant-numeric:tabular-nums}
+  .row.on .nm{color:#fff}
+  input[type=range]{width:100%;margin:2px 0 0;accent-color:var(--acc);height:16px}
+  #foot{border-top:1px solid var(--line);padding:8px 10px;display:flex;gap:8px;flex-wrap:wrap}
+  button{background:#1b2029;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:5px 9px;
+    font-size:12px;cursor:pointer}
+  button:hover{border-color:var(--acc)}
+  #hint{position:absolute;left:10px;bottom:8px;color:#6f7a8d;font-size:11px}
+  #err{position:absolute;inset:0;display:none;place-items:center;color:#ff8b8b;padding:20px;text-align:center}
+  html,body{height:100%;overflow:hidden}*{box-sizing:border-box}
+  details{border-bottom:1px solid var(--line);padding:8px 0}summary{cursor:pointer;color:#b7c9e2;font-weight:600;padding:5px 0}details .row{padding:4px 2px}
+  #tools{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 24px)}
+  #reference-panel{padding:8px 10px;border-bottom:1px solid var(--line)}select,input[type=number]{background:#10141c;color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:4px;max-width:100%}
+  #selection{width:100%;margin:6px 0}.axes{display:flex;gap:5px;margin:5px 0}.axes label{flex:1;min-width:0}.axes input{width:100%}.axes span{font-size:10px;color:#9aa6b8}
+  #status{font-size:11px;color:#9aa6b8;margin-top:5px}#stage.drop{outline:3px solid var(--acc);outline-offset:-3px}button.active{border-color:var(--acc);color:var(--acc)}
+  @media(max-width:650px){#app{flex-direction:column}#stage{height:50%;flex:none}#panel{width:100%;height:50%;border-top:1px solid var(--line)}#hint{font-size:9px}#reference-panel{max-height:170px;overflow:auto}}
+ .hair-row{display:flex;flex-wrap:wrap;justify-content:space-between;font-size:11px;margin:5px 0}.hair-row output{color:#7fb2ff}#hair-panel .sub,#head-panel .sub{font-size:10px;color:#8f9bb0;margin-top:6px}
+</style>
+<link rel="stylesheet" href="hair-studio.css?v=1">
+<link rel="stylesheet" href="editor-layout.css?v=1">
+<div id="app">
+  <div id="stage"><figure id="portrait-comparison" hidden style="position:absolute;left:12px;top:52px;margin:0;width:min(26vw,280px);z-index:2;background:#191d25;border:1px solid #39404e;border-radius:8px;overflow:hidden"><img id="portrait-image" alt="Портрет-референс" style="display:block;width:100%"><figcaption id="portrait-caption" style="padding:5px;font-size:11px"></figcaption><button id="portrait-close" style="position:absolute;right:4px;top:4px" aria-label="Скрыть портрет">×</button></figure>
+    <canvas id="c"></canvas>
+    <div id="hint">ЛКМ — вращение · ПКМ / Shift + ЛКМ — сдвиг · колесо — масштаб</div>
+    <div id="tools"><button id="frame">Вписать модель</button><button id="body-front">Спереди</button><button id="body-side">Сбоку</button><button id="body-back">Сзади</button><button id="frame-head">Голова крупно</button><button id="head-side">Голова · профиль</button><button id="head-top">Голова · сверху</button><button id="move">Перемещать объект</button></div><div id="body-reference" hidden style="position:absolute;right:12px;bottom:12px;width:180px;background:#252832;padding:7px;border-radius:7px"><button id="body-reference-close" style="float:right">×</button><div>Кейт · референс фигуры</div><select id="body-reference-select" aria-label="Референс фигуры Кейт"><option value="full">Полный рост · A-поза</option><option value="full-underwear">Полный рост · стоя</option><option value="standing">Корпус · стоя</option></select><img id="body-reference-image" src="./assets/body-references/kate/full.png" alt="Кейт · полный рост · референс пропорций" style="width:100%;max-height:310px;object-fit:contain"><div style="font-size:10px">Полный рост: пропорции ног, таза и стоп.</div></div><div id="err"></div>
+  </div>
+  <div id="panel">
+    <div id="editor-character-slot"></div>
+    <div id="head">
+      <b>Фабрика персонажей · VRM 1.0</b>
+      <div class="sub" id="count"></div>
+      <input type="search" id="q" placeholder="поиск по названию…">
+      <label class="chk"><input type="checkbox" id="only" checked> только заметные (≥2 мм)</label>
+    </div>
+    <details id="reference-panel" style="flex-shrink:0"><summary>Сцена и GLB-референсы</summary>
+      <button id="add-reference">＋ GLB-референс</button><input id="reference-file" type="file" accept=".glb" multiple hidden>
+      <select id="selection" aria-label="Выбранный объект"><option value="model">Основная модель</option></select>
+      <div id="object-settings">
+        <div class="axes" id="position-fields"></div>
+        <div class="axes"><label><span>Масштаб</span><input id="object-scale" aria-label="Масштаб объекта" type="number" min="0.001" step="0.05" value="1"></label><label><span>Поворот Y, °</span><input id="object-angle" aria-label="Поворот объекта" type="number" step="5" value="0"></label></div>
+        <label id="opacity-label">Прозрачность референса <output id="opacity-value">50%</output><input id="opacity" aria-label="Прозрачность референса" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+        <div id="reference-actions"><button id="fit-reference">Подогнать по росту</button> <button id="remove-reference">Удалить</button></div>
+      </div><div id="status" role="status">GLB можно также перетащить в сцену. Стрелки перемещают выбранный объект.</div>
+    </details>
+    <details id="head-panel" open style="padding:8px 10px;max-height:46vh;overflow:auto;flex-shrink:0;border-bottom:1px solid var(--line)">
+      <summary>Голова и лицо · VRM 1.0</summary>
+      <select id="head-style" aria-label="Голова"><option value="mira">Mira · VRM 1.0</option><option value="legacy">Evanescia · исходная</option></select>
+      <select id="head-materials" aria-label="Материалы головы"><option value="clay">Общая кожа · анатомический вид</option><option value="vrm">Исходные материалы VRM</option></select>
+      <div id="head-status" class="sub">Загрузка VRM-головы…</div>
+      <button id="head-neutral">Нейтральное лицо</button><button id="export-vrm">Экспорт VRM 1.0</button><a id="vrm-download" download="Mira-Anatomy.vrm" hidden style="color:#7fb2ff;margin:6px">Скачать VRM</a><a href="./vrm-preview.html" target="_blank" style="color:#7fb2ff;margin:6px">Проверить файл VRM</a>
+      <div style="display:flex;gap:6px;align-items:center;margin:6px 0"><button id="face-undo" aria-label="Отменить изменение лица" title="Ctrl+Z">↶ Отменить</button><button id="face-redo" aria-label="Повторить изменение лица" title="Ctrl+Shift+Z / Ctrl+Y">↷ Повторить</button><output id="face-history-count" class="sub"></output></div>
+      <details id="face-library"><summary>Мои варианты лица</summary><div class="sub">Форма, цвета и рисовка хранятся в этом браузере. Для переноса используйте JSON.</div><label>Имя варианта <input id="face-library-name" aria-label="Имя варианта лица" type="text" maxlength="80" placeholder="Например, Kate · вариант 1" style="box-sizing:border-box;width:100%"></label><button id="face-library-save">Сохранить копию</button><select id="face-library-select" aria-label="Сохранённые лица" style="max-width:100%"></select><button id="face-library-load">Открыть вариант</button><div id="face-library-status" role="status" class="sub"></div></details>
+      <div class="sub">Форма лица · прототип. Двойной щелчок по ползунку — сброс. Эмоции настраиваются отдельно.</div>
+      <button id="kate-body">Кейт · голова и тело по референсу</button><button id="kate-character">Кейт · лицо по референсу</button><select id="face-preset" aria-label="Основа формы лица"><option value="">Исходная Mira</option><option value="custom" disabled>Своя форма</option><option value="narrow">Узкое лицо · проба Mira</option><option value="sculpted">Выраженные скулы · проба Kai</option><option value="round">Округлое лицо · проба Kate</option></select>
+      <div class="sub">Это заготовки пропорций, не готовые копии портретов.</div>
+      <details id="face-appearance"><summary>Кожа, глаза и макияж</summary><div id="face-colors"></div><div id="face-paint-controls"></div><details id="lash-panel"><summary>Ресницы и подводка</summary><div id="lash-colors"></div><div id="lash-controls"></div><button id="lash-reset">Исходные ресницы</button></details><button id="face-paint-reset">Сбросить рисовку и ресницы</button><button id="face-color-reset">Исходные цвета</button></details>
+      <details id="portrait-panel"><summary>Сравнить с портретом</summary><select id="portrait-character" aria-label="Портрет персонажа"><option value="">Без референса</option><option value="mira">Mira</option><option value="kai">Kai</option><option value="kate">Kate</option></select><select id="portrait-expression" aria-label="Выражение на портрете"><option value="neutral">Нейтральное</option><option value="smile">Улыбка</option><option value="angry">Злость</option><option value="surprise">Удивление</option></select><button id="portrait-test">Показать эту эмоцию</button><button id="portrait-palette">Взять пробную палитру</button><div class="sub">Палитры подобраны приблизительно; форма лица и причёска не меняются.</div></details>
+      <div id="face-editor"></div><button id="face-reset">Сбросить форму лица</button><button id="face-save">Сохранить лицо JSON</button><a id="face-download" download="Mira-face.json" hidden style="color:#7fb2ff">Скачать лицо</a>
+      <details id="face-json-preview" hidden><summary>JSON проекта лица</summary><textarea id="face-json-source" aria-label="JSON проекта лица" readonly style="box-sizing:border-box;width:100%;height:120px;background:#10131a;color:#dce7f7"></textarea></details>
+      <label class="sub">Загрузить лицо JSON <input id="face-load" aria-label="Загрузить лицо JSON" type="file" accept=".json,application/json"></label><div id="face-message" role="status" class="sub"></div>
+      <details><summary>Выражения и речь</summary><div id="head-expressions"></div></details>
+      <label class="hair-row">Взгляд: влево / вправо<input id="head-lookX" aria-label="Взгляд по горизонтали" type="range" min="-1" max="1" step="0.01" value="0"></label>
+      <label class="hair-row">Взгляд: вверх / вниз<input id="head-lookY" aria-label="Взгляд по вертикали" type="range" min="-1" max="1" step="0.01" value="0"></label>
+    </details>
+    <details id="hair-panel" style="padding:8px 10px;border-bottom:1px solid var(--line);max-height:40vh;overflow:auto;flex-shrink:0">
+      <summary>Волосы</summary>
+      <select id="hair-style" aria-label="Причёска"><option value="none">Без волос</option><option value="kate">Кейт · волны из VRoid-ассетов</option><option value="builtin">VRoid · библиотека частей</option><option value="shaggy">Shaggy Short · Powdur</option></select>
+      <label style="display:inline-flex;gap:6px;align-items:center;margin:6px">Оттенок <input id="hair-color" aria-label="Оттенок волос" type="color" value="#ffffff"></label>
+      <div id="hair-controls"></div><button id="hair-reset">Сброс волос</button>
+      <label style="display:flex;gap:6px;margin:8px 0"><input id="hair-mesh-collision" type="checkbox">Коллизии по поверхности тела · эксперимент</label>
+      <div id="hair-collision-status" class="sub" role="status"></div>
+      <div id="hair-status" class="sub">Загрузка волос…</div>
+    </details>
+    <div id="list"></div>
+    <div id="foot">
+      <button id="reset">Сброс всех</button>
+      <button id="save">Сохранить в адресе</button>
+      <button id="wire">Сетка</button>
+      <button id="spin">Вращение</button>
+      <button id="dance">▶ Танец</button><button id="rest">A-поза</button>
+      <label style="width:100%;font-size:10px;color:#9aa6b8">Acto_Aerobic Dance · <span id="dance-time">0.00</span> / 15.12 с
+      <input aria-label="Время танца" id="timeline" type="range" min="0" max="15.1166677475" step="0.01" value="0"></label>
+    </div>
+  </div>
+</div>
+<script src="evanescia-data.js"></script>
+<script src="anatomy-rig.js"></script>
+<script src="anatomy.js?v=nika-neck-root-6"></script>
+<script src="anatomy-pose.js?v=runtime92b"></script>
+<script src="dance-data.js"></script>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
+<script type="module" src="anatomy-viewer.js?v=body110"></script>

@@ -1,0 +1,20 @@
+{
+  "clips": 56978,
+  "playableOnVrm": 55166,
+  "categories": {
+    "action": 1015,
+    "adv": 216,
+    "chara": 7,
+    "custom": 74,
+    "esthetic": 12,
+    "h": 23279,
+    "map": 96,
+    "mods": 26822,
+    "playerdata": 19,
+    "studio": 5434,
+    "vr": 4
+  },
+  "sourceBundles": 501,
+  "payloadBytes": 5066246322,
+  "nativeFormat": "koikatsu-native-v1"
+}

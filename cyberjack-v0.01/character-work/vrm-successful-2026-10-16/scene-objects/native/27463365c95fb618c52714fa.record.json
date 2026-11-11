@@ -1,0 +1,11 @@
+{
+  "id": "27463365c95fb618c52714fa",
+  "name": "senasi_isu_00_kind",
+  "kind": "furniture",
+  "source": "map/scene/hukuya.unity3d",
+  "sourceIdentity": "BuildPlayer-Hukuya:214",
+  "native": "native/27463365c95fb618c52714fa.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

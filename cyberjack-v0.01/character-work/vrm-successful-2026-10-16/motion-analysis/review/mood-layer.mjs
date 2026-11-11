@@ -1,0 +1,38 @@
+import {createFaceEffects} from './face-effects.mjs';
+import {resolvePortraitEmotion} from './kernel-portrait-emotion.mjs';
+import {PORTRAIT_PROFILES} from './portrait-profiles.mjs';
+import {clearNativeMoodFace,applyNativeMoodFace} from './native-mood-face.mjs';
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const number=(v,d=0)=>v!==null&&v!==''&&Number.isFinite(Number(v))?Number(v):d;
+export function deriveMood(input={}){
+ const core=input.core||input.condition||{},ob=input.observation||{},snap=ob.reactionSnapshot||input.reactionSnapshot||{},r={...(snap.sensation||{}),...(input.reaction||{}),...(ob.reaction||{})},phys=input.physiology||{},behavior=ob.behavioralState||snap.behavior?.state||input.behavioralState||'responsive';
+ const hasContext=number(core.capacity,50)<=30||input.reaction||ob.reaction||ob.behavioralState||input.behavioralState||ob.transitions||core.contexts||input.physiology?.sleep_debt;const emotion=input.emotion||snap.affect?.emotion||(hasContext?resolvePortraitEmotion({state:core,reaction:Object.keys(r).length?r:undefined,behavioralState:behavior,transitions:ob.transitions,speech:input.speech}):'neutral');
+ const activation=clamp(number(snap.affect?.arousal,number(core.tension))/100),valence=clamp(number(snap.affect?.valence,number(snap.appraisal?.valence,number(r.appraisal))), -1,1),fatigue=Math.max(clamp(1-number(core.capacity,50)/Math.max(1,number(core.baselineCapacity,50))),clamp(number(phys.sleep_debt)/100)),fear=Math.max(clamp(number(snap.dynamics?.fear)/100),behavior==='panic'||emotion==='fear'?1:emotion==='guarded'?.35:0),discomfort=clamp(number(r.discomfort)/20),overload=clamp(number(r.overload)/100),stress=Math.max(fear,discomfort,overload,behavior==='freeze'?.75:0),engagement=clamp(number(r.engagement)/10),expressivity=.75+.25*clamp(number(core.openness,50)/100),sleeping=phys.sleep_state==='sleeping'||behavior==='unresponsive';
+ const telemetry=input.telemetry?.signals?.find(s=>s.id==='breathing')?.numeric;
+ return {...Object.fromEntries(Object.keys(PORTRAIT_PROFILES).map(key=>['profile_'+key,key===emotion?1:0])),profileIntensity:clamp(number(input.expressionIntensity,.25+.75*Math.max(activation,Math.abs(valence),fatigue,stress))),happyCue:['smile','pleasure','receptive','excited','high_positive','smug'].includes(emotion)?1:0,sadCue:['sad','crying','distressed','pain'].includes(emotion)?1:0,angerCue:['angry','defiant'].includes(emotion)?1:0,fearCue:emotion==='fear'?1:0,activation,valence,fatigue,fear,stress,engagement,expressivity,sleeping:sleeping?1:0,defiance:behavior==='defiance'?1:0,breaths:clamp(number(telemetry,number(core.breathingRate,11+number(core.tension)*.12+number(r.pleasure)*.22+number(r.discomfort)*.30+number(r.overload)*.18)),7,36)};
+}
+export const MOOD_PRESETS={
+ neutral:{core:{tension:10,capacity:50,baselineCapacity:50,openness:50}},
+ positive:{core:{tension:85,capacity:50,baselineCapacity:50,openness:80},observation:{reaction:{appraisal:.8,pleasure:6,engagement:7}}},
+ guarded:{core:{tension:45,capacity:50,baselineCapacity:50,openness:25},observation:{reaction:{appraisal:-.5},reactionSnapshot:{dynamics:{fear:40}}}},
+ panic:{core:{tension:85,capacity:40,baselineCapacity:50},observation:{behavioralState:'panic',reaction:{appraisal:-.8,discomfort:8}}},
+ tired:{core:{tension:10,capacity:12,baselineCapacity:50,openness:45},physiology:{sleep_debt:70}},
+ defiant:{core:{tension:85,capacity:50,baselineCapacity:50,openness:70},observation:{behavioralState:'defiance',reaction:{appraisal:-.7}}}
+};
+Object.assign(MOOD_PRESETS,{high_negative:{core:{tension:95,capacity:35,baselineCapacity:50},observation:{reaction:{appraisal:-.4,engagement:7,discomfort:1.5,overload:20}}},mixed_overload:{core:{tension:95,capacity:35,baselineCapacity:50},observation:{behavioralState:'overload',reaction:{appraisal:0,pleasure:8,discomfort:9,overload:60,mixed:true}}},crying:{core:{tension:85,capacity:20,baselineCapacity:50},observation:{transitions:[{kind:'breakdown'}],reaction:{appraisal:-.5}}},unconscious:{core:{tension:15,capacity:0,baselineCapacity:50},observation:{behavioralState:'unresponsive'}}});
+export function createMoodLayer(){
+ const effectLayers=new WeakMap();let effectOverride=null;
+ let target=deriveMood(),current={...target},clock=0,breathPhase=0,strength=0,wanted=0,amplitude=1;
+ return {setEffects(value){effectOverride=value;},setIntensity(value){amplitude=clamp(number(value,1),0,1.5);},set(input,enabled=true){target=deriveMood(input);wanted=enabled?1:0;},get state(){return {...current,strength};},update(dt){dt=clamp(number(dt),0,.1);clock+=dt;const a=1-Math.exp(-dt/1.0);for(const key of Object.keys(current))current[key]+=(target[key]-current[key])*a;strength+=(wanted-strength)*a;breathPhase+=dt*current.breaths/60*Math.PI*2;},apply(vrm,{moving=false,upright=true,goals=[],handSupport=false}={}){
+  const c=current,positive=Math.max(0,c.valence),negative=Math.max(0,-c.valence),gain=1.7*amplitude*strength*c.expressivity;
+  const weights={happy:Math.max(c.happyCue*.55,positive*.75)*(1-c.stress),sad:Math.max(c.sadCue*.55,negative*(1-c.fear)*.6+c.fatigue*.22),angry:Math.max(c.angerCue*.65,c.defiance*.65,0),relaxed:c.fatigue*.45+positive*(1-c.activation)*.18,surprised:Math.max(c.fearCue,c.fear)*.55};const sum=Object.values(weights).reduce((a,b)=>a+b,0),norm=Math.max(1,sum/.9);
+  const face=vrm.expressionManager;clearNativeMoodFace(vrm);for(const [key,v]of Object.entries(weights))face?.setValue(key,clamp(v/norm*gain));
+  const blinkPhase=(clock%(4.3-c.activation*1.1)),blink=blinkPhase<.16?Math.sin(blinkPhase/.16*Math.PI):0;face?.setValue('blink',strength*Math.max(blink*clamp(amplitude),clamp(.65*c.fatigue*amplitude),.97*c.sleeping*clamp(amplitude)));face?.update();const profiles=Object.fromEntries(Object.keys(PORTRAIT_PROFILES).map(key=>[key,c['profile_'+key]])),speechActive=['aa','ih','ou','ee','oh'].some(key=>(face?.getValue?.(key)||0)>.02);applyNativeMoodFace(vrm,profiles,{strength:strength*amplitude*c.profileIntensity,blink,speechActive});
+  const lockedHead=goals.some(g=>/head|forehead/i.test(g.feature)),lockedHands=handSupport||goals.some(g=>/HandAt_|HandBetweenThighsDistance|HandKneeDistance/.test(g.feature)||/HandHeight/.test(g.feature)&&(g.max??1)<.12),allowTrunk=!moving&&upright&&!lockedHands&&c.sleeping<.5;
+  const rotate=(name,axis,value)=>{const bone=vrm.humanoid.getRawBoneNode(name);if(bone)bone['rotate'+axis](clamp(value*strength*amplitude,-.35,.35));};
+  const pose=Object.fromEntries(['headPitch','headRoll','headYaw','chestPitch','shoulder'].map(key=>[key,Object.entries(profiles).reduce((sum,[name,w])=>sum+(PORTRAIT_PROFILES[name][key]||0)*w,0)*c.profileIntensity]));
+  if(upright&&!lockedHead){const factor=moving?.2:1;rotate('neck','X',(pose.headPitch+.04*c.fatigue)*factor);rotate('head','Z',(pose.headRoll+positive*.02)*factor);rotate('head','Y',pose.headYaw*factor);}
+  if(allowTrunk){rotate('chest','X',pose.chestPitch+.035*c.fatigue);rotate('chest','X',Math.sin(breathPhase)*(.004+.004*c.activation));for(const side of ['left','right']){if(!goals.some(g=>g.feature.startsWith(side)&&/Arm|Hand|Elbow/.test(g.feature))){const sign=side==='left'?1:-1;rotate(side+'Shoulder','Z',sign*(pose.shoulder+.035*c.stress));rotate(side+'UpperArm','Z',sign*pose.shoulder*.65);}}}
+  vrm.scene.updateMatrixWorld(true);let fx=effectLayers.get(vrm);if(!fx){fx=createFaceEffects(vrm);effectLayers.set(vrm,fx);}const effectValues=Object.fromEntries(['tears','sweat','saliva'].map(key=>[key,(effectOverride?.[key]??Object.entries(profiles).reduce((sum,[name,w])=>sum+(PORTRAIT_PROFILES[name][key]||0)*w,0))*strength*amplitude*(effectOverride?1:c.profileIntensity)]));fx.apply(effectValues,clock);
+ }};
+}

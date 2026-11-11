@@ -1,0 +1,69 @@
+{
+  "rows": [
+    {
+      "active": {
+        "character": "mira",
+        "shown": true,
+        "playing": true,
+        "time": 0.5,
+        "clip": "a2e8a8e26572baadd16b735e",
+        "tracks": 33,
+        "bones": 11,
+        "voice": 0,
+        "speech": false
+      },
+      "finite": true,
+      "before": {
+        "Mouth": 0,
+        "mouthOpen": 0
+      },
+      "after": {
+        "Mouth": 0,
+        "mouthOpen": 0
+      },
+      "hidden": true,
+      "body": {
+        "pose": "Idle_00_00",
+        "clipTime": 0.16660000000000036,
+        "playing": true,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      },
+      "library": 56978
+    },
+    {
+      "active": {
+        "character": "rin",
+        "shown": true,
+        "playing": true,
+        "time": 0.5,
+        "clip": "a2e8a8e26572baadd16b735e",
+        "tracks": 33,
+        "bones": 11,
+        "voice": 0,
+        "speech": false
+      },
+      "finite": true,
+      "before": {
+        "Mouth": 0,
+        "mouthOpen": 0
+      },
+      "after": {
+        "Mouth": 0,
+        "mouthOpen": 0
+      },
+      "hidden": true,
+      "body": {
+        "pose": "Idle_00_00",
+        "clipTime": 0.15,
+        "playing": true,
+        "physicsEnabled": true,
+        "collisionsEnabled": true,
+        "bindings": 138
+      },
+      "library": 56978
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,16 @@
+{
+  "result": {
+    "state": {
+      "pose": "d82833280717194afd3bde21",
+      "clipTime": 0,
+      "playing": true,
+      "physicsEnabled": true,
+      "collisionsEnabled": true,
+      "bindings": 138
+    },
+    "status": "Idle_08_01 · 1029/1029 путей распознано",
+    "renderedRows": 30,
+    "bad": []
+  },
+  "errors": []
+}

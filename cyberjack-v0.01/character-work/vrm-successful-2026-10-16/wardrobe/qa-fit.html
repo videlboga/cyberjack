@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Подгонка по телу: до и после</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0f1116;color:#e8e8ea;font:12px/1.3 system-ui,sans-serif}
+  #grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}
+  figure{margin:0;background:#171a21;border-radius:10px;overflow:hidden}
+  figcaption{padding:7px 9px;color:#9fb}
+  canvas{display:block;width:100%;height:auto}
+  #status{padding:8px 10px;color:#7a9;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="status">загрузка…</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+import {Wardrobe} from './wardrobe.js';
+
+const W = 340, H = 520;
+const status = document.getElementById('status');
+const grid = document.getElementById('grid');
+const loader = new GLTFLoader();
+loader.register(p => new VRMLoaderPlugin(p));
+
+// файл подменяем напрямую: до/после одного и того же варианта b
+const PANELS = [
+  {label: 'b ДО подгонки', file: 'items/kk-before/kk-tops-ofcard-b.glb'},
+  {label: 'b ПОСЛЕ подгонки (зазор 2.5 мм + сглаживание)', file: 'items/kk/kk-tops-ofcard-b.glb'},
+  {label: 'a ПОСЛЕ подгонки', file: 'items/kk/kk-tops-ofcard-a.glb'},
+  {label: 'нативный аутфит (референс)', native: true},
+];
+
+const POSE = {spine: [0.08, 0, 0.05], chest: [0.05, 0, 0.03],
+  leftUpperArm: [0.05, 0, -0.55], rightUpperArm: [0.1, 0, 0.38],
+  leftLowerArm: [-0.5, 0, 0], rightLowerArm: [-0.25, 0, 0]};
+
+const views = [];
+for (const panel of PANELS) {
+  const fig = document.createElement('figure');
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const cap = document.createElement('figcaption'); cap.textContent = panel.label;
+  fig.append(canvas, cap); grid.append(fig);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x171a21);
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: true, preserveDrawingBuffer: true});
+  renderer.setSize(W, H, false);
+  const camera = new THREE.PerspectiveCamera(26, W / H, 0.1, 20);
+  camera.position.set(0.55, 1.30, 1.15);   // крупный план груди
+  camera.lookAt(0, 1.24, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.25));
+  const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(1.0, 2.0, 1.8); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x99aaff, 0.8); fill.position.set(-1.6, 1.2, 1.0); scene.add(fill);
+  views.push({panel, scene, renderer, camera});
+}
+
+const summary = [];
+for (const view of views) {
+  const url = view.panel.native ? '../characters/mira/Mira_outfit_00.vrm' : '../characters/mira/Mira_outfit_03.vrm';
+  const gltf = await loader.loadAsync(url);
+  const vrm = gltf.userData.vrm;
+  VRMUtils.removeUnnecessaryVertices(vrm.scene);
+  vrm.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  view.scene.add(vrm.scene);
+  let extra = {};
+  if (view.panel.file) {
+    const wardrobe = new Wardrobe(vrm);
+    await wardrobe.init('./wardrobe.json');
+    const gl = await new GLTFLoader().loadAsync('./' + view.panel.file);
+    const src = gl.scene.getObjectByProperty('isSkinnedMesh', true) || gl.scene;
+    const rec = wardrobe.equipped.get('top') || null;
+    // пришиваем напрямую, минуя манифест (файл «до» в манифесте не описан)
+    const bodyMesh = vrm.scene.getObjectByProperty('isSkinnedMesh', true);
+    src.skeleton = bodyMesh.skeleton;
+    src.bindMatrix.copy(bodyMesh.bindMatrix);
+    src.bindMatrixInverse.copy(bodyMesh.bindMatrixInverse);
+    src.frustumCulled = false;
+    // диагностическая раскраска: ткань — красная, чтобы отличить её от кожи
+    for (const m of (src.material ? [src.material] : [])) {
+      m.side = THREE.DoubleSide; m.transparent = false; m.opacity = 1;
+      m.color?.setRGB(1, 0.05, 0.05);
+      if (m.emissive) m.emissive.setRGB(0.35, 0, 0);
+    }
+    view.scene.add(src);
+    const pos = src.geometry.attributes.position;
+    const box = new THREE.Box3().setFromBufferAttribute(pos);
+    extra = {verts: pos.count, bboxY: [+box.min.y.toFixed(2), +box.max.y.toFixed(2)]};
+  }
+  for (const [bone, [x, y, z]] of Object.entries(POSE)) {
+    const node = vrm.humanoid.getRawBoneNode(bone);
+    if (node) node.rotation.set(x, y, z);
+  }
+  vrm.scene.updateMatrixWorld(true);
+  view.renderer.render(view.scene, view.camera);
+  summary.push({label: view.panel.label, ...extra});
+  status.textContent = `готово ${summary.length}/${views.length}`;
+}
+
+status.textContent = 'готово';
+window.__fit = {ready: true, summary};
+window.__render = () => { for (const v of views) { v.scene.updateMatrixWorld(true); v.renderer.render(v.scene, v.camera); } };
+</script>
+</body>
+</html>

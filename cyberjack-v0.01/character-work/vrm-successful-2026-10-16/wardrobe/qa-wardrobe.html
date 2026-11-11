@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Гардероб · PoC сшивания</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#111318;color:#e8e8ea;font:13px/1.35 system-ui,sans-serif}
+  #grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}
+  figure{margin:0;background:#181b22;border-radius:8px;overflow:hidden}
+  figcaption{padding:6px 8px;color:#aab;font-size:12px}
+  canvas{display:block;width:100%;height:auto}
+  #status{padding:8px;color:#8ab;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="status">загрузка…</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+
+const W = 460, H = 620;
+const status = document.getElementById('status');
+const grid = document.getElementById('grid');
+const loader = new GLTFLoader();
+loader.register(p => new VRMLoaderPlugin(p));
+
+async function loadVrm(url) {
+  const gltf = await loader.loadAsync(url);
+  const vrm = gltf.userData.vrm;
+  VRMUtils.removeUnnecessaryVertices(vrm.scene);
+  return {vrm, scene: vrm.scene};
+}
+
+function makeView(label) {
+  const fig = document.createElement('figure');
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const cap = document.createElement('figcaption');
+  cap.textContent = label;
+  fig.append(canvas, cap);
+  grid.append(fig);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x181b22);
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: true, preserveDrawingBuffer: true});
+  renderer.setSize(W, H, false);
+  renderer.setPixelRatio(1);
+  const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 20);
+  camera.position.set(1.4, 1.05, 2.6);
+  camera.lookAt(0, 0.95, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+  const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(1.4, 2.4, 2.2); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x88aaff, 0.8); rim.position.set(-2, 1.5, -1.5); scene.add(rim);
+  return {canvas, scene, renderer, camera, cap};
+}
+
+const viewA = makeView('нудес + пришитая куртка (outfit_00) + шорты (outfit_01)');
+const viewB = makeView('нативный Mira_outfit_00 (для сверки)');
+
+// ---------- базовое тело (outfit_03 — штатный вариант без одежды) ----------
+const base = await loadVrm('../characters/mira/Mira_outfit_03.vrm');
+base.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+viewA.scene.add(base.scene);
+status.textContent = 'тело загружено · пришиваю вещи…';
+
+const baseNodes = new Map();
+base.scene.traverse(n => { if (n.name) baseNodes.set(n.name, n); });
+// three называет примитивы "model_N", поэтому тело ищем по материалу, а не по имени узла
+let bodyMesh = null, bestVerts = 0;
+base.scene.traverse(o => {
+  if (!o.isSkinnedMesh) return;
+  const n = o.geometry.attributes.position.count;
+  const isBody = /cf_m_body|body/i.test(o.material?.name || '');
+  if (isBody || n > bestVerts) { if (isBody || !bodyMesh) { bodyMesh = o; bestVerts = Math.max(bestVerts, n); } }
+});
+if (!bodyMesh) throw new Error('не нашёл скелет тела');
+bodyMesh.skeleton.calculateInverses?.();
+
+// ---------- вещи ----------
+const ITEMS = [
+  {slot: 'top', file: './items/mira/mira-00-kk-pufferlong-8400.glb'},
+  {slot: 'bottom', file: './items/mira/mira-01-kk-cf-m-shorts-03-8591.glb'},
+];
+const grafted = [];
+for (const item of ITEMS) {
+  const gltf = await loader.loadAsync(item.file);
+  let mesh = null;
+  gltf.scene.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) throw new Error('в вещи нет меша: ' + item.file);
+  // скелеты идентичны (одни и те же имена и inverseBindMatrices) → подменяем ссылку на скелет тела
+  mesh.skeleton = bodyMesh.skeleton;
+  mesh.bindMatrix.copy(bodyMesh.bindMatrix);
+  mesh.bindMatrixInverse.copy(bodyMesh.bindMatrixInverse);
+  mesh.frustumCulled = false;
+  base.scene.add(mesh);   // вешаем на корень модели: собственный transform вещи не должен тянуть скин
+  grafted.push({slot: item.slot, mesh, name: mesh.name, material: mesh.material?.name});
+}
+
+// ---------- нативный аутфит для сверки ----------
+const native = await loadVrm('../characters/mira/Mira_outfit_00.vrm');
+native.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+viewB.scene.add(native.scene);
+// three теряет имена MToon-материалов (name = null), поэтому родную вещь ищем по числу вершин
+let nativeJacket = null;
+const graftedTopVerts = [...grafted].find(g => g.slot === 'top')?.mesh.geometry.attributes.position.count;
+native.scene.traverse(o => {
+  if (!nativeJacket && o.isSkinnedMesh && o.geometry.attributes.position.count === graftedTopVerts) nativeJacket = o;
+});
+
+// ---------- поза ----------
+const POSE = {
+  spine: [0.10, 0, 0.06],
+  leftUpperArm: [0, 0, -0.85],
+  rightUpperArm: [0, 0, 0.35],
+  leftLowerArm: [0, -0.5, 0],
+  leftUpperLeg: [0.55, 0, 0],
+  rightUpperLeg: [-0.25, 0, 0],
+  leftLowerLeg: [-0.5, 0, 0],
+};
+function applyPose(vrm) {
+  for (const [bone, [x, y, z]] of Object.entries(POSE)) {
+    const node = vrm.humanoid.getRawBoneNode(bone);
+    if (node) node.rotation.set(x, y, z);
+  }
+  vrm.scene.updateMatrixWorld(true);
+}
+applyPose(base.vrm);
+applyPose(native.vrm);
+
+// ---------- числовая сверка: вещь, пришитая к нудесу, против той же вещи в родном VRM ----------
+function worldVertices(mesh, count = 240) {
+  const pos = mesh.geometry.attributes.position;
+  const step = Math.max(1, Math.floor(pos.count / count));
+  const out = [];
+  const v = new THREE.Vector3();
+  mesh.skeleton.update();
+  mesh.updateMatrixWorld(true);
+  for (let i = 0; i < pos.count; i += step) {
+    v.fromBufferAttribute(pos, i);
+    mesh.applyBoneTransform(i, v);
+    mesh.localToWorld(v);
+    out.push(v.clone());
+  }
+  return {points: out, total: pos.count};
+}
+
+const jacket = grafted.find(g => g.slot === 'top').mesh;
+
+function deviation() {
+  const a = worldVertices(jacket);
+  if (!nativeJacket) return null;
+  const b = worldVertices(nativeJacket);
+  const n = Math.min(a.points.length, b.points.length);
+  let mx = 0, sum = 0;
+  for (let i = 0; i < n; i++) {
+    const d = a.points[i].distanceTo(b.points[i]);
+    mx = Math.max(mx, d); sum += d;
+  }
+  return {max: +mx.toFixed(5), mean: +(sum / n).toFixed(5), vertices: a.total};
+}
+
+// сначала в позе покоя, потом в позе — чтобы отделить статический сдвиг от ошибки скелета
+function resetPose(vrm) {
+  for (const bone of Object.keys(POSE)) {
+    const node = vrm.humanoid.getRawBoneNode(bone);
+    if (node) node.rotation.set(0, 0, 0);
+  }
+  vrm.scene.updateMatrixWorld(true);
+}
+resetPose(base.vrm); resetPose(native.vrm);
+// Обе модели ставим в ОДНУ позу: копируем повороты всех костей по имени.
+// Без этого сравниваются разные позы (разные скелетные объекты), и разница врёт.
+function syncSkeletons() {
+  const target = new Map(nativeJacket.skeleton.bones.map(b => [b.name, b]));
+  for (const bone of jacket.skeleton.bones) {
+    const twin = target.get(bone.name);
+    if (twin) twin.quaternion.copy(bone.quaternion);
+  }
+  base.scene.updateMatrixWorld(true);
+  native.scene.updateMatrixWorld(true);
+  jacket.skeleton.update();
+  nativeJacket.skeleton.update();
+}
+syncSkeletons();
+const deviationRest = deviation();
+applyPose(base.vrm);
+syncSkeletons();
+const deviationPosed = deviation();
+// главная проверка: родная вещь, пересаженная на ТОТ ЖЕ скелет тела, должна совпасть с пришитой
+nativeJacket.skeleton = bodyMesh.skeleton;
+nativeJacket.bindMatrix.copy(bodyMesh.bindMatrix);
+nativeJacket.bindMatrixInverse.copy(bodyMesh.bindMatrixInverse);
+const deviationRebound = deviation();
+const maxDev = deviationPosed?.max ?? null;
+const meanDev = deviationPosed?.mean ?? null;
+const a = {total: deviationPosed?.vertices ?? 0};
+
+viewA.renderer.render(viewA.scene, viewA.camera);
+viewB.renderer.render(viewB.scene, viewB.camera);
+
+const info = {
+  ready: true,
+  body: bodyMesh.name,
+  bodyBones: bodyMesh.skeleton.bones.length,
+  grafted: grafted.map(g => ({slot: g.slot, mesh: g.name, material: g.material})),
+  nativeJacket: nativeJacket ? {mesh: nativeJacket.name, vertices: nativeJacket.geometry.attributes.position.count} : null,
+  vertices: a.total,
+  deviation: {posed: deviationPosed, rest: deviationRest, reboundToBodySkeleton: deviationRebound},
+};
+status.textContent = `готово · тело «${info.body}» · костей ${info.bodyBones}\n` +
+  `пришито: ${info.grafted.map(g => g.slot + ' → ' + (g.material || g.mesh)).join('; ')}\n` +
+  (deviationPosed
+    ? `сверка: на одном скелете max ${deviationRebound.max} м / среднее ${deviationRebound.mean}; разные инстансы модели — max ${deviationPosed.max} м (${a.total} вершин)`
+    : 'нативных данных для сверки нет');
+info.diag = (() => {
+  if (!nativeJacket) return null;
+  const ga = jacket.geometry, gb = nativeJacket.geometry;
+  ga.computeBoundingBox(); gb.computeBoundingBox();
+  const bi = (m, i) => m.skeleton.boneInverses[i].elements.map(v => +v.toFixed(4));
+  const mw = m => m.matrixWorld.elements.map(v => +v.toFixed(4));
+  return {
+    bboxGrafted: ga.boundingBox.min.toArray().map(v => +v.toFixed(3)).concat(ga.boundingBox.max.toArray().map(v => +v.toFixed(3))),
+    bboxNative: gb.boundingBox.min.toArray().map(v => +v.toFixed(3)).concat(gb.boundingBox.max.toArray().map(v => +v.toFixed(3))),
+    boneInverse0: {grafted: bi(jacket, 0), native: bi(nativeJacket, 0)},
+    bindMatrixGrafted: jacket.bindMatrix.elements.map(v => +v.toFixed(4)),
+    bindMatrixNative: nativeJacket.bindMatrix.elements.map(v => +v.toFixed(4)),
+    worldGrafted: mw(jacket), worldNative: mw(nativeJacket),
+    boneOrderSame: jacket.skeleton.bones.map(b => b.name).join() === nativeJacket.skeleton.bones.map(b => b.name).join(),
+    boneDeltaTop: (() => {
+      jacket.skeleton.update(); nativeJacket.skeleton.update();
+      const A = jacket.skeleton.boneMatrices, B = nativeJacket.skeleton.boneMatrices;
+      const names = jacket.skeleton.bones.map(b => b.name);
+      const rows = [];
+      for (let bi = 0; bi < names.length; bi++) {
+        let mx = 0;
+        for (let k = 0; k < 16; k++) mx = Math.max(mx, Math.abs(A[bi*16+k] - B[bi*16+k]));
+        if (mx > 1e-4) rows.push([names[bi], +mx.toFixed(4)]);
+      }
+      rows.sort((x, y) => y[1] - x[1]);
+      return {count: rows.length, top: rows.slice(0, 8)};
+    })(),
+    maxBoneMatrixDelta: (() => {
+      jacket.skeleton.update(); nativeJacket.skeleton.update();
+      const A = jacket.skeleton.boneMatrices, B = nativeJacket.skeleton.boneMatrices;
+      let mx = 0;
+      for (let i = 0; i < Math.min(A.length, B.length); i++) mx = Math.max(mx, Math.abs(A[i] - B[i]));
+      return +mx.toFixed(6);
+    })(),
+    maxRawVertexDelta: (() => {
+      const pa = ga.attributes.position.array, pb = gb.attributes.position.array;
+      let mx = 0;
+      for (let i = 0; i < Math.min(pa.length, pb.length); i++) mx = Math.max(mx, Math.abs(pa[i] - pb[i]));
+      return +mx.toFixed(6);
+    })(),
+    attrs: {
+      grafted: Object.keys(ga.attributes), native: Object.keys(gb.attributes),
+      jointsA: Array.from(ga.attributes.skinIndex?.array || []).slice(0, 8),
+      jointsB: Array.from(gb.attributes.skinIndex?.array || []).slice(0, 8),
+      weightsA: Array.from(ga.attributes.skinWeight?.array || []).slice(0, 8).map(v => +v.toFixed(4)),
+      weightsB: Array.from(gb.attributes.skinWeight?.array || []).slice(0, 8).map(v => +v.toFixed(4)),
+    },
+  };
+})();
+window.__wardrobe = info;
+
+// рендер для съёмки
+window.__render = () => {
+  viewA.scene.updateMatrixWorld(true);
+  viewB.scene.updateMatrixWorld(true);
+  viewA.renderer.render(viewA.scene, viewA.camera);
+  viewB.renderer.render(viewB.scene, viewB.camera);
+};
+</script>
+</body>
+</html>

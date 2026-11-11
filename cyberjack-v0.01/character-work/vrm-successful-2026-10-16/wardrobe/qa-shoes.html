@@ -1,0 +1,41 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Туфли: мост + поза каблука</title>
+<script type="importmap">{"imports":{"three":"../viewer/node_modules/three/build/three.module.js","three/addons/":"../viewer/node_modules/three/examples/jsm/"}}</script>
+<style>body{margin:0;background:#0b0d11;color:#ddd;font:13px system-ui}canvas{display:block}#st{padding:8px 12px;color:#7a9;font:12px ui-monospace}</style></head>
+<body><div id="st">…</div><canvas id="c" width="900" height="760"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+import {applyBoneBridge, applyHeelPose} from './bones-bridge.js';
+const loader=new GLTFLoader(); loader.register(p=>new VRMLoaderPlugin(p));
+const vrm=(await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm')).userData.vrm;
+VRMUtils.removeUnnecessaryVertices(vrm.scene); vrm.scene.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});
+const side=await (await fetch('./items/kk/kk-strappy-heels.bones.json')).json();
+const shoe=(await new GLTFLoader().loadAsync('./items/kk/kk-strappy-heels.glb')).scene.getObjectByProperty('isSkinnedMesh',true);
+const r=applyBoneBridge(vrm, side);
+shoe.skeleton=r.skeleton; const b=vrm.scene.getObjectByProperty('isSkinnedMesh',true);
+shoe.bindMatrix.copy(b.bindMatrix); shoe.bindMatrixInverse.copy(b.bindMatrixInverse);
+shoe.frustumCulled=false;
+const m=shoe.material.map;
+shoe.material=new THREE.MeshStandardMaterial({map:m,roughness:0.4,metalness:0.45,side:THREE.DoubleSide});
+const ang=applyHeelPose(vrm, side.heelHeight||0.073);
+// лёгкая поза: колени чуть согнуты
+for (const [k,[x,y,z]] of Object.entries({leftUpperLeg:[0.12,0,0.04],rightUpperLeg:[-0.08,0,-0.03],leftLowerLeg:[-0.12,0,0]})){
+  const n=vrm.humanoid.getRawBoneNode(k); if(n) n.rotation.set(x,y,z);
+}
+vrm.scene.updateMatrixWorld(true); shoe.updateMatrixWorld(true);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x141821);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,6),new THREE.MeshStandardMaterial({color:0x2e3342,roughness:0.95}));
+floor.rotation.x=-Math.PI/2; scene.add(floor);
+scene.add(vrm.scene); scene.add(shoe);
+scene.add(new THREE.AmbientLight(0xffffff,1.6));
+const key=new THREE.DirectionalLight(0xffffff,2.4); key.position.set(1.2,2.2,1.6); scene.add(key);
+const fill=new THREE.DirectionalLight(0xbfd0ff,1.1); fill.position.set(-1.6,1.0,1.2); scene.add(fill);
+const canvas=document.getElementById('c');
+const rr=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
+rr.setSize(900,760,false); rr.toneMapping=THREE.ACESFilmicToneMapping; rr.toneMappingExposure=1.1;
+const cam=new THREE.PerspectiveCamera(30,900/760,0.01,20); cam.position.set(0.55,0.42,0.85); cam.lookAt(0,0.10,0);
+rr.render(scene,cam);
+document.getElementById('st').textContent='подстановочных '+r.applied+' · поза каблука '+(ang*180/Math.PI).toFixed(1)+'°';
+window.__shoes={ready:true};
+</script></body></html>

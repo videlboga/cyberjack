@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Мира: от базовой модели до полного костюма</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0b0d11;color:#e8e8ea;font:13px/1.35 system-ui,sans-serif}
+  #grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
+  figure{margin:0;background:#141821;border-radius:10px;overflow:hidden}
+  figcaption{padding:8px 10px;color:#9fd;min-height:30px}
+  canvas{display:block;width:100%;height:auto}
+  #status{padding:10px 12px;color:#7a9;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="status">загрузка…</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+
+const W = 470, H = 620;
+const status = document.getElementById('status');
+const grid = document.getElementById('grid');
+const loader = new GLTFLoader();
+loader.register(p => new VRMLoaderPlugin(p));
+
+const ITEMS = {
+  top: 'mira-00-kk-pufferlong-8400',
+  bottom: 'mira-00-kk-cf-m-bot-spants-8480',
+  socks: 'mira-00-kk-ztoki-socks-02-00-ma-8780',
+  shoes: 'mira-00-kk-m-cf-shoes-steampunk00-8900',
+  bra: 'mira-00-kk-bra-lace-mat-8560',
+  panties: 'mira-00-kk-panties-highleg-mat-8660',
+  choker: 'mira-00-kk-acs-chocker-belt-4760',
+  bell: 'mira-00-kk-acs-m-chocker-bell-4770',
+};
+
+const PANELS = [
+  {label: 'без всего (базовая модель)', items: []},
+  {label: 'только бельё', items: ['bra', 'panties']},
+  {label: '+ чулки', items: ['bra', 'panties', 'socks']},
+  {label: '+ шорты', items: ['bra', 'panties', 'socks', 'bottom']},
+  {label: '+ куртка и чокер', items: ['bra', 'panties', 'socks', 'bottom', 'top', 'choker', 'bell']},
+  {label: 'полный костюм (с обувью)', items: ['bra', 'panties', 'socks', 'bottom', 'top', 'choker', 'bell', 'shoes']},
+  {label: 'без обуви', items: ['bra', 'panties', 'socks', 'bottom', 'top', 'choker', 'bell']},
+  {label: 'без чулок', items: ['bra', 'panties', 'bottom', 'top', 'choker', 'bell', 'shoes']},
+  {label: 'без белья', items: ['socks', 'bottom', 'top', 'choker', 'bell', 'shoes']},
+];
+
+const POSE = {
+  hips: [0, 0.05, 0], spine: [0.05, 0, 0.03], chest: [0.03, 0, 0.02], head: [0.01, 0.09, 0],
+  leftUpperArm: [0.04, 0, -0.48], rightUpperArm: [0.07, 0, 0.32],
+  leftLowerArm: [-0.38, 0, 0], rightLowerArm: [-0.2, 0, 0],
+  leftUpperLeg: [0.09, 0, 0.04], rightUpperLeg: [-0.06, 0, -0.03],
+  leftLowerLeg: [-0.09, 0, 0], rightLowerLeg: [-0.03, 0, 0],
+};
+
+function lit(src) {
+  const m = new THREE.MeshStandardMaterial({
+    map: src.map || null,
+    color: src.color ? src.color.clone() : new THREE.Color(0xffffff),
+    roughness: 0.7, metalness: 0.05, side: THREE.DoubleSide,
+    transparent: !!src.transparent || src.alphaTest > 0,
+    alphaTest: src.alphaTest || 0, opacity: src.opacity ?? 1,
+  });
+  if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+  return m;
+}
+
+const views = [];
+for (const panel of PANELS) {
+  const fig = document.createElement('figure');
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const cap = document.createElement('figcaption'); cap.textContent = panel.label;
+  fig.append(canvas, cap); grid.append(fig);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x141821);
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: true, preserveDrawingBuffer: true});
+  renderer.setSize(W, H, false);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8),
+    new THREE.MeshStandardMaterial({color: 0x2a2f3d, roughness: 0.95}));
+  floor.rotation.x = -Math.PI / 2; scene.add(floor);
+  const camera = new THREE.PerspectiveCamera(30, W / H, 0.05, 30);
+  camera.position.set(1.2, 1.02, 2.55);
+  camera.lookAt(0, 0.82, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.35));
+  const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(1.6, 2.4, 2.0); scene.add(key);
+  const fill = new THREE.DirectionalLight(0xbfd0ff, 1.0); fill.position.set(-2.0, 1.2, 1.3); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xdde8ff, 0.85); rim.position.set(-1.2, 1.6, -2.0); scene.add(rim);
+  views.push({panel, scene, renderer, camera});
+}
+
+const summary = [];
+for (const view of views) {
+  const gltf = await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm');
+  const vrm = gltf.userData.vrm;
+  VRMUtils.removeUnnecessaryVertices(vrm.scene);
+  vrm.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  view.scene.add(vrm.scene);
+  const body = vrm.scene.getObjectByProperty('isSkinnedMesh', true);
+  for (const key of view.panel.items) {
+    const gl = await new GLTFLoader().loadAsync(`./items/mira/${ITEMS[key]}.glb`);
+    gl.scene.traverse(o => {
+      if (!o.isSkinnedMesh) return;
+      o.skeleton = body.skeleton;
+      o.bindMatrix.copy(body.bindMatrix);
+      o.bindMatrixInverse.copy(body.bindMatrixInverse);
+      o.frustumCulled = false;
+      o.material = Array.isArray(o.material) ? o.material.map(lit) : lit(o.material);
+    });
+    view.scene.add(gl.scene);
+  }
+  for (const [bone, [x, y, z]] of Object.entries(POSE)) {
+    const node = vrm.humanoid.getRawBoneNode(bone);
+    if (node) node.rotation.set(x, y, z);
+  }
+  vrm.scene.updateMatrixWorld(true);
+  view.renderer.render(view.scene, view.camera);
+  summary.push({label: view.panel.label, parts: view.panel.items.length});
+  status.textContent = `готово ${summary.length}/${views.length}`;
+}
+
+status.textContent = 'готово · ' + summary.map(s => `${s.label}: ${s.parts}`).join(' · ');
+window.__set = {ready: true, summary};
+window.__render = () => { for (const v of views) { v.scene.updateMatrixWorld(true); v.renderer.render(v.scene, v.camera); } };
+</script>
+</body>
+</html>

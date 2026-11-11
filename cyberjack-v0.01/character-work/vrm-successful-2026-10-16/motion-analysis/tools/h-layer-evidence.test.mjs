@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {normalizeHLayer,hLayerEvidence,hEvidencePenalty,hLayerManifest} from './h-layer-evidence.mjs';
+import {clipSemantics,semanticPenalty} from './command-semantics.mjs';
+const row={id:'test',name:'Idle',posture:'seated',postureSource:'derived_from_position',layerKind:'layer',act:'foreplay',actSource:'scene',notes:'ест',vlmAgreement:1};
+let e=normalizeHLayer(row,{nameCount:208});assert.equal(e.posture,null);assert.equal(e.scenePosture,'seated');assert.equal(e.layerOnly,null);assert.equal(e.actReliable,false);assert.equal(e.notes,null);
+e=normalizeHLayer({...row,postureSource:'vlm',static:true,notes:'Персонаж ест сидя',vlmFromRepresentative:false});
+assert(hEvidencePenalty(e,{description:'Спокойно сесть'}).cost>0);assert(hEvidencePenalty(e,{description:'Сесть и есть'}).cost<0);assert.equal(hEvidencePenalty(e,{description:'Сесть'},{whole:false}).cost,0);
+assert.equal(normalizeHLayer({...row,postureSource:'vlm',vlmAgreement:.5}).notes,null);assert.equal(normalizeHLayer({...row,postureSource:'vlm',vlmFromRepresentative:true}).posture,null);
+const id='452e608375f1068c85242961',actual=hLayerEvidence(id);assert(actual.visualEvidence);assert(actual.ambiguousName);assert.match(actual.notes,/Т-поз/);assert(hEvidencePenalty(actual,{}).cost>0);
+const clip={id,name:'Denma_kokan_C_ositukeru_B'},s=clipSemantics(clip);assert.equal(s.controller,null);assert.equal(s.layerOnly,false);assert.equal(semanticPenalty(clip,{semantics:{}}).excluded,false);
+assert(semanticPenalty(clip,{semantics:{}}).cost>semanticPenalty(clip,{semantics:{hLayerRanking:false}}).cost);
+assert.equal(hLayerManifest().clips,22276);console.log('PASS ID provenance, ambiguous names, scene posture isolation, visual confidence, task-aware soft costs, partial donor safety and feature toggle');

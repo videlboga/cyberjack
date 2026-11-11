@@ -1,0 +1,12 @@
+{
+  "id": "2aec0ac5d38bb87a343dd7bc",
+  "name": "p_aibu_pen01",
+  "kind": "item",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:8833113795138708744",
+  "native": "native/2aec0ac5d38bb87a343dd7bc.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_aibu_pen01-2aec0ac5d38bb87a343dd7bc.glb"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "cc509e70a9979d5055fee8fd",
+  "name": "p_ks_r01_table01 (1)",
+  "kind": "furniture",
+  "source": "map/scene/omiyageya.unity3d",
+  "sourceIdentity": "BuildPlayer-Omiyageya:249",
+  "native": "native/cc509e70a9979d5055fee8fd.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r01_table01_1_-cc509e70a9979d5055fee8fd.glb"
+}

@@ -1,0 +1,728 @@
+{
+  "format": "cyberjack-emotion-head-profile",
+  "version": 1,
+  "id": "mira-vrm-character-look-v12",
+  "mapping": {
+    "eye.soft": "Eye 微笑",
+    "eye.serious": "Eye 真剣",
+    "eye.smug": "Eye ドヤ",
+    "eye.thoughtful": "Eye 思案",
+    "eye.shy": "Eye 照れ",
+    "eye.bored": "Eye つまらない",
+    "eye.sad": "Eye 困る",
+    "eye.cry": "Eye 泣き",
+    "eye.angry": "Eye 怒り",
+    "eye.disgust": "Eye 嫌悪",
+    "eye.worried": "Eye 困る",
+    "eye.fear": "Eye 焦り",
+    "eye.wide": "Eye 焦り",
+    "eye.strained": "Eye 苦しい",
+    "brow.soft": "Eyebrow Default",
+    "brow.serious": "Eyebrow 真剣",
+    "brow.smug": "Eyebrow ドヤ",
+    "brow.question": "Eyebrow 疑問L",
+    "brow.bored": "Eyebrow つまらない",
+    "brow.worried": "Eyebrow 困り",
+    "brow.angry": "Eyebrow 怒り",
+    "brow.raised": "Eyebrow 驚き",
+    "mouth.smile": "Mouth 嬉しい, Closed",
+    "mouth.firm": "Mouth 真剣2, Closed",
+    "mouth.smug": "Mouth ドヤ, Closed",
+    "mouth.smallOpen": "Mouth あ　小, Closed",
+    "mouth.flat": "Mouth 怒り, Closed",
+    "mouth.sad": "Mouth 怒り, Closed",
+    "mouth.angry": "Mouth 怒り, Closed",
+    "mouth.disgust": "Mouth ドキドキss, Closed",
+    "mouth.tense": "Mouth ドキドキss, Closed",
+    "mouth.round": "Mouth 驚きs, Closed",
+    "mouth.open": "Mouth あ　小",
+    "lid.close": "Eye 両目閉じ",
+    "iris.contract": "_CJ Iris Contract",
+    "mouth.tongueOut": "Mouth 舌出し口開け, Closed",
+    "gaze.converge": "_CJ Iris Converge",
+    "eye.relaxed": "_CJ Relaxed Eye Corners",
+    "mouth.gasp": "Mouth 咥え, Closed"
+  },
+  "gains": {},
+  "characters": {
+    "mira": {
+      "gains": {},
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.15,
+        "brow": 1.3,
+        "mouth": 1.05
+      },
+      "procedural": {
+        "tongueOut": {
+          "materialPrefix": "KK cf_m_tang",
+          "nativeMorph": "Mouth 舌出し口開け",
+          "width": 1,
+          "forward": 1,
+          "drop": 0,
+          "clearance": 0.014,
+          "exitLift": 0,
+          "floorDrop": 0.012,
+          "tipLift": 0.012,
+          "floorOnlyWhenOut": true
+        }
+      }
+    },
+    "kate": {
+      "gains": {},
+      "clips": {
+        "climax": {
+          "gains": {},
+          "mouthShapeFloor": 0.5
+        }
+      },
+      "regionStrength": {
+        "eye": 1.15,
+        "brow": 1.05,
+        "mouth": 1.05
+      },
+      "restingPose": {
+        "eye.soft": 0.12,
+        "eye.relaxed": 0.18,
+        "brow.soft": 0.12
+      },
+      "procedural": {
+        "gasp": {
+          "nativeMorph": "Mouth 咥え",
+          "widthGain": 0.85,
+          "verticalGain": 1,
+          "teethVerticalGain": 1.35,
+          "tongueDrop": 0.002,
+          "tongueRetract": 0.006
+        },
+        "tongueOut": {
+          "materialPrefix": "KK cf_m_tang",
+          "nativeMorph": "Mouth 舌出し口開け",
+          "width": 0.78,
+          "forward": 1,
+          "drop": 0.006,
+          "clearance": 0.048,
+          "tipLift": 0.0035,
+          "exitLift": 0.008,
+          "floorDrop": 0,
+          "floorOnlyWhenOut": true
+        }
+      }
+    },
+    "nika": {
+      "gains": {},
+      "regionStrength": {
+        "eye": 1.2,
+        "brow": 1.3,
+        "mouth": 1
+      },
+      "clips": {}
+    },
+    "iona": {
+      "gains": {},
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.15,
+        "brow": 1.3,
+        "mouth": 1.05
+      },
+      "portrait": {
+        "glasses": {
+          "color": "#4b414c",
+          "radiusX": 0.028,
+          "radiusY": 0.0255,
+          "thickness": 0.00065,
+          "depth": 0.074,
+          "centerX": 0.0406,
+          "centerY": 1.493,
+          "shape": "roundedRect",
+          "cornerPower": 2,
+          "wrapDepth": 0.022,
+          "tilt": 0.08
+        }
+      },
+      "procedural": {
+        "tongueOut": {
+          "materialPrefix": "KK cf_m_tang",
+          "nativeMorph": "Mouth 舌出し口開け",
+          "width": 0.72,
+          "forward": 1,
+          "drop": 0,
+          "clearance": 0.018,
+          "exitLift": 0.012
+        }
+      }
+    },
+    "kai": {
+      "gains": {
+        "brow.angry": 0.62,
+        "brow.serious": 0.72,
+        "brow.smug": 0.7,
+        "effect.blush": 1.3
+      },
+      "clips": {},
+      "regionStrength": {
+        "eye": 0.95,
+        "brow": 0.65,
+        "mouth": 0.95
+      },
+      "portrait": {
+        "iris": "cyan"
+      },
+      "restingPose": {
+        "eye.smug": 0.18,
+        "lid.close": 0.42
+      },
+      "mouthShapeFloor": 0.05,
+      "procedural": {
+        "gasp": {
+          "nativeMorph": "Mouth 咥え",
+          "widthGain": 1.15,
+          "verticalGain": 0.55,
+          "tongueDrop": 0.004,
+          "tongueRetract": 0.012,
+          "teethVerticalGain": 1.5
+        }
+      },
+      "mapping": {
+        "mouth.smile": "Mouth ドヤ, Closed"
+      }
+    },
+    "rin": {
+      "gains": {
+        "eye.bored": 0.86
+      },
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.3,
+        "brow": 1.5,
+        "mouth": 1.3
+      },
+      "portrait": {
+        "glasses": {
+          "color": "#51434a",
+          "radiusX": 0.0255,
+          "radiusY": 0.0215,
+          "thickness": 0.0007,
+          "depth": 0.074,
+          "centerX": 0.0406,
+          "centerY": 1.494,
+          "shape": "roundedRect",
+          "cornerPower": 3.2,
+          "wrapDepth": 0.022,
+          "tilt": 0.08
+        }
+      },
+      "mouthShapeFloor": 0.68,
+      "mapping": {
+        "mouth.tense": "Mouth 焦り, Closed",
+        "mouth.disgust": "Mouth 嫌悪, Closed"
+      }
+    },
+    "sumi": {
+      "gains": {},
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.08,
+        "brow": 1.18,
+        "mouth": 1.05
+      },
+      "portrait": {
+        "accessories": {
+          "heartPendant": {
+            "position": [
+              0,
+              1.325,
+              0.026
+            ],
+            "size": 0.01,
+            "color": "#e687a2",
+            "cordColor": "#7a6265",
+            "cordPath": [
+              [
+                -0.037,
+                1.374,
+                -0.02
+              ],
+              [
+                -0.037,
+                1.363,
+                0.018
+              ],
+              [
+                -0.026,
+                1.346,
+                0.024
+              ],
+              [
+                0,
+                1.3315,
+                0.026
+              ],
+              [
+                0.026,
+                1.346,
+                0.024
+              ],
+              [
+                0.037,
+                1.363,
+                0.018
+              ],
+              [
+                0.037,
+                1.374,
+                -0.02
+              ],
+              [
+                0,
+                1.377,
+                -0.042
+              ]
+            ],
+            "fitToNeck": true
+          }
+        }
+      },
+      "procedural": {
+        "tongueOut": {
+          "materialPrefix": "KK cf_m_tang",
+          "nativeMorph": "Mouth 舌出し口開け",
+          "width": 0.85,
+          "forward": 1,
+          "drop": 0,
+          "clearance": 0.012,
+          "exitLift": 0,
+          "floorDrop": 0.01,
+          "tipLift": 0.009,
+          "floorOnlyWhenOut": true
+        }
+      },
+      "mapping": {
+        "mouth.round": "Mouth お　小, Closed"
+      }
+    },
+    "eli": {
+      "gains": {},
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.2,
+        "brow": 1.3,
+        "mouth": 1.1
+      }
+    },
+    "mai": {
+      "gains": {},
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.15,
+        "brow": 1.3,
+        "mouth": 1.05
+      },
+      "portrait": {
+        "flowers": [
+          {
+            "position": [
+              0.075,
+              1.581,
+              0.065
+            ],
+            "radius": 0.021,
+            "rotation": [
+              -0.12,
+              0.22,
+              0.25
+            ]
+          },
+          {
+            "position": [
+              0.055,
+              1.604,
+              0.052
+            ],
+            "radius": 0.013,
+            "rotation": [
+              0.12,
+              -0.15,
+              -0.2
+            ]
+          },
+          {
+            "position": [
+              0.078,
+              1.606,
+              0.041
+            ],
+            "radius": 0.01,
+            "rotation": [
+              -0.2,
+              0.15,
+              0.5
+            ]
+          }
+        ],
+        "iris": "amber"
+      },
+      "mouthShapeFloor": 0.45
+    },
+    "mika": {
+      "gains": {},
+      "clips": {},
+      "regionStrength": {
+        "eye": 1.3,
+        "brow": 1.35,
+        "mouth": 1.0
+      },
+      "portrait": {
+        "accessories": {
+          "color": "#6550a8",
+          "bows": {
+            "size": 0.05,
+            "styles": [
+              {
+                "color": "#7b5eb2",
+                "angle": -0.23
+              },
+              {
+                "color": "#eee5f4",
+                "angle": 0.19,
+                "scale": 0.94
+              }
+            ],
+            "asset": "Mika-Spring-Tails",
+            "roots": [
+              [
+                -0.06,
+                0.18,
+                -0.045
+              ],
+              [
+                0.06,
+                0.18,
+                -0.045
+              ]
+            ],
+            "ties": [
+              [
+                -0.117,
+                0.224,
+                -0.045
+              ],
+              [
+                0.117,
+                0.224,
+                -0.045
+              ]
+            ],
+            "tailWidth": 0.23,
+            "gatheredRoot": true
+          },
+          "earrings": {
+            "position": [
+              0.08464421,
+              1.4680027,
+              -0.02161367
+            ],
+            "radius": 0.025,
+            "angle": 0.7
+          },
+          "necklace": {
+            "position": [
+              1.37,
+              -0.015
+            ],
+            "radius": 0.044
+          }
+        }
+      },
+      "procedural": {
+        "tongueOut": {
+          "materialPrefix": "KK cf_m_tang",
+          "nativeMorph": "Mouth 舌出し口開け",
+          "width": 0.65,
+          "forward": 0.85,
+          "drop": 0.003,
+          "clearance": 0.012,
+          "exitLift": 0,
+          "floorDrop": 0.012
+        },
+        "gasp": {
+          "nativeMorph": "Mouth 咥え",
+          "verticalGain": 0.9,
+          "widthGain": 0.75,
+          "tongueDrop": 0.004,
+          "tongueRetract": 0.01,
+          "tongueWidth": 0.7,
+          "tongueBaseDrop": 0.01
+        }
+      },
+      "mapping": {
+        "mouth.tense": "Mouth 焦り, Closed",
+        "mouth.disgust": "Mouth 嫌悪, Closed"
+      }
+    }
+  },
+  "notes": "Смысловые каналы, включая язык, сведение глаз и баланс сторон лица, независимы от индексов геометрии. При замене головы обновляется профиль привязок.",
+  "calibrationStatus": "Nika has authored per-state variants based on the 32 reference portraits. Closed mouth forms, eyelid closure and iris contraction are separate.",
+  "mouthShapeFloor": 0,
+  "regionStrength": {
+    "eye": 1.15,
+    "brow": 1.25,
+    "mouth": 1
+  },
+  "procedural": {
+    "irisContract": {
+      "materialPrefix": "KK cf_m_hitomi_00",
+      "maximumContraction": 0.48,
+      "maximumConvergence": 0.18
+    },
+    "asymmetry": {
+      "enabled": true,
+      "blendWidth": 0.004
+    },
+    "tongueOut": {
+      "materialPrefix": "KK cf_m_tang",
+      "nativeMorph": "Mouth 舌出し口開け",
+      "width": 0.8,
+      "forward": 1,
+      "drop": 0.004,
+      "clearance": 0.009
+    },
+    "eyeOcclusion": {
+      "upperMaterialPrefix": "KK cf_m_eyeline_00_up",
+      "lowerMaterialPrefix": "KK cf_m_eyeline_down",
+      "eyeMaterialPrefixes": [
+        "KK cf_m_sirome_00",
+        "KK cf_m_hitomi_00"
+      ],
+      "scleraMaterialPrefix": "KK cf_m_sirome_00",
+      "irisMaterialPrefix": "KK cf_m_hitomi_00"
+    },
+    "waterEffects": {
+      "tongueMaterialPrefix": "KK cf_m_tang",
+      "paths": [
+        {
+          "type": "tears",
+          "points": [
+            [
+              -0.056,
+              1.485,
+              0.065
+            ],
+            [
+              -0.054,
+              1.477,
+              0.073
+            ],
+            [
+              -0.052,
+              1.466,
+              0.078
+            ],
+            [
+              -0.048,
+              1.453,
+              0.079
+            ]
+          ],
+          "seed": 0.6,
+          "radius": 0.00145
+        },
+        {
+          "type": "sweat",
+          "points": [
+            [
+              -0.067,
+              1.507,
+              0.045
+            ],
+            [
+              -0.068,
+              1.492,
+              0.05
+            ],
+            [
+              -0.066,
+              1.478,
+              0.06
+            ]
+          ],
+          "seed": 0.7,
+          "radius": 0.0017
+        },
+        {
+          "type": "sweat",
+          "points": [
+            [
+              -0.062,
+              1.477,
+              0.065
+            ],
+            [
+              -0.062,
+              1.463,
+              0.073
+            ]
+          ],
+          "seed": 0.35,
+          "radius": 0.0013
+        },
+        {
+          "type": "saliva",
+          "points": [
+            [
+              -0.012,
+              1.434,
+              0.075
+            ],
+            [
+              -0.011,
+              1.423,
+              0.077
+            ]
+          ],
+          "seed": 0.8,
+          "radius": 0.00115
+        },
+        {
+          "type": "tears",
+          "points": [
+            [
+              0.056,
+              1.485,
+              0.065
+            ],
+            [
+              0.054,
+              1.477,
+              0.073
+            ],
+            [
+              0.052,
+              1.466,
+              0.078
+            ],
+            [
+              0.048,
+              1.453,
+              0.079
+            ]
+          ],
+          "seed": 0.1,
+          "radius": 0.00145
+        },
+        {
+          "type": "sweat",
+          "points": [
+            [
+              0.067,
+              1.507,
+              0.045
+            ],
+            [
+              0.068,
+              1.492,
+              0.05
+            ],
+            [
+              0.066,
+              1.478,
+              0.06
+            ]
+          ],
+          "seed": 0.2,
+          "radius": 0.0017
+        },
+        {
+          "type": "sweat",
+          "points": [
+            [
+              0.062,
+              1.477,
+              0.065
+            ],
+            [
+              0.062,
+              1.463,
+              0.073
+            ]
+          ],
+          "seed": 0.8,
+          "radius": 0.0013
+        },
+        {
+          "type": "saliva",
+          "points": [
+            [
+              0.012,
+              1.434,
+              0.075
+            ],
+            [
+              0.011,
+              1.423,
+              0.077
+            ]
+          ],
+          "seed": 0.4,
+          "radius": 0.00115
+        },
+        {
+          "type": "saliva",
+          "points": [
+            [
+              0,
+              1.433,
+              0.078
+            ],
+            [
+              0,
+              1.419,
+              0.079
+            ]
+          ],
+          "seed": 0.3,
+          "radius": 0.0016,
+          "followTongue": true
+        }
+      ]
+    },
+    "relaxedEyes": {
+      "materialPrefixes": [
+        "KK cf_m_face_00",
+        "KK cf_m_eyeline",
+        "KK cf_m_sirome_00"
+      ],
+      "centerX": 0.0415,
+      "centerY": 1.495,
+      "halfWidth": 0.032,
+      "halfHeight": 0.039,
+      "frontStart": 0.03,
+      "cornerDrop": 0.0075
+    },
+    "gasp": {
+      "nativeMorph": "Mouth 咥え",
+      "verticalGain": 1,
+      "widthGain": 1,
+      "tongueDrop": 0.006,
+      "tongueRetract": 0.008
+    },
+    "mouthCavity": {
+      "uvBounds": [
+        0.325,
+        0.001,
+        0.675,
+        0.175
+      ],
+      "edge": 0.002
+    }
+  },
+  "gazeCalibration": {
+    "horizontalDegrees": 18,
+    "upDegrees": 24,
+    "downDegrees": 18,
+    "verticalSign": -1
+  },
+  "portraitIris": false,
+  "portraitTeeth": "#e9e3dc"
+}

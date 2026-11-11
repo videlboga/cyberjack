@@ -1,0 +1,162 @@
+{
+  "loaded": 24,
+  "models": [
+    {
+      "ready": true,
+      "id": "SexMachineModel-065",
+      "name": "SexMachineModel-065",
+      "meshes": 346
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-066",
+      "name": "SexMachineModel-066",
+      "meshes": 15
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-067",
+      "name": "SexMachineModel-067",
+      "meshes": 34
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-068",
+      "name": "SexMachineModel-068",
+      "meshes": 29
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-069",
+      "name": "SexMachineModel-069",
+      "meshes": 24
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-070",
+      "name": "SexMachineModel-070",
+      "meshes": 16
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-071",
+      "name": "SexMachineModel-071",
+      "meshes": 31
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-072",
+      "name": "SexMachineModel-072",
+      "meshes": 45
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-073",
+      "name": "SexMachineModel-073",
+      "meshes": 41
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-074",
+      "name": "SexMachineModel-074",
+      "meshes": 12
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-075",
+      "name": "SexMachineModel-075",
+      "meshes": 39
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-076",
+      "name": "SexMachineModel-076",
+      "meshes": 14
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-077",
+      "name": "SexMachineModel-077",
+      "meshes": 18
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-078",
+      "name": "SexMachineModel-078",
+      "meshes": 24
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-079",
+      "name": "SexMachineModel-079",
+      "meshes": 14
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-080",
+      "name": "SexMachineModel-080",
+      "meshes": 189
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-081",
+      "name": "SexMachineModel-081",
+      "meshes": 25
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-082",
+      "name": "SexMachineModel-082",
+      "meshes": 33
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-083",
+      "name": "SexMachineModel-083",
+      "meshes": 8
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-084",
+      "name": "SexMachineModel-084",
+      "meshes": 35
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-085",
+      "name": "SexMachineModel-085",
+      "meshes": 11
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-086",
+      "name": "SexMachineModel-086",
+      "meshes": 14
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-087",
+      "name": "SexMachineModel-087",
+      "meshes": 180
+    },
+    {
+      "ready": true,
+      "id": "SexMachineModel-088",
+      "name": "SexMachineModel-088",
+      "meshes": 26
+    }
+  ],
+  "originalObjects": {
+    "ready": true,
+    "id": "75930ddad353c11061b57e16",
+    "name": "p_item_beach_ball",
+    "meshes": 1
+  },
+  "originalFurniture": {
+    "ready": true,
+    "id": "465c08e024253f0a00ce66ba",
+    "name": "p_ks_m03bench00_00 (1)",
+    "meshes": 1
+  },
+  "errors": []
+}

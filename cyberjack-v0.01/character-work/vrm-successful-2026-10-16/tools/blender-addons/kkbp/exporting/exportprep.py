@@ -1,0 +1,547 @@
+#simplfies bone count using the merge weights function in CATS
+
+import bpy, traceback, time, os, numpy
+from .. import common as c
+from ..interface.dictionary_en import t
+from .material_combiner import globs
+from ..importing.modifyarmature import modify_armature
+
+def prep_operations(prep_type, simp_type):
+
+    c.kklog('\nPrepping for export...')
+    armature = c.get_armature()
+    try:
+        c.switch(armature, 'pose')
+    except:
+        armature.hide_set(False)
+        c.switch(armature, 'pose')
+
+    bpy.ops.armature.collection_show_all()
+    
+    # If exporting for Unreal...
+    if prep_type == 'Unreal':
+        #Rename some bones to make it match Mannequin skeleton
+        #Not necessary, but allows Unreal automatically recognize and match bone names when retargeting
+        ue_rename_dict = {
+            'Hips': 'pelvis',
+            'Spine': 'spine_01',
+            'Chest': 'spine_02',
+            'Upper Chest': 'spine_03',
+            'Neck': 'neck',
+            'Head': 'head',
+            'Left shoulder': 'clavicle_l',
+            'Right shoulder': 'clavicle_r',
+            'Left arm': 'upperarm_l',
+            'Right arm': 'upperarm_r',
+            'Left elbow': 'lowerarm_l',
+            'Right elbow': 'lowerarm_r',
+            'Left wrist': 'hand_l',
+            'Right wrist': 'hand_r',
+
+            'Left leg': 'thigh_l',
+            'Right leg': 'thigh_r',
+            'Left knee': 'calf_l',
+            'Right knee': 'calf_r',
+            'cf_j_leg03_L': 'foot_l',
+            'cf_j_leg03_R': 'foot_r',
+            'Left toe': 'ball_l',
+            'Right toe': 'ball_r',
+        }
+        for bone in ue_rename_dict:
+            if armature.data.bones.get(bone):
+                armature.data.bones[bone].name = ue_rename_dict[bone]
+
+        c.switch(armature, 'edit')
+
+        #Make all the bones on the legs face the same direction, otherwise IK won't work in Unreal
+        armature.data.edit_bones["calf_l"].tail.z = armature.data.edit_bones["calf_l"].head.z + 0.1
+        armature.data.edit_bones["calf_l"].head.y += 0.01
+        armature.data.edit_bones["calf_r"].tail.z = armature.data.edit_bones["calf_r"].head.z + 0.1
+        armature.data.edit_bones["calf_r"].head.y += 0.01
+
+        armature.data.edit_bones["ball_l"].tail.z = armature.data.edit_bones["ball_l"].head.z
+        armature.data.edit_bones["ball_l"].tail.y = armature.data.edit_bones["ball_l"].head.y - 0.05
+        armature.data.edit_bones["ball_r"].tail.z = armature.data.edit_bones["ball_r"].head.z
+        armature.data.edit_bones["ball_r"].tail.y = armature.data.edit_bones["ball_r"].head.y - 0.05
+
+        c.switch(armature, 'pose')
+    
+    #If exporting for Koikatsu...
+    if prep_type == 'Koikatsu':
+        #rename the bones back to their original names
+        for bone_name in modify_armature.bone_rename_dict:
+            if armature.data.bones.get(modify_armature.bone_rename_dict[bone_name]):
+                armature.data.bones[modify_armature.bone_rename_dict[bone_name]].name = bone_name
+        c.switch(armature, 'edit')
+        armature.data.edit_bones['p_cf_body_bone'].parent = None
+        armature.data.edit_bones['cf_j_root'].parent = armature.data.edit_bones['p_cf_body_bone']
+        armature.data.edit_bones['cf_n_height'].parent = armature.data.edit_bones['cf_j_root']
+        c.switch(armature, 'pose')
+
+    #If simplifying the bones...
+    if simp_type in ['A', 'B']:
+        bpy.ops.pose.select_all(action='DESELECT')
+
+        #Move pupil bones to layer 1
+        if armature.data.bones.get('Left Eye'):
+            armature.data.bones['Left Eye'].collections.clear()
+            armature.data.collections['Torso'].assign(armature.data.bones.get('Left Eye'))
+            armature.data.bones['Right Eye'].collections.clear()
+            armature.data.collections['Torso'].assign(armature.data.bones.get('Right Eye'))
+        
+        #If simple is selected, only delete the junk layer
+        for bone in armature.data.bones:
+            if bone.collections.get('Junk'):
+                armature.pose.bones[bone.name].select = True
+        
+        #if very simple selected, also get 3-5,12,17-19
+        if simp_type in ['A']:
+            for bone in armature.data.bones:
+                select_bool = (bone.collections.get('Charamaker bones')  or 
+                               bone.collections.get('Deform bones')  or 
+                               bone.collections.get('NSFW')  or 
+                               bone.collections.get('Face') or 
+                               bone.collections.get('Face (MCH)') or 
+                               bone.collections.get('Rigged tongue')
+                               )
+                if select_bool:
+                    armature.pose.bones[bone.name].select = True
+        
+        c.kklog('Using the merge weights function in CATS to simplify bones...')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.kkbp.cats_merge_weights()
+
+    #If exporting for VRM or VRC...
+    if prep_type in ['VRM', 'VRC']:
+        c.kklog('Editing armature for VRM...')
+        separate_eye_meshes()
+        c.switch(armature, 'edit')
+
+        #Rearrange bones to match CATS output 
+        if armature.data.edit_bones.get('Pelvis'):
+            armature.data.edit_bones['Pelvis'].parent = None
+            armature.data.edit_bones['Spine'].parent = armature.data.edit_bones['Pelvis']
+            armature.data.edit_bones['Hips'].name = 'dont need lol'
+            armature.data.edit_bones['Pelvis'].name = 'Hips'
+            armature.data.edit_bones['Left leg'].parent = armature.data.edit_bones['Hips']
+            armature.data.edit_bones['Right leg'].parent = armature.data.edit_bones['Hips']
+            armature.data.edit_bones['Left ankle'].parent = armature.data.edit_bones['Left knee']
+            armature.data.edit_bones['Right ankle'].parent = armature.data.edit_bones['Right knee']
+            armature.data.edit_bones['Left shoulder'].parent = armature.data.edit_bones['Upper Chest']
+            armature.data.edit_bones['Right shoulder'].parent = armature.data.edit_bones['Upper Chest']
+            armature.data.edit_bones.remove(armature.data.edit_bones['dont need lol'])
+
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='DESELECT')
+
+        #Merge specific bones for unity rig autodetect
+        merge_these = ['cf_j_waist02', 'cf_s_waist01', 'cf_s_hand_L', 'cf_s_hand_R']
+        #Delete the upper chest for VR chat models, since it apparently causes errors with eye tracking
+        if prep_type == 'VRC':
+            merge_these.append('Upper Chest')
+            c.kklog('Removing Upper Chest bone for VRC...')
+        for bone in armature.data.bones:
+            if bone.name in merge_these:
+                armature.pose.bones[bone.name].select = True
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.kkbp.cats_merge_weights()
+        bpy.ops.armature.collection_remove_unused()
+        c.switch(armature, 'object')
+
+        #remove the eye UV warp modifiers
+        c.kklog('Removing eye UV warp modifiers...')
+        body = c.get_body()
+        if mod := body.modifiers.get('Left Eye UV warp'):
+            mod.show_viewport = False
+        if mod := body.modifiers.get('Right Eye UV warp'):
+            mod.show_viewport = False
+
+def separate_eye_meshes():
+    if c.get_body().data.materials.get('KK cf_m_eyeline_00_up'):
+        #select the eye material
+        c.switch(c.get_body(), 'edit')
+        bpy.context.object.active_material_index = c.get_body().data.materials.find('KK cf_m_eyeline_00_up')
+        bpy.ops.object.material_slot_select()
+        #refresh the selection and move them forwards a tiny bit to prevent UV issues when exporting as an FBX file
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.transform.translate(value=(0, -.0001, 0))
+        bpy.ops.mesh.select_all(action='DESELECT')
+        c.switch(c.get_body(), 'object')
+
+def get_image_node(bake_type):
+    dict = {
+        'light': '_light.png',
+        'dark' : '_dark.png',
+        'normal':'_NMP_CNV.png',
+        'detail':'_light.png',
+        'alphamask': '_AM.png',
+        'detailnormal': '_NMPD_CNV.png',
+        'colormask': '_CM.png',
+        'clothalpha': '_AM.png',
+        'clothalphabot': '_AM.png',
+    }
+    return dict[bake_type]
+
+def save_uvs(vgroup_name):
+    """Save UV coordinates for a specific vertex group."""
+    body = c.get_body()
+    body = bpy.data.objects[body.name + '.001']
+    
+    mesh = body.data
+    uv_layer = mesh.uv_layers.get("uv_main")
+    # Get vertex group and member vertex indices
+    vgroup = body.vertex_groups.get(vgroup_name)
+    group_verts = {v.index for v in body.data.vertices if any(g.group == vgroup.index for g in v.groups)}
+    saved_uvs = {}
+    for poly in mesh.polygons:
+        for loop_idx in poly.loop_indices:
+            vert_idx = mesh.loops[loop_idx].vertex_index
+            if vert_idx in group_verts:
+                saved_uvs[loop_idx] = tuple(uv_layer.data[loop_idx].uv)
+    return saved_uvs
+
+def restore_uvs(uvs, vgroup_name):
+    """Restore UV coordinates previously saved for the vertex group."""
+    body = c.get_body()
+    body = bpy.data.objects[body.name + '.001']
+
+    uv_layer = body.data.uv_layers.get("uv_main")
+    saved_uvs = uvs
+    for loop_idx_str, uv_coords in saved_uvs.items():
+        loop_idx = int(loop_idx_str)
+        uv_layer.data[loop_idx].uv = uv_coords
+
+
+# https://blender.stackexchange.com/questions/127403/change-active-collection
+#Recursivly transverse layer_collection for a particular name
+def recurLayerCollection(layerColl, collName):
+    found = None
+    if (layerColl.name == collName):
+        return layerColl
+    for layer in layerColl.children:
+        found = recurLayerCollection(layer, collName)
+        if found:
+            return found
+
+def create_material_atlas():
+    '''Merges all the finalized material png files into a single atlas file, copies the current model and applies the atlas to the copy'''
+
+    folderpath = os.path.join(bpy.context.scene.kkbp.import_dir, 'atlas_files', '')
+    
+    def remove_orphan_data():
+        #revert the image back from the atlas file to the baked file   
+        for mat in bpy.data.materials:
+            if mat.name[-4:] == '-ORG':
+                simplified_name = mat.name[:-4]
+                if bpy.data.materials.get(simplified_name):
+                    simplified_mat = bpy.data.materials[simplified_name]
+                    for bake_type in ['light', 'dark', 'normal']:
+                        simplified_mat.node_tree.nodes[bake_type].image = bpy.data.images.get(simplified_name + ' ' + bake_type + '.png')
+        #delete orphan data
+        for cat in [bpy.data.armatures, bpy.data.objects, bpy.data.meshes, bpy.data.materials, bpy.data.images, bpy.data.node_groups]:
+            for block in cat:
+                if block.users == 0:
+                    cat.remove(block)
+
+    if bpy.data.collections.get(c.get_name() + ' atlas'):
+        c.kklog(f'deleting previous collection "{c.get_name()} atlas" and regenerating atlas model...')
+        def del_collection(coll):
+            for c in coll.children:
+                del_collection(c)
+            bpy.data.collections.remove(coll,do_unlink=True)
+        del_collection(bpy.data.collections[c.get_name() + ' atlas'])
+        remove_orphan_data()
+        #show the original collection again
+        c.show_layer_collection(c.get_name(), False)
+
+    #Change the Active LayerCollection to the character collection
+    layer_collection = bpy.context.view_layer.layer_collection
+    layerColl = recurLayerCollection(layer_collection, c.get_name())
+    bpy.context.view_layer.active_layer_collection = layerColl
+
+    # https://blender.stackexchange.com/questions/157828/how-to-duplicate-a-certain-collection-using-python
+    from collections import  defaultdict
+    def copy_objects(from_col, to_col, linked, dupe_lut):
+        for o in from_col.objects:
+            dupe = o.copy()
+            if not linked and o.data:
+                dupe.data = dupe.data.copy()
+            to_col.objects.link(dupe)
+            dupe_lut[o] = dupe
+    def copy(parent, collection, linked=False):
+        dupe_lut = defaultdict(lambda : None)
+        def _copy(parent, collection, linked=False):
+            cc = bpy.data.collections.new(collection.name)
+            copy_objects(collection, cc, linked, dupe_lut)
+            for c in collection.children:
+                _copy(cc, c, linked)
+            parent.children.link(cc)
+            return cc
+        the_copy = _copy(parent, collection, linked)
+        for o, dupe in tuple(dupe_lut.items()):
+            parent = dupe_lut[o.parent]
+            if parent:
+                dupe.parent = parent
+        return the_copy
+    context = bpy.context
+    scene = context.scene
+    col = context.collection
+    assert(col is not scene.collection)
+    copied_collection = copy(scene.collection, col)
+    copied_collection.name = c.get_name() + ' atlas'
+
+    #get the uv info for the eyes if skip eyes is enabled
+    if bpy.context.scene.kkbp.atlas_dropdown in ['skip_eyes', 'all_textures']:
+        left_uvs =  save_uvs('Left Eye')
+        right_uvs = save_uvs('Right Eye')
+
+    #setup materials for the combiner script
+    for obj in [o for o in bpy.data.collections[c.get_name() + ' atlas'].all_objects if o.type == 'MESH']:
+        for mat in [mat_slot.material for mat_slot in obj.material_slots if mat_slot.material.get('name')]:
+            nodes = mat.node_tree.nodes
+            if not nodes.get('_light.png'):
+                continue
+            print(mat)
+            links = mat.node_tree.links
+            emissive_node = nodes.new('ShaderNodeEmission')
+            emissive_node.name = 'Emission'
+            image_node = nodes.new('ShaderNodeTexImage')
+            image_node.name = 'Image Texture'
+            links.new(emissive_node.inputs[0], image_node.outputs[0])
+            image_node.image = nodes['_light.png'].image
+        context.view_layer.objects.active = obj
+        bpy.ops.object.material_slot_remove_unused()
+
+    #call the material combiner script
+    bpy.ops.kkbp.combiner()
+
+    #replace all images with the atlas in a new atlas material
+    bake_types = ['light', 'dark', 'normal']
+    if bpy.context.scene.kkbp.atlas_dropdown == 'all_textures':
+        bake_types.extend(['detail', 'alphamask', 'detailnormal', 'colormask'])
+    for index, obj in enumerate([o for o in bpy.data.collections[c.get_name() + ' atlas'].all_objects if o.type == 'MESH']):
+        #fix modifiers for all objects in this collection
+        for mod in obj.modifiers:
+            if mod.type == 'ARMATURE':
+                #fix the armature modifier to use the copied aramture
+                copied_armature = [o for o in bpy.data.collections[c.get_name() + ' atlas'].all_objects if o.type == 'ARMATURE'][0]
+                mod.object = copied_armature
+        
+        #check if this object had any atlas-able materials to begin with. If not, skip
+        if not [mat_slot.material for mat_slot in obj.material_slots if mat_slot.material.get('name')]:
+            continue
+
+        for bake_type in bake_types:
+            #check for atlas dupes
+            atlas_image_name = f'{sanitizeMaterialName(obj.name).replace("001","")}_{bake_type}.png'
+            if bpy.data.images.get(atlas_image_name):
+                bpy.data.images.remove(bpy.data.images.get(atlas_image_name))
+            #the atlas image is originally named after the index of the object. Rename it to the object name
+            original_image_path = os.path.join(context.scene.kkbp.import_dir, 'atlas_files', f'{index}_{bake_type}.png')
+            new_image_path = os.path.join(context.scene.kkbp.import_dir, 'atlas_files', atlas_image_name)
+            if os.path.exists(original_image_path):
+                try:
+                    os.rename(original_image_path, new_image_path)
+                except:
+                    #rename failed because the file already exists. Delete the old one and try again
+                    os.remove(new_image_path)
+                    os.rename(original_image_path, new_image_path)
+            #then load it into blender
+            atlas_image = bpy.data.images.load(new_image_path)
+            bpy.data.images.remove(bpy.data.images.get(f'{index}_{bake_type}.png'))
+            for material in [mat_slot.material for mat_slot in obj.material_slots if mat_slot.material.get('name')]:
+                if node := material.node_tree.nodes.get(get_image_node(bake_type)):
+                    image = node.image
+                else:
+                    continue
+                
+                if image:
+                    if image.name in ['Template: Placeholder', 'Template: Normal detail placeholder']:
+                        image = None
+                if not image:
+                    print(image)
+                    continue
+                else:
+                    if not bpy.data.materials.get('{} Atlas'.format(material.name)):
+                        #remove the emission nodes from earlier
+                        if material.node_tree.nodes.get('Emission'):
+                            material.node_tree.nodes.remove(material.node_tree.nodes['Image Texture'])
+                            material.node_tree.nodes.remove(material.node_tree.nodes['Emission'])
+                        atlas_material = material.copy()
+                        atlas_material['atlas'] = True
+                        atlas_material.name = '{} Atlas'.format(material.name)
+                    else:
+                        atlas_material =  bpy.data.materials.get('{} Atlas'.format(material.name))
+                    atlas_material.node_tree.nodes[get_image_node(bake_type)].image = atlas_image
+                    #remove the alpha masks because they interfere with the atlas
+                    atlas_material.node_tree.nodes['_AM.png'].image = bpy.data.images['Template: Placeholder']
+                    #load in the light image to the dark slot to make it look better when only the light colors are baked.
+                    # This will be overwritten with the dark image in the next loop if the user baked it
+                    if bake_type == 'light':
+                        atlas_material.node_tree.nodes['_dark.png'].image = atlas_image
+
+        #replace all images with the atlas in a new atlas material
+        for mat_slot in [m for m in obj.material_slots if m.material.get('name')]:
+            material = mat_slot.material
+            atlas_material = bpy.data.materials.get('{} Atlas'.format(material.name))
+            mat_slot.material = atlas_material
+
+    #restore the eye uvs if skip eyes is enabled
+    if bpy.context.scene.kkbp.atlas_dropdown in ['skip_eyes', 'all_textures']:
+        body = c.get_body()
+        body = bpy.data.objects[body.name + '.001']
+        if body.material_slots.get('KK cf_m_hitomi_00_cf_Ohitomi_L02 Atlas'):
+            mat = bpy.data.materials.get('KK cf_m_hitomi_00_cf_Ohitomi_L02')
+            body.material_slots['KK cf_m_hitomi_00_cf_Ohitomi_L02 Atlas'].material = mat
+            restore_uvs(left_uvs,  'Left Eye')
+            mat.node_tree.nodes['_light.png'].image.save_render(filepath=os.path.join(folderpath, 'eye_left.png'))
+            body.material_slots['KK cf_m_hitomi_00_cf_Ohitomi_R02 Atlas'].material = bpy.data.materials.get('KK cf_m_hitomi_00_cf_Ohitomi_R02')
+            restore_uvs(right_uvs, 'Right Eye')
+            mat.node_tree.nodes['_light.png'].image.save_render(filepath=os.path.join(folderpath, 'eye_right.png'))
+
+    #get rid of the outlines
+    for index, obj in enumerate([o for o in bpy.data.collections[c.get_name() + ' atlas'].all_objects if o.type == 'MESH']):
+        c.switch(obj, 'object')
+        bpy.ops.object.material_slot_remove_unused()
+        for mod in obj.modifiers:
+            if mod.type == 'SOLIDIFY':
+                mod.show_viewport = False
+                mod.show_render = False
+
+    #setup the new collection for exporting
+    layer_collection = bpy.context.view_layer.layer_collection
+    layerColl = recurLayerCollection(layer_collection, c.get_name() + ' atlas')
+    bpy.context.view_layer.active_layer_collection = layerColl
+    bpy.ops.collection.exporter_add(name="IO_FH_fbx")
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.object_types = {'EMPTY', 'ARMATURE', 'MESH', 'OTHER'}
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.use_mesh_modifiers = False
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.add_leaf_bones = False
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.bake_anim = False
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.apply_scale_options = 'FBX_SCALE_ALL'
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.path_mode = 'COPY'
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.embed_textures = False
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.mesh_smooth_type = 'OFF'
+    bpy.data.collections[c.get_name() + ' atlas'].exporters[0].export_properties.filepath = os.path.join(folderpath, f'{sanitizeMaterialName(c.get_name())} exported model atlas.fbx')
+
+    #hide the new collection
+    c.show_layer_collection('Rigged tongue ' + c.get_name() + '.001', True)
+    c.show_layer_collection(c.get_name() + ' atlas', True)
+    remove_orphan_data()
+
+def sanitizeMaterialName(text: str) -> str:
+    '''Mat names need to be sanitized else you can't delete the files with windows explorer'''
+    for ch in ['\\','`','*','<','>','.',':','?','|','/','\"']:
+        if ch in text:
+            text = text.replace(ch,'')
+    return text
+
+def combine_alpha_with_pillow(Image, save_folder, alphamask, lightdark):
+    img1 = Image.open(alphamask).convert("RGBA")
+    img2 = Image.open(lightdark).convert("RGBA")
+
+    # Resize alpha to match lightdark dimensions
+    img1 = img1.resize(img2.size, Image.LANCZOS)
+
+    # Split channels
+    r1, g1, b1, a1 = img1.split()
+    r2, g2, b2, a2 = img2.split()
+    img1.close()
+    img2.close()
+    r1_arr = numpy.array(r1, dtype=numpy.float32)
+    a1_arr = numpy.array(a1, dtype=numpy.float32)
+    a2_arr = numpy.array(a2, dtype=numpy.float32)
+    del r1
+    del a1
+    del a2
+    r1_arr /= 255.0
+    a1_arr /= 255.0
+    a2_arr /= 255.0
+
+    # Multiply red and alpha from alphamask, then multiply it to the lightdark
+    mask = r1_arr * a1_arr
+    del r1_arr
+    del a1_arr
+    new_alpha = a2_arr * mask
+    del a2_arr
+
+    # put it back and save
+    new_alpha_img = Image.fromarray((new_alpha * 255).astype(numpy.uint8))
+    result = Image.merge("RGBA", (r2, g2, b2, new_alpha_img))
+    os.makedirs(save_folder, exist_ok=True)
+    new_filepath = os.path.join(save_folder, os.path.basename(lightdark).replace('.png', '_aa.png'))
+    result.save(new_filepath)
+    c.print_timer(f'{os.path.basename(lightdark)} apply alpha')
+    del result
+    del new_alpha_img
+    return new_filepath
+
+def apply_alpha():
+    '''Apply the state of the alpha to each image. This needs to be done because the maintex and alpha mask images are separate. 
+    This will combine them into a single image so the altased model retains it's alpha state without needing an alpha mask atlas'''
+    from PIL import Image
+    save_folder = os.path.join(bpy.context.scene.kkbp.import_dir, 'alpha_files', '')
+    for object in c.get_all_objects():
+        for mat_slot in object.material_slots:
+            if mat := mat_slot.material:
+                if mat.node_tree.nodes.get('_light.png'):
+                    light_filepath = bpy.path.abspath(mat.node_tree.nodes.get('_light.png').image.filepath)
+                    dark_filepath =  bpy.path.abspath(mat.node_tree.nodes.get('_dark.png').image.filepath)
+                    alpha_filepath = bpy.path.abspath(mat.node_tree.nodes.get('_AM.png').image.filepath)
+                    shader_node = mat.node_tree.nodes.get('shader')
+                    preserve_alpha = False
+                    if shader_node:
+                        preserve_alpha = True if shader_node.inputs[0].default_value == 0 else False    
+                    if not alpha_filepath or not light_filepath or preserve_alpha:
+                        continue
+                    new_light_filepath = combine_alpha_with_pillow(Image, save_folder, alpha_filepath, light_filepath)
+                    new_dark_filepath  = combine_alpha_with_pillow(Image, save_folder, alpha_filepath, dark_filepath)
+                    new_light = bpy.data.images.load(new_light_filepath)
+                    new_dark = bpy.data.images.load(new_dark_filepath)
+                    mat.node_tree.nodes.get('_light.png').image = new_light
+                    mat.node_tree.nodes.get('_dark.png').image = new_dark
+
+class export_prep(bpy.types.Operator):
+    bl_idname = "kkbp.exportprep"
+    bl_label = "Prep for target application"
+    bl_description = t('export_prep_tt')
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        scene = context.scene.kkbp
+        prep_type = scene.prep_dropdown
+        simp_type = scene.simp_dropdown
+        last_step = time.time()
+        try:
+            c.toggle_console()
+            prep_operations(prep_type, simp_type)
+            if bpy.context.scene.kkbp.atlas_dropdown != 'None' and globs.pil_exist == 'yup':
+                apply_alpha()
+                create_material_atlas()
+            else:
+                #setup the existing collection for exporting
+                layer_collection = bpy.context.view_layer.layer_collection
+                layerColl = recurLayerCollection(layer_collection, c.get_name())
+                bpy.context.view_layer.active_layer_collection = layerColl
+                bpy.ops.collection.exporter_add(name="IO_FH_fbx")
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.object_types = {'EMPTY', 'ARMATURE', 'MESH', 'OTHER'}
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.use_mesh_modifiers = False
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.add_leaf_bones = False
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.bake_anim = False
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.apply_scale_options = 'FBX_SCALE_ALL'
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.path_mode = 'COPY'
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.embed_textures = False
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.mesh_smooth_type = 'OFF'
+                folderpath = os.path.join(bpy.context.scene.kkbp.import_dir, 'atlas_files', '')
+                bpy.data.collections[c.get_name()].exporters[0].export_properties.filepath = os.path.join(folderpath, f'{sanitizeMaterialName(c.get_name())} exported model.fbx')
+
+            c.kklog('Finished in ' + str(time.time() - last_step)[0:4] + 's')
+            c.toggle_console()
+            return {'FINISHED'}
+        except:
+            c.kklog('Unknown python error occurred', type = 'error')
+            c.kklog(traceback.format_exc())
+            self.report({'ERROR'}, traceback.format_exc())
+            return {"CANCELLED"}
+    

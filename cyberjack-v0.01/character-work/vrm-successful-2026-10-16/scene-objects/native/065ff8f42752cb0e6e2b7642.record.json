@@ -1,0 +1,11 @@
+{
+  "id": "065ff8f42752cb0e6e2b7642",
+  "name": "senasi_isu_00_kind",
+  "kind": "furniture",
+  "source": "map/scene/forest.unity3d",
+  "sourceIdentity": "BuildPlayer-Forest:1096",
+  "native": "native/065ff8f42752cb0e6e2b7642.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

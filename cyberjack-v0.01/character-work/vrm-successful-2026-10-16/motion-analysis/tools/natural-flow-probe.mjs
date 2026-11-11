@@ -1,0 +1,3 @@
+import fs from'node:fs';import{commandBootstrap,planCharacterCommand}from'./command-planner.mjs';
+const demos=JSON.parse(fs.readFileSync('data/support-demos.json'));
+for(const clip of ['sit','bow']){const state=commandBootstrap();state.profile.supportMode='whole-body';const intent=demos[clip],result=await planCharacterCommand({text:intent.summary,state},{interpret:async()=>intent});fs.writeFileSync('artifacts/natural-flow/'+clip+'-after.json',JSON.stringify(result));console.log(clip,result.status,result.steps.map(s=>({motion:s.motion?.source?.name,seconds:s.duration,reason:s.reason,contactError:s.wholeBody?.maxContactErrorMeters})));}

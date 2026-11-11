@@ -1,0 +1,12 @@
+{
+  "id": "55818032371b32a50811a9cf",
+  "name": "o_ks_m03bench00_00",
+  "kind": "furniture",
+  "source": "map/scene/harbor.unity3d",
+  "sourceIdentity": "BuildPlayer-Harbor:839",
+  "native": "native/55818032371b32a50811a9cf.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/o_ks_m03bench00_00-55818032371b32a50811a9cf.glb"
+}

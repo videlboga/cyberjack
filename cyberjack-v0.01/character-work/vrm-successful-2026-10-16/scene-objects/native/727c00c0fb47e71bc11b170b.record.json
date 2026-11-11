@@ -1,0 +1,11 @@
+{
+  "id": "727c00c0fb47e71bc11b170b",
+  "name": "nagaisu_00_kind (2)",
+  "kind": "furniture",
+  "source": "map/scene/gassyukuoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuOutside:170",
+  "native": "native/727c00c0fb47e71bc11b170b.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

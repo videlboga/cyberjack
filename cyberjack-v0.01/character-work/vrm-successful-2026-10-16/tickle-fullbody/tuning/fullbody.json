@@ -1,0 +1,26 @@
+{
+  "sources": {
+    "Proelss2022": {
+      "title": "The human tickle response and mechanisms of self-tickle suppression",
+      "doi": "10.1098/rstb.2021.0185",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9489287/"
+    },
+    "Kilteni2025": {
+      "title": "The extraordinary enigma of ordinary tickle behavior: Why gargalesis still puzzles neuroscience",
+      "doi": "10.1126/sciadv.adt0350",
+      "url": "https://science.org/doi/10.1126/sciadv.adt0350"
+    }
+  },
+  "parameters": {
+    "face.latency_ms": {"value": [294, 316], "evidence": "direct", "source": "Proelss2022", "note": "AU06=294 ms, AU12=316 ms; в аниме-голове happy — стилизованный proxy для AU06+AU12, не точный FACS"},
+    "breath.latency_ms": {"value": 317, "evidence": "direct", "source": "Proelss2022", "note": "окружность грудной клетки; Tickle_Breath — авторская геометрическая реализация канала"},
+    "voice.latency_ms": {"value": 534, "evidence": "direct", "source": "Proelss2022", "note": "начало вокализации; прототип анимирует рот, аудио не синтезирует"},
+    "motor.local_latency_ms": {"value": 40, "evidence": "authored", "note": "для пальцев/стопы в Proelss2022 не измерялось"},
+    "motor.body_latency_multiplier": {"value": 2.25, "evidence": "authored", "note": "отдельная проксимальная задержка для читаемости; не физиологическая константа"},
+    "self_touch.suppression": {"value": 0.30, "evidence": "hypothesis", "source": "Proelss2022", "note": "подавление при self-touch измерено; коэффициент для ожидаемого чужого контакта — допущение"},
+    "body.qualitative_response": {"value": ["stiffening", "withdrawal", "smiling", "laughing"], "evidence": "direct_qualitative", "source": "Kilteni2025", "note": "качественное описание gargalesis; углы и ритм процедурной анимации авторские"},
+    "zones.sensitivity": {"value": "08_sim profile", "evidence": "authored", "source": "Kilteni2025", "note": "единой научной карты щекотливости поверхности нет"},
+    "zones.motion_recipes": {"value": "zone-dependent foot/toe movement", "evidence": "authored", "note": "болевые withdrawal-рефлексы не используются как доказательство механики щекотки"},
+    "style.anime": {"value": "non-photorealistic morphs and proportions", "evidence": "authored", "note": "сохраняются каналы и порядок событий, а не фотометрия кожи или человеческие пропорции"}
+  }
+}

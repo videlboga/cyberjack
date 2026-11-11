@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {Matrix4,Vector3} from 'three';
+import {nativePalmCost} from './native-arm-retrieval.mjs';
+const t={height:1,m:{index:new Map([['cf_j_hand_R',0],['cf_j_middle01_R',1]])},betweenThighsPoint:()=>new Vector3(.1,0,0)};
+const pose=x=>[{world:new Matrix4()},{world:new Matrix4().makeTranslation(x,0,0)}];
+const goals=[{feature:'rightHandBetweenThighsDistance',max:.07}];
+const good=nativePalmCost(t,pose(.1),goals),bad=nativePalmCost(t,pose(-.1),goals);
+assert(good.cost<bad.cost);assert.equal(good.details[0].fingersAway,0);assert.equal(bad.details[0].fingersAway,1);
+assert.equal(nativePalmCost(t,pose(.1),[]).cost,0);
+console.log('PASS identical wrist position prefers palm and fingers toward contact; unrelated tasks unchanged');

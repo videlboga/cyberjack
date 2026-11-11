@@ -1,0 +1,6 @@
+import fs from'node:fs';import path from'node:path';import crypto from'node:crypto';
+// Recomputable canonical source frames. The key includes the rig and normalization
+// code; every read also checks source file stats and the library's content hash.
+export function createPoseStore(rig){const code=['../review/command-pose.mjs','../review/mix-core.mjs','./command-planner.mjs','./geometry.mjs'].map(p=>fs.readFileSync(new URL(p,import.meta.url),'utf8')).join('\n'),version=crypto.createHash('sha256').update(JSON.stringify(rig)+code).digest('hex').slice(0,20),directory=path.resolve(import.meta.dirname,'../artifacts/planner-cache',version);let initialized=false;
+ const file=key=>path.join(directory,crypto.createHash('sha256').update(key).digest('hex')+'.json');
+ return {read(key,stamp,sha256){try{const record=JSON.parse(fs.readFileSync(file(key),'utf8'));return record.stamp===stamp&&record.sha256===sha256&&Array.isArray(record.pose)?record.pose:null;}catch{return null;}},write(key,stamp,sha256,pose){try{if(!initialized){fs.mkdirSync(directory,{recursive:true});initialized=true;}const target=file(key),temp=target+'.'+process.pid+'.tmp';fs.writeFileSync(temp,JSON.stringify({stamp,sha256,pose}));fs.renameSync(temp,target);}catch{/* Cache I/O must not prevent planning. */}},version};}

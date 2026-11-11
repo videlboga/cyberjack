@@ -1,0 +1,12 @@
+{
+  "id": "dda8b08c011b9421889b0a88",
+  "name": "move_chair08",
+  "kind": "furniture",
+  "source": "map/scene/minsyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuLobby:246",
+  "native": "native/dda8b08c011b9421889b0a88.json.gz",
+  "nodes": 5,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/move_chair08-dda8b08c011b9421889b0a88.glb"
+}

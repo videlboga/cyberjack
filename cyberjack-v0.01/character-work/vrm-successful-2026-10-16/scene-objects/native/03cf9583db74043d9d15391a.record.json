@@ -1,0 +1,12 @@
+{
+  "id": "03cf9583db74043d9d15391a",
+  "name": "p_ks_r01_table01",
+  "kind": "furniture",
+  "source": "map/scene/estheticroom.unity3d",
+  "sourceIdentity": "BuildPlayer-EstheticRoom:139",
+  "native": "native/03cf9583db74043d9d15391a.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r01_table01-03cf9583db74043d9d15391a.glb"
+}

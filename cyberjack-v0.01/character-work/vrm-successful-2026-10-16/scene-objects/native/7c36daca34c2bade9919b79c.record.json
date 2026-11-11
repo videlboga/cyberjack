@@ -1,0 +1,11 @@
+{
+  "id": "7c36daca34c2bade9919b79c",
+  "name": "nagaisu_00_kimd (1)",
+  "kind": "furniture",
+  "source": "map/scene/hoteloutside.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelOutside:123",
+  "native": "native/7c36daca34c2bade9919b79c.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

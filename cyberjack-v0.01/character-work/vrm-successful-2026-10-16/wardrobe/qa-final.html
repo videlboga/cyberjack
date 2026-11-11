@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Гардероб · итоговая примерка</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0f1116;color:#e8e8ea;font:12px/1.3 system-ui,sans-serif}
+  #grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px}
+  figure{margin:0;background:#171a21;border-radius:10px;overflow:hidden}
+  figcaption{padding:7px 9px;color:#9fb;font-size:12px}
+  canvas{display:block;width:100%;height:auto}
+  #status{padding:8px 10px;color:#7a9;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="status">собираю гардероб…</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+import {Wardrobe} from './wardrobe.js';
+
+const W = 420, H = 560;
+const status = document.getElementById('status');
+const grid = document.getElementById('grid');
+const loader = new GLTFLoader();
+loader.register(p => new VRMLoaderPlugin(p));
+
+const PANELS = [
+  {label: 'полный комплект: куртка, шорты, чулки, ботинки, чокер', set: {
+    top: 'mira-00-kk-pufferlong-8400', bottom: 'mira-01-kk-cf-m-shorts-03-8591',
+    socks: 'mira-00-kk-ztoki-socks-02-00-ma-8780', shoes: 'mira-00-kk-m-cf-shoes-steampunk00-8900',
+    accessory: ['mira-00-kk-acs-chocker-belt-4760', 'mira-00-kk-acs-m-chocker-bell-4770']}},
+  {label: 'микс: топ из zipmod (вариант b) + шорты + ботинки', set: {
+    top: 'kk-tops-ofcard-b', bottom: 'mira-01-kk-cf-m-shorts-03-8591',
+    shoes: 'mira-00-kk-m-cf-shoes-steampunk00-8900'}},
+  {label: 'бельё: браузер + трусики', set: {
+    underwear_top: 'mira-00-kk-bra-lace-mat-8560', underwear_bottom: 'mira-00-kk-panties-highleg-mat-8660'}},
+  {label: 'платье anonep (одна вещь из двух частей)', set: {dress: 'mira-02-kk-cf-top-aonep-m-8372'}},
+  {label: 'только обувь и чулки (слоты независимы)', set: {
+    socks: 'mira-00-kk-ztoki-socks-02-00-ma-8780', shoes: 'mira-00-kk-m-cf-shoes-steampunk00-8900'}},
+  {label: 'без одежды — контроль', set: {}},
+];
+
+const POSE = {
+  hips: [0, 0.18, 0], spine: [0.1, 0, 0.06], chest: [0.05, 0, 0.03],
+  leftUpperArm: [0.05, 0, -0.62], rightUpperArm: [0.1, 0, 0.42],
+  leftLowerArm: [-0.55, 0, 0], rightLowerArm: [-0.3, 0, 0],
+  leftUpperLeg: [0.28, 0, 0.06], rightUpperLeg: [-0.12, 0, -0.05],
+  leftLowerLeg: [-0.4, 0, 0], rightLowerLeg: [-0.1, 0, 0],
+  head: [0.03, 0.15, 0],
+};
+
+const views = [];
+for (const panel of PANELS) {
+  const fig = document.createElement('figure');
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const cap = document.createElement('figcaption');
+  cap.textContent = panel.label;
+  fig.append(canvas, cap);
+  grid.append(fig);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x171a21);
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: true, preserveDrawingBuffer: true});
+  renderer.setSize(W, H, false);
+  const camera = new THREE.PerspectiveCamera(30, W / H, 0.1, 20);
+  camera.position.set(1.15, 1.02, 2.35);
+  camera.lookAt(0, 0.98, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+  const key = new THREE.DirectionalLight(0xffffff, 1.9); key.position.set(1.3, 2.3, 2.1); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x8899cc, 0.7); fill.position.set(-2.2, 1.4, 1.2); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0x99bbff, 0.9); rim.position.set(-1.4, 1.6, -2.0); scene.add(rim);
+  views.push({panel, scene, renderer, camera});
+}
+
+const summary = [];
+for (const view of views) {
+  const gltf = await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm');
+  const vrm = gltf.userData.vrm;
+  VRMUtils.removeUnnecessaryVertices(vrm.scene);
+  vrm.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  view.scene.add(vrm.scene);
+  const wardrobe = new Wardrobe(vrm);
+  await wardrobe.init('./wardrobe.json');
+  if (Object.keys(view.panel.set).length) await wardrobe.setOutfit(view.panel.set);
+  for (const [bone, [x, y, z]] of Object.entries(POSE)) {
+    const node = vrm.humanoid.getRawBoneNode(bone);
+    if (node) node.rotation.set(x, y, z);
+  }
+  vrm.scene.updateMatrixWorld(true);
+  view.renderer.render(view.scene, view.camera);
+  summary.push({label: view.panel.label, slots: Object.keys(wardrobe.state).length});
+  status.textContent = `готово ${summary.length}/${views.length}`;
+}
+
+status.textContent = 'готово · ' + summary.map(s => `${s.slots} слот(ов)`).join(' / ');
+window.__final = {ready: true, summary};
+window.__render = () => { for (const v of views) { v.scene.updateMatrixWorld(true); v.renderer.render(v.scene, v.camera); } };
+</script>
+</body>
+</html>

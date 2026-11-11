@@ -1,0 +1,12 @@
+{
+  "id": "d2f7309cdffcc92c500e42c6",
+  "name": "p_item_kibako",
+  "kind": "item",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:212924605435239225",
+  "native": "native/d2f7309cdffcc92c500e42c6.json.gz",
+  "nodes": 15,
+  "meshes": 10,
+  "skins": 0,
+  "model": "models/p_item_kibako-d2f7309cdffcc92c500e42c6.glb"
+}

@@ -1,0 +1,8 @@
+import fs from'node:fs';import assert from'node:assert/strict';import{poseTools}from'../review/command-pose.mjs';import{compileMotionIntent}from'./motion-intent.mjs';import{validateIntent}from'./command-language.mjs';import{legOnlyEdit}from'./arm-only-edit.mjs';
+const t=poseTools(JSON.parse(fs.readFileSync('data/mix-bank.json'))),state=JSON.parse(fs.readFileSync('artifacts/right-leg-raised-regression/request.json')).state;
+for(const side of ['left','right'])for(const description of ['Поднять '+(side==='left'?'левую':'правую')+' ножку','Приподнять конечность']){
+ const raw=compileMotionIntent({stages:[{description,query:'raise one leg while seated',legs:'raised',side}]},state,description),stage=validateIntent(raw).stages[0],local=legOnlyEdit(t,state,stage);assert.deepEqual(local.legOnly.sides,[side]);assert(local.constraints.every(c=>c.feature.startsWith(side)));assert(local.constraints.some(c=>c.feature===side+'FootHeight'));assert(local.constraints.find(c=>c.feature===side+'Knee').max<=28);
+}
+for(const description of ['Встать и поднять правую ногу','Поднять правую ногу и наклонить корпус']){const stage={description,constraints:[{feature:'rightFootHeight',min:.2,max:.5},{feature:'torsoInclination',min:80,max:100}],translation:[0,0],yaw:0};assert.equal(legOnlyEdit(t,state,stage).legOnly,undefined);}
+assert.throws(()=>compileMotionIntent({stages:[{description:'Поднять ногу',query:'raise leg',legs:'raised'}]},state,'Поднять ногу'));
+console.log('PASS explicit left/right semantics survives validation and paraphrase; straight knee retained; compound body requests are not reduced to a leg-only task');

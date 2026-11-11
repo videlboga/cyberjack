@@ -1,0 +1,16 @@
+{
+  "outfits": 4,
+  "gltf_errors": 0,
+  "textures_embedded": true,
+  "body_bindings_per_avatar": 138,
+  "two_and_three_participants": true,
+  "pause_shared_clock": true,
+  "packaged_portrait_matches_live": true,
+  "face_follows_body_rin_mira": true,
+  "culling_angles": 8,
+  "culling_parts_drawn_each_angle": 24,
+  "limitations": [
+    "Scene IK, attachment points, height corrections and contact alignment are not reconstructed.",
+    "Scene facial control is currently primary Rin/Mira only."
+  ]
+}

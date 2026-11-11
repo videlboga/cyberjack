@@ -1,0 +1,12 @@
+{
+  "id": "dec6c6a7d71e5cc61d00f870",
+  "name": "o_ks_r07_table00",
+  "kind": "furniture",
+  "source": "map/scene/minsyukumyroom.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuMyroom:42",
+  "native": "native/dec6c6a7d71e5cc61d00f870.json.gz",
+  "nodes": 4,
+  "meshes": 4,
+  "skins": 0,
+  "model": "models/o_ks_r07_table00-dec6c6a7d71e5cc61d00f870.glb"
+}

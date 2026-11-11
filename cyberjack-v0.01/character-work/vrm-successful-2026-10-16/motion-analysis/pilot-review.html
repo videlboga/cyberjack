@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Пилот VLM · 16 клипов · крупно</title>
+<style>
+ :root{color-scheme:dark}
+ body{margin:0;background:#0b0d11;color:#e8e8ea;font:14px/1.4 system-ui,sans-serif}
+ header{padding:16px 18px;background:#12161f;border-bottom:1px solid #222a38;position:sticky;top:0;z-index:5}
+ h1{margin:0 0 6px;font-size:18px}
+ header p{margin:0;color:#93a4bb}
+ .grid{display:grid;grid-template-columns:1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto}
+ .card{background:#12161f;border:1px solid #222a38;border-radius:12px;overflow:hidden}
+ .card.good{border-color:#2e5b3a} .card.soft{border-color:#5b502e} .card.bad{border-color:#5b2e2e}
+ .shots{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#0b0d11}
+ .shots figure{margin:0}
+ .shots img{display:block;width:100%;height:auto;cursor:zoom-in}
+ .shots figcaption{padding:4px 8px;color:#7f90a8;font-size:12px;background:#12161f}
+ .meta{padding:12px 14px}
+ .meta h3{margin:0 0 8px;font-size:15px;color:#9fe3ff}
+ .row{margin:3px 0;color:#c9d2de}
+ .note{margin:8px 0 4px;color:#ffd9a0}
+ .unc{margin:0;color:#8b98a8;font-size:12px}
+ #zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}
+ #zoom img{max-width:98vw;max-height:96vh}
+</style></head><body>
+<header>
+ <h1>Пилот разметки VLM · 16 клипов 100STYLE</h1>
+ <p>Два прогона на клип, модель gemma4:31b · согласие двух прогонов: 10 полное / 5 частичное / 1 на ревью ·
+ базовое движение угадано 5 из 16 · клик по листу — увеличить</p>
+</header>
+<div class="grid">
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-star-fw-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-star-fw-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-star-fw</h3>
+      <p class="row"><b>ожидалось:</b> walk &nbsp;·&nbsp; <b>VLM:</b> walk / walk
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.30 · силуэт 0.90 · экспозиция груди 0.00</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.3</p>
+      <p class="note">Персонаж совершает плавное движение вперед, имитирующее начало ходьбы или медленный шаг.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-star-fr-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-star-fr-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-star-fr</h3>
+      <p class="row"><b>ожидалось:</b> run &nbsp;·&nbsp; <b>VLM:</b> dance / dance
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.36 · силуэт 0.89 · экспозиция груди 0.87</p>
+      <p class="row"><b>аффект:</b> {'valence': 1, 'arousal': 1, 'control': 1} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Персонаж совершает плавные покачивания бедрами и разводит руки, что характерно для танцевального или кокетливого движения.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-star-id-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-star-id-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-star-id</h3>
+      <p class="row"><b>ожидалось:</b> idle &nbsp;·&nbsp; <b>VLM:</b> idle / idle
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.21 · силуэт 1.12 · экспозиция груди 0.95</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.1</p>
+      <p class="note">Персонаж стоит в статичной позе с разведенными руками, минимальные изменения положения между кадрами.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-aeroplane-fw-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-aeroplane-fw-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-aeroplane-fw</h3>
+      <p class="row"><b>ожидалось:</b> walk &nbsp;·&nbsp; <b>VLM:</b> dance / walk
+         &nbsp;·&nbsp; <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.40 · силуэт 0.73 · экспозиция груди 0.00</p>
+      <p class="row"><b>аффект:</b> {'valence': 1, 'arousal': 1, 'control': 1} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Плавные волнообразные движения корпусом и руками, напоминающие танец или разминку.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-aeroplane-fr-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-aeroplane-fr-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-aeroplane-fr</h3>
+      <p class="row"><b>ожидалось:</b> run &nbsp;·&nbsp; <b>VLM:</b> dance / dance
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.44 · силуэт 0.50 · экспозиция груди 0.34</p>
+      <p class="row"><b>аффект:</b> {'valence': 1, 'arousal': 1, 'control': 1} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Плавные волнообразные движения корпусом и руками, напоминающие элементы танца или разминки.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-aeroplane-id-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-aeroplane-id-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-aeroplane-id</h3>
+      <p class="row"><b>ожидалось:</b> idle &nbsp;·&nbsp; <b>VLM:</b> idle / idle
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.30 · силуэт 1.00 · экспозиция груди 0.95</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.1</p>
+      <p class="note">Персонаж стоит в статичной T-позе с минимальными колебаниями.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-armsabovehead-fw-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-armsabovehead-fw-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-armsabovehead-fw</h3>
+      <p class="row"><b>ожидалось:</b> walk &nbsp;·&nbsp; <b>VLM:</b> stretch / stretch
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.30 · силуэт 0.44 · экспозиция груди 0.96</p>
+      <p class="row"><b>аффект:</b> {'valence': 1, 'arousal': 1, 'control': 2} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Персонаж медленно поднимает руки вверх и слегка переносит вес с ноги на ногу, имитируя потягивание или разминку.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-armsabovehead-fr-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-armsabovehead-fr-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-armsabovehead-fr</h3>
+      <p class="row"><b>ожидалось:</b> run &nbsp;·&nbsp; <b>VLM:</b> stretch / struggle
+         &nbsp;·&nbsp; <b>согласие:</b> 0.50</p>
+      <p class="row"><b>замеры:</b> закрытость 0.41 · силуэт 0.48 · экспозиция груди 0.00</p>
+      <p class="row"><b>аффект:</b> {'valence': 1, 'arousal': 1, 'control': 1} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Персонаж потягивается, поднимая руки вверх и слегка прогибаясь в спине.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-armsabovehead-id-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-armsabovehead-id-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-armsabovehead-id</h3>
+      <p class="row"><b>ожидалось:</b> idle &nbsp;·&nbsp; <b>VLM:</b> stretch / stretch
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.34 · силуэт 0.46 · экспозиция груди 0.97</p>
+      <p class="row"><b>аффект:</b> {'valence': 1, 'arousal': 1, 'control': 2} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Персонаж стоит и медленно поднимает руки вверх, совершая потягивание.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-widelegs-fw-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-widelegs-fw-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-widelegs-fw</h3>
+      <p class="row"><b>ожидалось:</b> walk &nbsp;·&nbsp; <b>VLM:</b> walk / walk
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.35 · силуэт 0.60 · экспозиция груди 0.00</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.3</p>
+      <p class="note">Персонаж совершает обычную ходьбу вперед.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-widelegs-fr-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-widelegs-fr-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-widelegs-fr</h3>
+      <p class="row"><b>ожидалось:</b> run &nbsp;·&nbsp; <b>VLM:</b> walk / walk
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.36 · силуэт 0.64 · экспозиция груди 0.93</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.3</p>
+      <p class="note">Персонаж совершает несколько шагов вперед, переходя из бокового ракурса в фронтальный.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-widelegs-id-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-widelegs-id-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-widelegs-id</h3>
+      <p class="row"><b>ожидалось:</b> idle &nbsp;·&nbsp; <b>VLM:</b> walk / idle
+         &nbsp;·&nbsp; <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.28 · силуэт 0.65 · экспозиция груди 1.00</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.3</p>
+      <p class="note">Персонаж совершает шаги вперед, виден цикл походки.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-old-fw-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-old-fw-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-old-fw</h3>
+      <p class="row"><b>ожидалось:</b> walk &nbsp;·&nbsp; <b>VLM:</b> idle / idle
+         &nbsp;·&nbsp; <b>согласие:</b> 0.50</p>
+      <p class="row"><b>замеры:</b> закрытость 0.60 · силуэт 0.26 · экспозиция груди 0.90</p>
+      <p class="row"><b>аффект:</b> {'valence': -1, 'arousal': -1, 'control': -2} &nbsp;·&nbsp; <b>интенсивность:</b> 0.2</p>
+      <p class="note">Персонаж стоит в статичной позе с заведенными за спину руками (armbinder), голова опущена.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card bad">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-old-fr-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-old-fr-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-old-fr</h3>
+      <p class="row"><b>ожидалось:</b> run &nbsp;·&nbsp; <b>VLM:</b> struggle / transition
+         &nbsp;·&nbsp; <b>согласие:</b> 0.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.63 · силуэт 0.30 · экспозиция груди 0.00</p>
+      <p class="row"><b>аффект:</b> {'valence': -1, 'arousal': 1, 'control': -2} &nbsp;·&nbsp; <b>интенсивность:</b> 0.6</p>
+      <p class="note">Персонаж в армбиндере, пытается вырваться или изменить положение тела, наклоняясь вперед.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-old-id-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-old-id-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-old-id</h3>
+      <p class="row"><b>ожидалось:</b> idle &nbsp;·&nbsp; <b>VLM:</b> idle / idle
+         &nbsp;·&nbsp; <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.63 · силуэт 0.32 · экспозиция груди 0.81</p>
+      <p class="row"><b>аффект:</b> {'valence': -1, 'arousal': -1, 'control': -2} &nbsp;·&nbsp; <b>интенсивность:</b> 0.2</p>
+      <p class="note">Персонаж стоит в статичной, покорной позе с опущенной головой. Заметны минимальные колебания тела.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/100style-crouched-fw-pass1.png" alt="прогон 1"><figcaption>прогон 1</figcaption></figure>
+      <figure><img src="data/pilot-sheets/100style-crouched-fw-pass2.png" alt="прогон 2"><figcaption>прогон 2</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>100style-crouched-fw</h3>
+      <p class="row"><b>ожидалось:</b> walk &nbsp;·&nbsp; <b>VLM:</b> crouch / walk
+         &nbsp;·&nbsp; <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.57 · силуэт 0.29 · экспозиция груди 0.00</p>
+      <p class="row"><b>аффект:</b> {'valence': 0, 'arousal': 0, 'control': 0} &nbsp;·&nbsp; <b>интенсивность:</b> 0.4</p>
+      <p class="note">Персонаж плавно переходит из вертикального положения в полуприсед.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section></div>
+<div id="zoom"><img alt=""></div>
+<script>
+const z=document.getElementById('zoom'), zi=z.querySelector('img');
+document.querySelectorAll('.shots img').forEach(img=>img.addEventListener('click',()=>{zi.src=img.src;z.style.display='flex';}));
+z.addEventListener('click',()=>z.style.display='none');
+document.addEventListener('keydown',e=>{if(e.key==='Escape')z.style.display='none';});
+</script>
+</body></html>

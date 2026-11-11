@@ -1,0 +1,22 @@
+import {Vector3,Quaternion} from 'three';
+import {pack,constraintScore} from '../review/command-pose.mjs';
+import {worldToSource,sourceToWorld,supportObjects} from '../review/scene-supports.mjs';
+// A label is only a prior. Verify support-side clearance and the recorded arm
+// geometry before placing the whole pose against the actual vertical plane.
+export function selectWallSupport(t,state,stage,rows,sample,catalog){
+ const object=stage.object;if(object?.role!=='wall')return null;
+ const limbs=stage.support.contacts,side=limbs[0]==='rightHand'?'R':'L',normal=new Vector3(-Math.cos((state.yaw||0)*Math.PI/180),0,Math.sin((state.yaw||0)*Math.PI/180)),towards=normal.clone().negate(),scale=state.sceneScale||1;
+ const ranked=rows.filter(r=>{const f=r.features;return f&&f.hipHeight>.45&&f.torsoInclination<40&&f.leftFootHeight<.08&&f.rightFootHeight<.08&&f[(side==='L'?'left':'right')+'HandHeight']>.35;}).map(r=>({r,priority:/leaning on a wall/i.test(catalog.get(r.id)?.name||'')?-20:0})).sort((a,b)=>a.priority-b.priority||constraintScore(a.r.features,stage.constraints).cost-constraintScore(b.r.features,stage.constraints).cost);
+ let best=null,checked=0;const seen=new Set();for(const {r}of ranked){if(checked>=500)break;const key=r.id+':'+r.time;if(seen.has(key))continue;seen.add(key);checked++;try{
+ const src=sample(r),p=src.pose;t.limitJoints(p);t.m.fk(p);const shoulder=t.point(p,'arm00_'+side),hand=t.point(p,'hand_'+side),direction=hand.clone().sub(shoulder).setY(0);if(direction.length()<t.height*.12)continue;
+ direction.normalize();const angle=Math.atan2(towards.x,towards.z)-Math.atan2(direction.x,direction.z),q=new Quaternion().setFromAxisAngle(new Vector3(0,1,0),angle);p[0].p.applyQuaternion(q);p[0].q.premultiply(q);t.m.fk(p);
+ const plane=worldToSource([object.position[0]+object.size[0]/2+.025,0,object.position[2]],state),h=t.point(p,'hand_'+side),shift=new Vector3(...plane).sub(h);shift.y=-Math.min(t.point(p,'foot_L').y,t.point(p,'foot_R').y);p[0].p.add(shift);t.m.fk(p);
+ const basePosition=p[0].p.clone(),origin=worldToSource([0,0,0],state);let clear=false;for(const lateral of [0,.22,-.22]){const delta=new Vector3(...worldToSource([0,0,lateral],state)).sub(new Vector3(...origin));p[0].p.copy(basePosition).add(delta);t.m.fk(p);const collision=supportObjects(state.sceneObjects).filter(o=>o.enabled&&o.id!==object.id).some(o=>['hips','spine03','head','leg01_L','leg01_R','foot_L','foot_R'].some(n=>{const w=sourceToWorld(t.point(p,n).toArray(),state);return w.every((v,i)=>v>o.position[i]-o.size[i]/2-.035&&v<o.position[i]+o.size[i]/2+.035);}));if(!collision){clear=true;break;}}if(!clear)continue;
+ const hip=t.point(p,'hips'),height=t.point(p,'hand_'+side).y*scale;if(height<.6||height>1.3)continue;
+ const clearance=['hips','spine03','head','leg01_L','leg01_R','foot_L','foot_R'].map(n=>t.point(p,n).sub(t.point(p,'hand_'+side)).dot(normal));if(Math.min(...clearance)<t.height*.035)continue;
+ const contacts=[];let bad=false;for(const limb of limbs){const s=limb==='leftHand'?'L':'R',h=t.point(p,'hand_'+s),distance=Math.abs(h.clone().sub(t.point(p,'hand_'+side)).dot(normal));if(distance>.035){bad=true;break;}const point=h.clone().addScaledVector(normal,-.025/scale);contacts.push({id:'object_hand_'+s,joint:'hand_'+s,kind:'hand',objectId:object.id,label:(s==='L'?'левая':'правая')+' ладонь · '+object.label,anchor:h.toArray(),point:point.toArray(),normal:normal.toArray(),radii:[.035,.045],error:0});}if(bad)continue;
+ const features=t.features(p),quality=constraintScore(features,stage.constraints);if(quality.worst>.12)continue;const semantic=/leaning on a wall/i.test(src.source.name)?-2:0,score=quality.cost+semantic+Math.abs(hip.clone().sub(t.point(p,'hand_'+side)).dot(normal)/t.height-.24);
+ if(!best||score<best.score)best={score,status:'ready',description:stage.description,pose:pack(p),features,source:src.source,method:'Поза библиотеки с геометрически проверенной вертикальной опорой',constraints:stage.constraints,duration:stage.duration,translation:stage.translation,yaw:stage.yaw,objectContacts:contacts,supportSelection:{kind:'vertical-plane',checked,sourcePreserved:true,labelEvidence:/wall/i.test(src.source.name),clearance:Math.min(...clearance)}};
+ }catch{}}
+ if(best){delete best.score;best.supportSelection.checked=checked;return best;}return {status:'unresolved',description:stage.description,reason:'В проверенной выборке не найдена поза с подходящей вертикальной опорой; процедурная постановка руки не подставлена',constraints:stage.constraints};
+}

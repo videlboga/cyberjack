@@ -1,0 +1,11 @@
+{
+  "id": "d2373d8a4fc8d2f86e4869f3",
+  "name": "senasi_nagaisu_00_kind (1)",
+  "kind": "furniture",
+  "source": "map/scene/minsyukuoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuOutside:26",
+  "native": "native/d2373d8a4fc8d2f86e4869f3.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

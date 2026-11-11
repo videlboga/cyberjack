@@ -1,0 +1,12 @@
+{
+  "id": "78e9af8052b5a23f5a7c991f",
+  "name": "p_ks_r14_bench00 (2)",
+  "kind": "furniture",
+  "source": "map/scene/beachkouisitu.unity3d",
+  "sourceIdentity": "BuildPlayer-BeachKouisitu:85",
+  "native": "native/78e9af8052b5a23f5a7c991f.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r14_bench00_2_-78e9af8052b5a23f5a7c991f.glb"
+}

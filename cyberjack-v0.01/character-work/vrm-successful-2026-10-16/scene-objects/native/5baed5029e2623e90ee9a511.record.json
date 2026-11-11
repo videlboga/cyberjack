@@ -1,0 +1,12 @@
+{
+  "id": "5baed5029e2623e90ee9a511",
+  "name": "p_ks_m04_chair00_00 (1)",
+  "kind": "furniture",
+  "source": "map/scene/beach.unity3d",
+  "sourceIdentity": "BuildPlayer-Beach:357",
+  "native": "native/5baed5029e2623e90ee9a511.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m04_chair00_00_1_-5baed5029e2623e90ee9a511.glb"
+}

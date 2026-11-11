@@ -1,0 +1,150 @@
+{
+  "format": "koikatsu-object-animation-links-v1",
+  "resolved": [
+    {
+      "table": "item_khs_f_n54",
+      "object": "p_item_ukiwa",
+      "animator": "khs_p_n54",
+      "controllers": [
+        "13f038f29bfaf08e07e00b14"
+      ],
+      "assets": [
+        {
+          "id": "13f038f29bfaf08e07e00b14",
+          "asset": "../animation-links/controllers/13f038f29bfaf08e07e00b14.json.gz",
+          "states": 96,
+          "clips": 546,
+          "resolvedClips": 546
+        }
+      ]
+    },
+    {
+      "table": "item_khs3_f_01",
+      "object": "p_item_hand",
+      "animator": "khs3_p_00",
+      "controllers": [
+        "d53479959915938b4ecfed76"
+      ],
+      "assets": [
+        {
+          "id": "d53479959915938b4ecfed76",
+          "asset": "../animation-links/controllers/d53479959915938b4ecfed76.json.gz",
+          "states": 96,
+          "clips": 492,
+          "resolvedClips": 492
+        }
+      ]
+    },
+    {
+      "table": "item_khs_f_n55",
+      "object": "p_item_dan_kotei",
+      "animator": "khs_p_n55",
+      "controllers": [
+        "1dec4ed5329e35ff7d4a7642"
+      ],
+      "assets": [
+        {
+          "id": "1dec4ed5329e35ff7d4a7642",
+          "asset": "../animation-links/controllers/1dec4ed5329e35ff7d4a7642.json.gz",
+          "states": 96,
+          "clips": 546,
+          "resolvedClips": 546
+        }
+      ]
+    },
+    {
+      "table": "item_kht_f_07",
+      "object": "p_item_rotor_L",
+      "animator": "kht_pL_07",
+      "controllers": [
+        "6adf9a74deab7378a7456d29"
+      ],
+      "assets": [
+        {
+          "id": "6adf9a74deab7378a7456d29",
+          "asset": "../animation-links/controllers/6adf9a74deab7378a7456d29.json.gz",
+          "states": 79,
+          "clips": 492,
+          "resolvedClips": 492
+        }
+      ]
+    },
+    {
+      "table": "item_kht_f_07",
+      "object": "p_item_rotor_R",
+      "animator": "kht_pR_07",
+      "controllers": [
+        "73bcd7fcb14e855ac89dd202"
+      ],
+      "assets": [
+        {
+          "id": "73bcd7fcb14e855ac89dd202",
+          "asset": "../animation-links/controllers/73bcd7fcb14e855ac89dd202.json.gz",
+          "states": 79,
+          "clips": 492,
+          "resolvedClips": 492
+        }
+      ]
+    },
+    {
+      "table": "item_khs_f_n53",
+      "object": "p_item_beach_ball",
+      "animator": "khs_p_n53",
+      "controllers": [
+        "1e360588a7ba8d1621e6be73"
+      ],
+      "assets": [
+        {
+          "id": "1e360588a7ba8d1621e6be73",
+          "asset": "../animation-links/controllers/1e360588a7ba8d1621e6be73.json.gz",
+          "states": 96,
+          "clips": 546,
+          "resolvedClips": 546
+        }
+      ]
+    },
+    {
+      "table": "item_khs3_f_00",
+      "object": "p_item_hand",
+      "animator": "khs3_p_00",
+      "controllers": [
+        "d53479959915938b4ecfed76"
+      ],
+      "assets": [
+        {
+          "id": "d53479959915938b4ecfed76",
+          "asset": "../animation-links/controllers/d53479959915938b4ecfed76.json.gz",
+          "states": 96,
+          "clips": 492,
+          "resolvedClips": 492
+        }
+      ]
+    },
+    {
+      "table": "item_kht_f_06",
+      "object": "p_item_dildo",
+      "animator": "kht_p_06",
+      "controllers": [
+        "6aa0f3d7cfc2db4744841261"
+      ],
+      "assets": [
+        {
+          "id": "6aa0f3d7cfc2db4744841261",
+          "asset": "../animation-links/controllers/6aa0f3d7cfc2db4744841261.json.gz",
+          "states": 79,
+          "clips": 492,
+          "resolvedClips": 492
+        }
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "table": "item_khh_f_61",
+      "object": "p_null",
+      "animator": "khh_p_61",
+      "controllers": [],
+      "assets": []
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "34289e8e058cda861f7414a5",
+  "name": "p_ks_m01_table00_00 (1)",
+  "kind": "furniture",
+  "source": "map/scene/minsyukuoutside.unity3d",
+  "sourceIdentity": "BuildPlayer-MinsyukuOutside:1529",
+  "native": "native/34289e8e058cda861f7414a5.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_m01_table00_00_1_-34289e8e058cda861f7414a5.glb"
+}

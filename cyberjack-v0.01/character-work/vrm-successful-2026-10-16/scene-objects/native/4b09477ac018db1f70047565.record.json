@@ -1,0 +1,12 @@
+{
+  "id": "4b09477ac018db1f70047565",
+  "name": "o_ks_r06_esthebed00.003",
+  "kind": "furniture",
+  "source": "map/scene/estheticroom.unity3d",
+  "sourceIdentity": "BuildPlayer-EstheticRoom:50",
+  "native": "native/4b09477ac018db1f70047565.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/o_ks_r06_esthebed00.003-4b09477ac018db1f70047565.glb"
+}

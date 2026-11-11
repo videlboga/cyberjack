@@ -1,0 +1,368 @@
+{
+  "file": {
+    "path": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/rin-kkbp-session-2026-10-14/Rin_KKBP_v1.vrm",
+    "bytes": 138685184,
+    "container": "glb",
+    "jsonBytes": 1861548,
+    "binBytes": 136823608
+  },
+  "vrm": {
+    "specFamily": "vrm1",
+    "specVersion": "1.0",
+    "exporterVersion": null
+  },
+  "meta": {
+    "allowAntisocialOrHateUsage": false,
+    "allowExcessivelySexualUsage": false,
+    "allowExcessivelyViolentUsage": false,
+    "allowPoliticalOrReligiousUsage": false,
+    "allowRedistribution": false,
+    "authors": [
+      "undefined"
+    ],
+    "avatarPermission": "onlyAuthor",
+    "commercialUsage": "personalNonProfit",
+    "creditNotation": "required",
+    "licenseUrl": "https://vrm.dev/licenses/1.0/",
+    "modification": "prohibited",
+    "name": "Рин",
+    "version": "undefined"
+  },
+  "humanoid": {
+    "mappedBoneCount": 51,
+    "bones": [
+      {
+        "bone": "chest",
+        "node": 734,
+        "nodeName": "Chest"
+      },
+      {
+        "bone": "head",
+        "node": 730,
+        "nodeName": "Head"
+      },
+      {
+        "bone": "hips",
+        "node": 736,
+        "nodeName": "Hips"
+      },
+      {
+        "bone": "leftFoot",
+        "node": 193,
+        "nodeName": "Left ankle"
+      },
+      {
+        "bone": "leftHand",
+        "node": 448,
+        "nodeName": "Left wrist"
+      },
+      {
+        "bone": "leftIndexDistal",
+        "node": 421,
+        "nodeName": "IndexFinger3_L"
+      },
+      {
+        "bone": "leftIndexIntermediate",
+        "node": 422,
+        "nodeName": "IndexFinger2_L"
+      },
+      {
+        "bone": "leftIndexProximal",
+        "node": 423,
+        "nodeName": "IndexFinger1_L"
+      },
+      {
+        "bone": "leftLittleDistal",
+        "node": 430,
+        "nodeName": "LittleFinger3_L"
+      },
+      {
+        "bone": "leftLittleIntermediate",
+        "node": 431,
+        "nodeName": "LittleFinger2_L"
+      },
+      {
+        "bone": "leftLittleProximal",
+        "node": 432,
+        "nodeName": "LittleFinger1_L"
+      },
+      {
+        "bone": "leftLowerArm",
+        "node": 449,
+        "nodeName": "Left elbow"
+      },
+      {
+        "bone": "leftLowerLeg",
+        "node": 204,
+        "nodeName": "Left knee"
+      },
+      {
+        "bone": "leftMiddleDistal",
+        "node": 435,
+        "nodeName": "MiddleFinger3_L"
+      },
+      {
+        "bone": "leftMiddleIntermediate",
+        "node": 436,
+        "nodeName": "MiddleFinger2_L"
+      },
+      {
+        "bone": "leftMiddleProximal",
+        "node": 437,
+        "nodeName": "MiddleFinger1_L"
+      },
+      {
+        "bone": "leftRingDistal",
+        "node": 440,
+        "nodeName": "RingFinger3_L"
+      },
+      {
+        "bone": "leftRingIntermediate",
+        "node": 441,
+        "nodeName": "RingFinger2_L"
+      },
+      {
+        "bone": "leftRingProximal",
+        "node": 442,
+        "nodeName": "RingFinger1_L"
+      },
+      {
+        "bone": "leftShoulder",
+        "node": 451,
+        "nodeName": "Left shoulder"
+      },
+      {
+        "bone": "leftThumbDistal",
+        "node": 444,
+        "nodeName": "Thumb2_L"
+      },
+      {
+        "bone": "leftThumbMetacarpal",
+        "node": 446,
+        "nodeName": "Thumb0_L"
+      },
+      {
+        "bone": "leftThumbProximal",
+        "node": 445,
+        "nodeName": "Thumb1_L"
+      },
+      {
+        "bone": "leftToes",
+        "node": 192,
+        "nodeName": "Left toe"
+      },
+      {
+        "bone": "leftUpperArm",
+        "node": 450,
+        "nodeName": "Left arm"
+      },
+      {
+        "bone": "leftUpperLeg",
+        "node": 205,
+        "nodeName": "Left leg"
+      },
+      {
+        "bone": "neck",
+        "node": 732,
+        "nodeName": "Neck"
+      },
+      {
+        "bone": "rightFoot",
+        "node": 243,
+        "nodeName": "Right ankle"
+      },
+      {
+        "bone": "rightHand",
+        "node": 520,
+        "nodeName": "Right wrist"
+      },
+      {
+        "bone": "rightIndexDistal",
+        "node": 493,
+        "nodeName": "IndexFinger3_R"
+      },
+      {
+        "bone": "rightIndexIntermediate",
+        "node": 494,
+        "nodeName": "IndexFinger2_R"
+      },
+      {
+        "bone": "rightIndexProximal",
+        "node": 495,
+        "nodeName": "IndexFinger1_R"
+      },
+      {
+        "bone": "rightLittleDistal",
+        "node": 502,
+        "nodeName": "LittleFinger3_R"
+      },
+      {
+        "bone": "rightLittleIntermediate",
+        "node": 503,
+        "nodeName": "LittleFinger2_R"
+      },
+      {
+        "bone": "rightLittleProximal",
+        "node": 504,
+        "nodeName": "LittleFinger1_R"
+      },
+      {
+        "bone": "rightLowerArm",
+        "node": 521,
+        "nodeName": "Right elbow"
+      },
+      {
+        "bone": "rightLowerLeg",
+        "node": 254,
+        "nodeName": "Right knee"
+      },
+      {
+        "bone": "rightMiddleDistal",
+        "node": 507,
+        "nodeName": "MiddleFinger3_R"
+      },
+      {
+        "bone": "rightMiddleIntermediate",
+        "node": 508,
+        "nodeName": "MiddleFinger2_R"
+      },
+      {
+        "bone": "rightMiddleProximal",
+        "node": 509,
+        "nodeName": "MiddleFinger1_R"
+      },
+      {
+        "bone": "rightRingDistal",
+        "node": 512,
+        "nodeName": "RingFinger3_R"
+      },
+      {
+        "bone": "rightRingIntermediate",
+        "node": 513,
+        "nodeName": "RingFinger2_R"
+      },
+      {
+        "bone": "rightRingProximal",
+        "node": 514,
+        "nodeName": "RingFinger1_R"
+      },
+      {
+        "bone": "rightShoulder",
+        "node": 523,
+        "nodeName": "Right shoulder"
+      },
+      {
+        "bone": "rightThumbDistal",
+        "node": 516,
+        "nodeName": "Thumb2_R"
+      },
+      {
+        "bone": "rightThumbMetacarpal",
+        "node": 518,
+        "nodeName": "Thumb0_R"
+      },
+      {
+        "bone": "rightThumbProximal",
+        "node": 517,
+        "nodeName": "Thumb1_R"
+      },
+      {
+        "bone": "rightToes",
+        "node": 242,
+        "nodeName": "Right toe"
+      },
+      {
+        "bone": "rightUpperArm",
+        "node": 522,
+        "nodeName": "Right arm"
+      },
+      {
+        "bone": "rightUpperLeg",
+        "node": 255,
+        "nodeName": "Right leg"
+      },
+      {
+        "bone": "spine",
+        "node": 735,
+        "nodeName": "Spine"
+      }
+    ],
+    "missingRequiredBones": []
+  },
+  "expressions": {
+    "presetCount": 18,
+    "presets": [
+      "aa",
+      "angry",
+      "blink",
+      "blinkLeft",
+      "blinkRight",
+      "ee",
+      "happy",
+      "ih",
+      "lookDown",
+      "lookLeft",
+      "lookRight",
+      "lookUp",
+      "neutral",
+      "oh",
+      "ou",
+      "relaxed",
+      "sad",
+      "surprised"
+    ],
+    "customCount": 0,
+    "customs": []
+  },
+  "geometry": {
+    "meshCount": 5,
+    "primitiveCount": 41,
+    "totalVertices": 75369,
+    "totalTriangles": 115248,
+    "perMesh": [
+      {
+        "name": "model.006",
+        "vertices": 720,
+        "triangles": 1188
+      },
+      {
+        "name": "model.005",
+        "vertices": 1162,
+        "triangles": 2052
+      },
+      {
+        "name": "model",
+        "vertices": 28292,
+        "triangles": 50820
+      },
+      {
+        "name": "model.003",
+        "vertices": 23931,
+        "triangles": 33486
+      },
+      {
+        "name": "model.001",
+        "vertices": 21264,
+        "triangles": 27702
+      }
+    ]
+  },
+  "textures": {
+    "imageCount": 0,
+    "totalImageBytes": 0,
+    "maxDimension": null,
+    "images": []
+  },
+  "materials": {
+    "materialCount": 41
+  },
+  "nodes": {
+    "nodeCount": 743,
+    "skinCount": 1,
+    "jointCount": 738
+  },
+  "hasThumbnail": false,
+  "extensionsUsed": [
+    "VRMC_vrm"
+  ]
+}

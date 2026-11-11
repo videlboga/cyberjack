@@ -1,0 +1,65 @@
+{
+ "_comment": "Параметры модели реакции и каналов. Поле evidence у каждого: direct / analogy / hypothesis / authored.",
+ "suppression_k": {
+  "value": 0.30,
+  "evidence": "hypothesis",
+  "note": "основано на прямых данных о подавлении при собственном прикосновении [Proelss 2022], но перенос на предсказание чужого контакта не измерен"
+ },
+ "area_response": {
+  "value": [0.60, 1.00],
+  "evidence": "authored",
+  "note": "амплитуда от площади контакта: 0.6 при точечном касании, 1.0 при полном покрытии зоны"
+ },
+ "expectedness": {
+  "rise_per_s": 1.6,
+  "decay_per_s": 0.9,
+  "hover_weight": 0.5,
+  "repeat_weight": 0.5,
+  "evidence": "hypothesis",
+  "note": "ожидание растёт от зависания над зоной и от повторных касаний той же зоны"
+ },
+ "channels": {
+  "motor": {
+   "median_ms": 40,
+   "jitter": 0.50,
+   "evidence": "authored",
+   "note": "измерений задержки сгибания пальцев/стопы нет; диапазон 0-80 мс выбран как правдоподобный"
+  },
+  "face": {
+   "median_ms": 300,
+   "jitter": 0.25,
+   "evidence": "direct",
+   "ref": "Proelss et al. 2022 (мимика ~0.3 с)",
+   "note": "измерено для мимики, не для конечностей"
+  },
+  "breath": {
+   "median_ms": 300,
+   "jitter": 0.30,
+   "evidence": "direct",
+   "ref": "Proelss et al. 2022 (окружность грудной клетки ~0.3 с)",
+   "note": "измерено для дыхания"
+  },
+  "voice": {
+   "median_ms": 500,
+   "jitter": 0.30,
+   "evidence": "direct",
+   "ref": "Proelss et al. 2022 (вокализации ~0.5 с)",
+   "note": "измерено для вокализации"
+  }
+ },
+ "model": {
+  "adaptation_rate": {"value": 0.28, "evidence": "authored", "note": "взято из разобранного демо Tickling Studio как инженерное решение"},
+  "recovery_rate": {"value": 0.16, "evidence": "authored"},
+  "max_reduction": {"value": 0.70, "evidence": "authored"},
+  "rise_rate": {"value": 1.6, "evidence": "authored"},
+  "fall_rate": {"value": 0.45, "evidence": "authored"},
+  "load_threshold": {"value": 0.30, "evidence": "authored"},
+  "endurance_s": {"value": 12.0, "evidence": "authored", "note": "не физиология, а темп игры"},
+  "load_recovery_per_s": {"value": 0.07, "evidence": "authored"},
+  "sustained_gain": {"value": 0.35, "evidence": "authored"},
+  "adapted_at": {"value": 0.30, "evidence": "authored"},
+  "fatigued_at": {"value": 0.60, "evidence": "authored"},
+  "oversensitive_below": {"value": 0.10, "evidence": "authored"},
+  "oversensitive_sens": {"value": 0.80, "evidence": "authored"}
+ }
+}

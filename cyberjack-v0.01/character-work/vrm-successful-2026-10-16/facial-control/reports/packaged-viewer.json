@@ -1,0 +1,21 @@
+{
+  "result": {
+    "face": {
+      "Eye": 1,
+      "Eyebrow": 0,
+      "Mouth": 27,
+      "eyesOpen": 1,
+      "mouthOpen": 0.5,
+      "browStrength": 1,
+      "enabled": true,
+      "blink": false,
+      "character": "mira",
+      "meshes": 11
+    },
+    "shapes": 151,
+    "library": 56978,
+    "bad": []
+  },
+  "errors": [],
+  "outsideRequests": []
+}

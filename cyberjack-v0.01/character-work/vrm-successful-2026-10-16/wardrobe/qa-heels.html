@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Туфли: проверка посадки</title>
+<script type="importmap">{"imports":{"three":"../viewer/node_modules/three/build/three.module.js","three/addons/":"../viewer/node_modules/three/examples/jsm/"}}</script>
+<style>body{margin:0;background:#0b0d11;color:#ddd;font:13px system-ui}#g{display:flex;gap:12px;padding:12px}figure{margin:0;background:#141821;border-radius:10px;padding-bottom:8px}figcaption{padding:8px 10px;color:#9fd}canvas{display:block}#st{padding:8px 12px;color:#7a9;white-space:pre-wrap}</style>
+</head><body><div id="st">…</div><div id="g"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+const W=620,H=560, loader=new GLTFLoader(); loader.register(p=>new VRMLoaderPlugin(p));
+const gltf=await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm');
+const vrm=gltf.userData.vrm; VRMUtils.removeUnnecessaryVertices(vrm.scene);
+vrm.scene.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});
+const body=vrm.scene.getObjectByProperty('isSkinnedMesh',true);
+const shoes=(await new GLTFLoader().loadAsync('./items/kk/kk-strappy-heels.glb')).scene;
+shoes.traverse(o=>{ if(!o.isSkinnedMesh) return;
+  o.skeleton=body.skeleton; o.bindMatrix.copy(body.bindMatrix); o.bindMatrixInverse.copy(body.bindMatrixInverse);
+  o.frustumCulled=false;
+  const map=o.material.map;
+  o.material=new THREE.MeshStandardMaterial({map, roughness:0.5, metalness:0.35, side:THREE.DoubleSide});
+});
+
+const res=[];
+for (const heelDeg of [0, 25]) {
+  for (const b of ['leftFoot','rightFoot','leftToes','rightToes']) {
+    const n=vrm.humanoid.getRawBoneNode(b); if(!n) continue;
+    n.rotation.set(heelDeg*Math.PI/180*(b.includes('Foot')?1:0.5), 0, 0);
+  }
+  vrm.scene.updateMatrixWorld(true);
+  shoes.updateMatrixWorld(true);
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x141821);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,6), new THREE.MeshStandardMaterial({color:0x2b3040,roughness:0.95}));
+  floor.rotation.x=-Math.PI/2; scene.add(floor);
+  scene.add(vrm.scene); scene.add(shoes);
+  scene.add(new THREE.AmbientLight(0xffffff,1.4));
+  const k=new THREE.DirectionalLight(0xffffff,2.4); k.position.set(1.2,2.0,1.8); scene.add(k);
+  const f=new THREE.DirectionalLight(0xbfd0ff,1.1); f.position.set(-1.8,1.0,1.2); scene.add(f);
+  const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
+  const fig=document.createElement('figure'); const cap=document.createElement('figcaption');
+  cap.textContent=`стопа ${heelDeg}°`; fig.append(canvas,cap); document.getElementById('g').append(fig);
+  const r=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true}); r.setSize(W,H,false);
+  r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=1.1;
+  const cam=new THREE.PerspectiveCamera(32,W/H,0.02,20); cam.position.set(0.75,0.45,0.95); cam.lookAt(0,0.07,0);
+  r.render(scene,cam);
+  const bb=new THREE.Box3().setFromObject(shoes);
+  const ft=new THREE.Vector3(); vrm.humanoid.getRawBoneNode('leftFoot').getWorldPosition(ft);
+  const toe=new THREE.Vector3(); vrm.humanoid.getRawBoneNode('leftToes').getWorldPosition(toe);
+  res.push({heelDeg, shoe:[bb.min.y.toFixed(3),bb.max.y.toFixed(3)], ankle:[ft.y.toFixed(3)], toeY:[toe.y.toFixed(3)]});
+}
+document.getElementById('st').textContent=JSON.stringify(res,null,1);
+window.__heel={ready:true,res};
+</script></body></html>

@@ -1,0 +1,125 @@
+{
+  "base": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/vrm-successful-2026-10-16/character-factory/base-rigged.blend",
+  "head": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/vrm-successful-2026-10-16/character-factory/mira/work/exports/Mira-Anatomy.vrm",
+  "anatomy": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/vrm-successful-2026-10-16/character-factory/mira/anatomy-rig.js",
+  "rig_bones": 75,
+  "rig_deform_bones": 75,
+  "body_vertices": 13109,
+  "body_shape_keys": 48,
+  "weights": {
+    "weight_assignments": 30789,
+    "min_sum": 0.9999999999999998,
+    "max_sum": 1.0000000000000002,
+    "bones_with_weights": 71
+  },
+  "head_objects": {
+    "objects": [
+      {
+        "name": "Mira model",
+        "vertices": 2665,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_3",
+        "vertices": 242,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_6",
+        "vertices": 214,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_8",
+        "vertices": 179,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011927
+      },
+      {
+        "name": "Mira model_9",
+        "vertices": 247,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_1",
+        "vertices": 298,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_2",
+        "vertices": 90,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_4",
+        "vertices": 364,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_5",
+        "vertices": 364,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011944
+      },
+      {
+        "name": "Mira model_7",
+        "vertices": 179,
+        "shape_keys": 152,
+        "rest_delta_mm": 0.00011973
+      }
+    ],
+    "rest_max_delta_mm": 0.0001197320124506071
+  },
+  "zones": {
+    "method": "recomputed on calibrated full rest mesh",
+    "faces": 13098,
+    "marked_faces": 1043,
+    "zones": {
+      "heel": {
+        "faces": 54,
+        "area_cm2": 49.3
+      },
+      "ball": {
+        "faces": 37,
+        "area_cm2": 32.29
+      },
+      "toe_pad_2_5": {
+        "faces": 648,
+        "area_cm2": 65.19
+      },
+      "toe_pad_1": {
+        "faces": 151,
+        "area_cm2": 24.93
+      },
+      "instep": {
+        "faces": 97,
+        "area_cm2": 87.07
+      },
+      "arch_lateral": {
+        "faces": 26,
+        "area_cm2": 24.14
+      },
+      "arch_medial": {
+        "faces": 12,
+        "area_cm2": 12.35
+      },
+      "ankle_ring": {
+        "faces": 18,
+        "area_cm2": 15.07
+      }
+    },
+    "sensitivity_minmax": [
+      0.3625,
+      0.9
+    ],
+    "intertoe_faces": 133
+  },
+  "control": "Tickle_Control"
+}

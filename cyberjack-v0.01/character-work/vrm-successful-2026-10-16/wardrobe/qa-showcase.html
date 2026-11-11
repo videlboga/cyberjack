@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Витрина: шорты, колготки, носки, обувь, шея, голова — крупным планом</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0b0d11;color:#e8e8ea;font:13px/1.3 system-ui,sans-serif}
+  #grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
+  figure{margin:0;background:#141821;border-radius:10px;overflow:hidden}
+  figcaption{padding:8px 10px;color:#9fd;min-height:30px}
+  canvas{display:block;width:100%;height:auto}
+  #status{padding:10px 12px;color:#7a9;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="status">загрузка…</div>
+<div id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+
+const W = 560, H = 640;
+const status = document.getElementById('status');
+const grid = document.getElementById('grid');
+const loader = new GLTFLoader();
+loader.register(p => new VRMLoaderPlugin(p));
+
+// каждая панель — свой кадр: смотрим на тот участок, о котором речь
+const PANELS = [
+  {label: 'шорты (hot pants)', items: ['kk-hotpants'], target: [0, 0.97, 0], dist: 0.95, elev: 0.15},
+  {label: 'колготки + туфли', items: ['kk-pantyhose', 'kk-strappy-heels'], target: [0, 0.5, 0], dist: 2.0, elev: 0.1},
+  {label: 'гольфы до колена + туфли', items: ['kk-line-socks', 'kk-strappy-heels'], target: [0, 0.35, 0], dist: 1.5, elev: 0.12},
+  {label: 'туфли крупным планом', items: ['kk-strappy-heels'], target: [0, 0.06, 0], dist: 0.75, elev: 0.18},
+  {label: 'шляпа + воротник на шею', items: ['kk-tophat', 'kk-collar'], target: [0, 1.5, 0], dist: 0.85, elev: 0.08},
+  {label: 'всё вместе', items: ['kk-tophat', 'kk-collar', 'kk-hotpants', 'kk-pantyhose', 'kk-strappy-heels'], target: [0, 0.85, 0], dist: 3.1, elev: 0.06},
+];
+
+const POSE = {
+  hips: [0, 0.1, 0], spine: [0.05, 0, 0.03], chest: [0.03, 0, 0.02],
+  leftUpperArm: [0.05, 0, -0.58], rightUpperArm: [0.1, 0, 0.38],
+  leftLowerArm: [-0.45, 0, 0], rightLowerArm: [-0.25, 0, 0],
+  leftUpperLeg: [0.14, 0, 0.05], rightUpperLeg: [-0.08, 0, -0.04],
+  leftLowerLeg: [-0.16, 0, 0], rightLowerLeg: [-0.04, 0, 0],
+};
+
+function litMaterial(src) {
+  const map = src.map || null;
+  const m = new THREE.MeshStandardMaterial({
+    map, color: src.color ? src.color.clone() : new THREE.Color(0xffffff),
+    roughness: 0.75, metalness: 0.0, side: THREE.DoubleSide,
+    transparent: !!src.transparent || (src.alphaTest > 0),
+    alphaTest: src.alphaTest || 0, opacity: src.opacity ?? 1,
+  });
+  if (map) map.colorSpace = THREE.SRGBColorSpace;
+  return m;
+}
+
+const views = [];
+for (const panel of PANELS) {
+  const fig = document.createElement('figure');
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const cap = document.createElement('figcaption'); cap.textContent = panel.label;
+  fig.append(canvas, cap); grid.append(fig);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x141821);
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: true, preserveDrawingBuffer: true});
+  renderer.setSize(W, H, false);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  // пол, чтобы обувь читалась
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8),
+    new THREE.MeshStandardMaterial({color: 0x2b3040, roughness: 0.95}));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -0.02; scene.add(floor);
+
+  const [tx, ty, tz] = panel.target;
+  const camera = new THREE.PerspectiveCamera(32, W / H, 0.05, 40);
+  camera.position.set(panel.dist * 0.42, ty + panel.dist * panel.elev + 0.02, panel.dist);
+  camera.lookAt(tx, ty, tz);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+  const key = new THREE.DirectionalLight(0xffffff, 2.6); key.position.set(1.6, ty + 2.4, 2.2); scene.add(key);
+  const fill = new THREE.DirectionalLight(0xbfd0ff, 1.2); fill.position.set(-2.0, ty + 1.2, 1.4); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xdde8ff, 1.0); rim.position.set(-1.0, ty + 1.8, -2.2); scene.add(rim);
+  views.push({panel, scene, renderer, camera});
+}
+
+const summary = [];
+for (const view of views) {
+  const gltf = await loader.loadAsync('../characters/mira/Mira_outfit_03.vrm');
+  const vrm = gltf.userData.vrm;
+  VRMUtils.removeUnnecessaryVertices(vrm.scene);
+  vrm.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  view.scene.add(vrm.scene);
+  const body = vrm.scene.getObjectByProperty('isSkinnedMesh', true);
+  const loaded = [];
+  for (const id of view.panel.items) {
+    const gl = await new GLTFLoader().loadAsync(`./items/kk/${id}.glb`);
+    gl.scene.traverse(o => {
+      if (!o.isSkinnedMesh) return;
+      o.skeleton = body.skeleton;
+      o.bindMatrix.copy(body.bindMatrix);
+      o.bindMatrixInverse.copy(body.bindMatrixInverse);
+      o.frustumCulled = false;
+      o.material = Array.isArray(o.material) ? o.material.map(litMaterial) : litMaterial(o.material);
+    });
+    view.scene.add(gl.scene);
+    const mesh = gl.scene.getObjectByProperty('isSkinnedMesh', true);
+    loaded.push({id, verts: mesh.geometry.attributes.position.count,
+                 textured: !!mesh.material.map});
+  }
+  for (const [bone, [x, y, z]] of Object.entries(POSE)) {
+    const node = vrm.humanoid.getRawBoneNode(bone);
+    if (node) node.rotation.set(x, y, z);
+  }
+  vrm.scene.updateMatrixWorld(true);
+  view.renderer.render(view.scene, view.camera);
+  summary.push({label: view.panel.label, items: loaded});
+  status.textContent = `готово ${summary.length}/${views.length}`;
+}
+
+status.textContent = 'готово · ' + summary.map(s => s.items.filter(i => i.textured).length + '/' + s.items.length).join(' · ');
+window.__show = {ready: true, summary};
+window.__render = () => { for (const v of views) { v.scene.updateMatrixWorld(true); v.renderer.render(v.scene, v.camera); } };
+</script>
+</body>
+</html>

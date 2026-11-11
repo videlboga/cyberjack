@@ -1,0 +1,30 @@
+{
+  "counts": {
+    "objects": 22,
+    "placements": 112,
+    "furniture": 389,
+    "furnitureModels": 254,
+    "maps": 31,
+    "textures": 140,
+    "sources": 44
+  },
+  "errors": [],
+  "previewVectorsNormalized": 10,
+  "animatedItemRows": 9,
+  "unresolvedAnimatorRows": [
+    {
+      "table": "item_khh_f_61",
+      "object": "p_null",
+      "animator": "khh_p_61",
+      "controllers": [],
+      "assets": []
+    }
+  ],
+  "mapInteractions": 396,
+  "propModels": 19,
+  "helperRootsWithoutGeometry": [
+    "p_item_hand",
+    "p_null",
+    "p_item_dan_kotei"
+  ]
+}

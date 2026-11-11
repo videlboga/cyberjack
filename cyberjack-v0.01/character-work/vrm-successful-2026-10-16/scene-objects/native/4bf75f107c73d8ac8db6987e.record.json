@@ -1,0 +1,12 @@
+{
+  "id": "4bf75f107c73d8ac8db6987e",
+  "name": "p_ks_r08_table01",
+  "kind": "furniture",
+  "source": "map/scene/gassyukulobby.unity3d",
+  "sourceIdentity": "BuildPlayer-GassyukuLobby:432",
+  "native": "native/4bf75f107c73d8ac8db6987e.json.gz",
+  "nodes": 1,
+  "meshes": 1,
+  "skins": 0,
+  "model": "models/p_ks_r08_table01-4bf75f107c73d8ac8db6987e.glb"
+}

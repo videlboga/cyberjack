@@ -1,0 +1,11 @@
+{
+  "id": "958ec77d2aa83ac91ef13549",
+  "name": "senasi_isu_00_kind (3)",
+  "kind": "furniture",
+  "source": "map/scene/hotelkouisitu.unity3d",
+  "sourceIdentity": "BuildPlayer-HotelKouisitu:51",
+  "native": "native/958ec77d2aa83ac91ef13549.json.gz",
+  "nodes": 1,
+  "meshes": 0,
+  "skins": 0
+}

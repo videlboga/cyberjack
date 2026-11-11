@@ -1,0 +1,12 @@
+{
+  "id": "c40b904c60202b8918a3742f",
+  "name": "o_ks_r01_table03",
+  "kind": "furniture",
+  "source": "map/scene/hukuya.unity3d",
+  "sourceIdentity": "BuildPlayer-Hukuya:189",
+  "native": "native/c40b904c60202b8918a3742f.json.gz",
+  "nodes": 9,
+  "meshes": 9,
+  "skins": 0,
+  "model": "models/o_ks_r01_table03-c40b904c60202b8918a3742f.glb"
+}

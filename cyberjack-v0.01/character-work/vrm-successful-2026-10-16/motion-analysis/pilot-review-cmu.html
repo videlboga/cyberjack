@@ -1,0 +1,218 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Пилот VLM · не-походки (CMU) · крупно</title>
+<style>
+ :root{color-scheme:dark} body{margin:0;background:#0b0d11;color:#e8e8ea;font:14px/1.4 system-ui}
+ header{padding:16px 18px;background:#12161f;border-bottom:1px solid #222a38;position:sticky;top:0;z-index:5}
+ h1{margin:0 0 6px;font-size:18px} header p{margin:0;color:#93a4bb}
+ .grid{display:grid;grid-template-columns:1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto}
+ .card{background:#12161f;border:1px solid #222a38;border-radius:12px;overflow:hidden}
+ .card.good{border-color:#2e5b3a} .card.soft{border-color:#5b502e} .card.bad{border-color:#5b2e2e}
+ .shots{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#0b0d11}
+ .shots figure{margin:0} .shots img{display:block;width:100%;height:auto;cursor:zoom-in}
+ .shots figcaption{padding:4px 8px;color:#7f90a8;font-size:12px}
+ .meta{padding:12px 14px} .meta h3{margin:0 0 8px;font-size:15px;color:#9fe3ff}
+ .row{margin:3px 0;color:#c9d2de} .note{margin:8px 0 4px;color:#ffd9a0} .unc{margin:0;color:#8b98a8;font-size:12px}
+ #zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}
+ #zoom img{max-width:98vw;max-height:96vh}
+</style></head><body>
+<header><h1>Пилот VLM · не-походки: 13 клипов CMU (сидение, присед, наклоны, танец, жест)</h1>
+<p>9 кадров на прогон · согласие 7 полное / 5 частичное / 1 на ревью · клик по листу — увеличить</p></header>
+<div class="grid">
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-13-01-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-13-01-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-13-01 · CMU · 13_01 (sit on high stool, stand up)</h3>
+      <p class="row"><b>VLM:</b> idle / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.41 · силуэт 0.45</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Персонаж стоит в спокойной позе с минимальными смещениями веса тела, характерными для анимации ожидания (idle).</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card bad">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-13-02-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-13-02-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-13-02 · CMU · 13_02 (sit on high stool, stand up)</h3>
+      <p class="row"><b>VLM:</b> frogtie / crouch
+        · <b>поза:</b> crouching · <b>согласие:</b> 0.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.39 · силуэт 0.44</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Персонаж зафиксирован в позе 'лягушки' с разведенными коленями, наблюдается легкое покачивание.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-13-01-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-13-01-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-13-01 · CMU · 13_01 (sit on high stool, stand up)</h3>
+      <p class="row"><b>VLM:</b> idle / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.41 · силуэт 0.45</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Персонаж стоит в статичной позе с минимальными колебаниями корпуса, характерными для idle-анимации.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-13-02-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-13-02-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-13-02 · CMU · 13_02 (sit on high stool, stand up)</h3>
+      <p class="row"><b>VLM:</b> dance / idle
+        · <b>поза:</b> standing · <b>согласие:</b> 0.50</p>
+      <p class="row"><b>замеры:</b> закрытость 0.39 · силуэт 0.44</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Циклическое движение ногой, напоминающее элемент танца или разминки.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-88-08-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-88-08-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-88-08 · CMU · 88_08 (crouch and flip backward on hands)</h3>
+      <p class="row"><b>VLM:</b> transition / dance
+        · <b>поза:</b> standing · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.36 · силуэт 0.57</p>
+      <p class="row"><b>фазы:</b> start[0-1]</p>
+      <p class="note">Персонаж поднимается из перевернутого положения (акробатический элемент или падение) в вертикальное положение стоя.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-22-03-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-22-03-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-22-03 · CMU · 22_03 (A sits, holds face in hands; B kneels, comforts A (2 subject)</h3>
+      <p class="row"><b>VLM:</b> sit / sit
+        · <b>поза:</b> seated · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.59 · силуэт 0.25</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Персонаж находится в статичном сидячем положении с минимальными колебаниями позы.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-23-03-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-23-03-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-23-03 · CMU · 23_03 (A sits, holds face in hands; B kneels, comforts A (2 subject)</h3>
+      <p class="row"><b>VLM:</b> dance / jump
+        · <b>поза:</b> standing · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.43 · силуэт 0.53</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Плавные движения бедрами и руками, напоминающие танец или кокетливое движение.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-120-01-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-120-01-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-120-01 · CMU · 120_01 (Alien Turn)</h3>
+      <p class="row"><b>VLM:</b> dance / dance
+        · <b>поза:</b> standing · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.57 · силуэт 0.47</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Плавные покачивания бедрами и движение корпуса, характерные для танца или кокетливого перемещения.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-26-09-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-26-09-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-26-09 · CMU · 26_09 (bend, pick up)</h3>
+      <p class="row"><b>VLM:</b> stand_up / stand_up
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.45 · силуэт 0.22</p>
+      <p class="row"><b>фазы:</b> start[0-1]</p>
+      <p class="note">Персонаж поднимается из глубокого приседа в вертикальное положение.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card soft">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-13-26-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-13-26-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-13-26 · CMU · 13_26 (direct traffic, wave)</h3>
+      <p class="row"><b>VLM:</b> stretch / dance
+        · <b>поза:</b> standing · <b>согласие:</b> 0.75</p>
+      <p class="row"><b>замеры:</b> закрытость 0.29 · силуэт 0.39</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Персонаж потягивается, поднимая руки вверх и разводя их в стороны.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-13-27-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-13-27-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-13-27 · CMU · 13_27 (direct traffic, wave, point)</h3>
+      <p class="row"><b>VLM:</b> stretch / stretch
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.28 · силуэт 0.39</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Персонаж потягивается, поднимая руку вверх и прогибая спину.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-05-02-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-05-02-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-05-02 · CMU · 05_02 (dance - expressive arms, pirouette)</h3>
+      <p class="row"><b>VLM:</b> dance / dance
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.31 · силуэт 0.49</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Плавные танцевальные движения корпусом и руками, смена поз в ритме.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section>
+  <section class="card good">
+    <div class="shots">
+      <figure><img src="data/pilot-sheets/cmu-05-03-pass1.png"><figcaption>прогон 1 · 9 кадров</figcaption></figure>
+      <figure><img src="data/pilot-sheets/cmu-05-03-pass2.png"><figcaption>прогон 2 · 9 кадров</figcaption></figure>
+    </div>
+    <div class="meta">
+      <h3>cmu-05-03 · CMU · 05_03 (dance - sideways arabesque, turn step, folding arms)</h3>
+      <p class="row"><b>VLM:</b> dance / dance
+        · <b>поза:</b> standing · <b>согласие:</b> 1.00</p>
+      <p class="row"><b>замеры:</b> закрытость 0.39 · силуэт 0.61</p>
+      <p class="row"><b>фазы:</b> loop[0-1]</p>
+      <p class="note">Плавные волнообразные движения телом и руками, характерные для танца или экспрессивного движения.</p>
+      <p class="unc">Не определено: —</p>
+    </div>
+  </section></div><div id="zoom"><img></div>
+<script>const z=document.getElementById('zoom'),zi=z.querySelector('img');
+document.querySelectorAll('.shots img').forEach(i=>i.addEventListener('click',()=>{zi.src=i.src;z.style.display='flex';}));
+z.addEventListener('click',()=>z.style.display='none');document.addEventListener('keydown',e=>{if(e.key==='Escape')z.style.display='none';});</script>
+</body></html>

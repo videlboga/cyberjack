@@ -1,0 +1,26 @@
+{
+  "filters": {
+    "duplicateAll": "1875 из 56978 клипов",
+    "duplicateFiltered": "1649 из 56978 клипов",
+    "all": "228 из 56978 клипов",
+    "unique": "228 из 56978 клипов",
+    "dedupeEnabled": true,
+    "rows": 30,
+    "first": "f_suwari_00_00_L · 12.83 с · female"
+  },
+  "result": {
+    "state": {
+      "pose": "aa2a92e2db65f21d9bc1b29d",
+      "clipTime": 1,
+      "playing": false,
+      "physicsEnabled": true,
+      "collisionsEnabled": true,
+      "bindings": 138
+    },
+    "catalogClips": 56978,
+    "complete": true,
+    "bad": []
+  },
+  "errors": [],
+  "outsideRequests": []
+}

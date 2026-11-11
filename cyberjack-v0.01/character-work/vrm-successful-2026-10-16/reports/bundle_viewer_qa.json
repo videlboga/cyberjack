@@ -1,0 +1,14 @@
+{
+  "state": {
+    "ready": true,
+    "model": "Mira_outfit_00.vrm",
+    "character": "mira",
+    "retarget": {
+      "boundBones": 138,
+      "sourceBones": 565,
+      "coreBound": true
+    }
+  },
+  "errors": [],
+  "outsideRequests": []
+}

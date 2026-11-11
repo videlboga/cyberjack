@@ -1,0 +1,16 @@
+{
+  "bones_keyed": 40,
+  "bone_fcurves": 280,
+  "face_fcurves": 20,
+  "frames": 120,
+  "actions": [
+    "Tickle_Face_Demo",
+    "Tickle_FullBody_Demo",
+    "Tickle_ToolAction"
+  ],
+  "head_delta_mm": 10.8,
+  "knee_delta_mm": 51.4,
+  "toe_delta_mm": 68.5,
+  "breath_at_90": 0.444,
+  "pass": true
+}

@@ -1,0 +1,272 @@
+{
+  "results": {
+    "kai": {
+      "state": {
+        "mode": "all",
+        "filter": "all",
+        "groups": [
+          {
+            "id": "body",
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "physics",
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "manual-face",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "face-section",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "speech",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "tongue",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "performance",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "links",
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "participants",
+            "supported": false,
+            "blocked": true,
+            "hidden": false
+          },
+          {
+            "id": "scene-face",
+            "supported": false,
+            "blocked": true,
+            "hidden": false
+          },
+          {
+            "id": "pair",
+            "supported": false,
+            "blocked": true,
+            "hidden": false
+          },
+          {
+            "id": "linked-tongue-cycle",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          },
+          {
+            "id": "linked-example",
+            "supported": false,
+            "blocked": false,
+            "hidden": false
+          }
+        ]
+      },
+      "faceDisabled": true,
+      "tongueDisabled": true,
+      "multiDisabled": true,
+      "reason": "Не поддерживается: для выбранной модели нет проверенного профиля. ручные паттерны глаз, бровей и рта"
+    },
+    "filtered": {
+      "mode": "all",
+      "filter": "compatible",
+      "groups": [
+        {
+          "id": "body",
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "physics",
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "manual-face",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "face-section",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "speech",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "tongue",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "performance",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "links",
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "participants",
+          "supported": false,
+          "blocked": true,
+          "hidden": true
+        },
+        {
+          "id": "scene-face",
+          "supported": false,
+          "blocked": true,
+          "hidden": true
+        },
+        {
+          "id": "pair",
+          "supported": false,
+          "blocked": true,
+          "hidden": true
+        },
+        {
+          "id": "linked-tongue-cycle",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "linked-example",
+          "supported": false,
+          "blocked": false,
+          "hidden": true
+        }
+      ]
+    },
+    "physics": {
+      "disabled": true,
+      "reason": "Физика выключена: столкновения не рассчитываются. Отладочный показ костей и коллайдеров доступен."
+    },
+    "owned": {
+      "disabled": true,
+      "reason": "Сейчас недоступно: лицо управляется сценой. Отключите «Лицо по игровым таблицам сцены» в режиме «Связанные сцены».",
+      "active": true
+    },
+    "released": {
+      "disabled": false,
+      "tongueDisabled": false,
+      "multiDisabled": false
+    },
+    "available": {
+      "mode": "face",
+      "filter": "available",
+      "groups": [
+        {
+          "id": "body",
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "physics",
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "manual-face",
+          "supported": true,
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "face-section",
+          "supported": true,
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "speech",
+          "supported": true,
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "tongue",
+          "supported": true,
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "performance",
+          "supported": true,
+          "blocked": false,
+          "hidden": false
+        },
+        {
+          "id": "links",
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "participants",
+          "supported": true,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "scene-face",
+          "supported": true,
+          "blocked": true,
+          "hidden": true
+        },
+        {
+          "id": "pair",
+          "supported": true,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "linked-tongue-cycle",
+          "supported": true,
+          "blocked": false,
+          "hidden": true
+        },
+        {
+          "id": "linked-example",
+          "supported": true,
+          "blocked": false,
+          "hidden": true
+        }
+      ]
+    },
+    "errorVisible": true,
+    "roleFilterOK": true,
+    "tongueOwned": true,
+    "tongueReleased": true
+  },
+  "errors": []
+}

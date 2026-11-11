@@ -1,0 +1,210 @@
+{
+  "zone_probe": {
+    "heel": {
+      "hit": true,
+      "expected": 0,
+      "actual": 0,
+      "pass": true
+    },
+    "arch_medial": {
+      "hit": true,
+      "expected": 1,
+      "actual": 1,
+      "pass": true
+    },
+    "arch_lateral": {
+      "hit": true,
+      "expected": 2,
+      "actual": 2,
+      "pass": true
+    },
+    "ball": {
+      "hit": true,
+      "expected": 3,
+      "actual": 3,
+      "pass": true
+    },
+    "toe_pad_1": {
+      "hit": true,
+      "expected": 4,
+      "actual": 4,
+      "pass": true
+    },
+    "toe_pad_2_5": {
+      "hit": true,
+      "expected": 5,
+      "actual": 5,
+      "pass": true
+    },
+    "instep": {
+      "hit": true,
+      "expected": 6,
+      "actual": 6,
+      "pass": true
+    },
+    "ankle_ring": {
+      "hit": true,
+      "expected": 7,
+      "actual": 7,
+      "pass": true
+    }
+  },
+  "samples": [
+    {
+      "t": 0.0,
+      "zone": null,
+      "character": "rest",
+      "stimulus": 0.0,
+      "local": 0.0,
+      "body": 0.0,
+      "face": 0.0,
+      "breath": 0.0,
+      "mouth": 0.0
+    },
+    {
+      "t": 1.0,
+      "zone": "arch_medial",
+      "character": "oversensitive",
+      "stimulus": 0.141,
+      "local": 0.0,
+      "body": 0.0,
+      "face": 0.0,
+      "breath": 0.0,
+      "mouth": 0.0
+    },
+    {
+      "t": 2.0,
+      "zone": "arch_medial",
+      "character": "fresh",
+      "stimulus": 0.57,
+      "local": 0.4675946773690886,
+      "body": 0.4675946773690886,
+      "face": 0.4675946773690886,
+      "breath": 0.24314632093193184,
+      "mouth": 0.17127832855957448
+    },
+    {
+      "t": 3.0,
+      "zone": "arch_medial",
+      "character": "adapted",
+      "stimulus": 0.51,
+      "local": 0.5191425450987741,
+      "body": 0.5191425450987741,
+      "face": 0.5191425450987741,
+      "breath": 0.30174391985466525,
+      "mouth": 0.4124553449891984
+    },
+    {
+      "t": 4.0,
+      "zone": null,
+      "character": "after_release",
+      "stimulus": 0.0,
+      "local": 0.4801043223158801,
+      "body": 0.4801043223158801,
+      "face": 0.4801043223158801,
+      "breath": 0.16726036401900815,
+      "mouth": 0.09059186763439125
+    },
+    {
+      "t": 5.0,
+      "zone": "ball",
+      "character": "fresh",
+      "stimulus": 0.135,
+      "local": 0.11235407619926945,
+      "body": 0.0,
+      "face": 0.0,
+      "breath": 0.0,
+      "mouth": 0.0
+    },
+    {
+      "t": 6.0,
+      "zone": "ball",
+      "character": "fresh",
+      "stimulus": 0.549,
+      "local": 0.5127309203923583,
+      "body": 0.5127309203923583,
+      "face": 0.5127309203923583,
+      "breath": 0.37158156864903064,
+      "mouth": 0.30647683083474264
+    },
+    {
+      "t": 7.0,
+      "zone": "ball",
+      "character": "fresh",
+      "stimulus": 0.494,
+      "local": 0.5197339821313565,
+      "body": 0.5197339821313565,
+      "face": 0.5197339821313565,
+      "breath": 0.5017167369666717,
+      "mouth": 0.14875919902837267
+    },
+    {
+      "t": 8.0,
+      "zone": null,
+      "character": "after_release",
+      "stimulus": 0.0,
+      "local": 0.47569494370021764,
+      "body": 0.47569494370021764,
+      "face": 0.47569494370021764,
+      "breath": 0.16572420981653027,
+      "mouth": 0.0897598529548042
+    },
+    {
+      "t": 9.0,
+      "zone": "toe_pad_1",
+      "character": "oversensitive",
+      "stimulus": 0.148,
+      "local": 0.0,
+      "body": 0.0,
+      "face": 0.0,
+      "breath": 0.0,
+      "mouth": 0.0
+    },
+    {
+      "t": 10.0,
+      "zone": "toe_pad_1",
+      "character": "fresh",
+      "stimulus": 0.597,
+      "local": 0.5530431944728826,
+      "body": 0.5530431944728826,
+      "face": 0.5530431944728826,
+      "breath": 0.5289125410872325,
+      "mouth": 0.5430407592414459
+    },
+    {
+      "t": 11.0,
+      "zone": "toe_pad_1",
+      "character": "adapted",
+      "stimulus": 0.533,
+      "local": 0.56256372263924,
+      "body": 0.56256372263924,
+      "face": 0.56256372263924,
+      "breath": 0.39544936525949215,
+      "mouth": 0.41244885687955263
+    },
+    {
+      "t": 12.0,
+      "zone": "toe_pad_1",
+      "character": "adapted",
+      "stimulus": 0.476,
+      "local": 0.5401956402380385,
+      "body": 0.5401956402380385,
+      "face": 0.5401956402380385,
+      "breath": 0.2081353417356627,
+      "mouth": 0.15166323947516241
+    }
+  ],
+  "errors": [],
+  "pass_zones": true,
+  "max_step_deg_per_frame": 5.904,
+  "right_foot_max_rotation_deg": 0.0,
+  "head_mesh_motion_mm": 8.748,
+  "face_mesh_motion_mm": 8.748,
+  "happy_max": 0.5665,
+  "mouth_max": 0.5659,
+  "breath_max": 0.5652,
+  "rig_bones": 75,
+  "expression_targets": 190,
+  "head_parts": 10,
+  "pass": true
+}

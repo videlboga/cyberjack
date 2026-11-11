@@ -1,0 +1,12 @@
+{
+  "before": 443,
+  "first": {
+    "open": true,
+    "scroll": 443,
+    "editor": true,
+    "keys": 41
+  },
+  "errors": [],
+  "tools": true,
+  "details": true
+}

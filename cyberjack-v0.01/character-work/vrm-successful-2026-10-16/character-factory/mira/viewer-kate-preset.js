@@ -1,0 +1,5 @@
+import {kateMouthTargetPreset} from './viewer-mouth-presets.js?v=mouth-transition-1';
+// Accepted mouth is the baseline; other features remain independently editable.
+export const kateFacePreset={...kateMouthTargetPreset,preserveTargetMouth:1,width:.1,length:-.12,cheeks:.4,cheekVolume:.6,jaw:.55,chinLength:-.85,chinWidth:1,chinRound:1,eyeSize:.65,eyeWidth:.95,eyeOpening:.2,eyeSpacing:.12,irisSize:-.45,innerEyeCorner:-.2,outerEyeCorner:.15,upperLid:.1,lowerLid:.15,browHeight:-.3,browArch:.9,browTilt:.05,browSpacing:-.2,noseWidth:.3,noseLength:.05,noseDepth:.7,noseTip:.7};
+export const kateAppearancePreset={skin:'#e6b19c',iris:'#858e53',brows:'#ad512d',freckles:.65,freckleSize:1.1,freckleDensity:.55,blush:.2,lips:0,lipColor:'#b9767d',lashColor:'#542b36',lashLength:.2,lashThickness:-.2,lashDensity:.5,irisTone:.85,irisHighlights:.65,browThickness:.9,noseShade:.5};
+export const kateFaceProject={format:'cyberjack-face',version:1,base:'mira-canonical-1',face:kateFacePreset,appearance:kateAppearancePreset};

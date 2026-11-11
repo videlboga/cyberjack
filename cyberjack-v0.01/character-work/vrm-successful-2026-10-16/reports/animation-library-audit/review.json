@@ -1,0 +1,28 @@
+{
+  "previousCatalogueClips": 54571,
+  "clipsMissingAtPreviousReadme": 2400,
+  "additionalVrRuntimeClips": 7,
+  "finalClips": 56978,
+  "findings": [
+    {
+      "issue": "README claimed complete=false was stale and coverage proved complete",
+      "correction": "Merged all completed scans and imported 2400 missing clips; scanned VR player data and imported another7; complete=true now follows finished workers and full inventory comparison."
+    },
+    {
+      "issue": "Duplicate filter removed global aliases before category/rig/name/source filters",
+      "correction": "Filter first, then choose a representative among matching clips; tested cross-category alias retention."
+    },
+    {
+      "issue": "Duplicate report had no catalogue freshness check or rig/object-reference context",
+      "correction": "SHA256 full clip except name plus rig/resolved binding layout and source scope for objects/events/PPtr; catalogue fingerprint; stale indices rejected or disabled. Every original remains."
+    },
+    {
+      "issue": "--exact used substring matching for untranslated terms",
+      "correction": "Exact equality now tested."
+    },
+    {
+      "issue": "Glossary claimed universal L/M/S body-size semantics and guessed ecg/khh/ptn meanings",
+      "correction": "Variant semantics marked unconfirmed; unknown codes kept; basic touch/knead/idle translations corrected. Descriptions explicitly lexical, not visually verified."
+    }
+  ]
+}

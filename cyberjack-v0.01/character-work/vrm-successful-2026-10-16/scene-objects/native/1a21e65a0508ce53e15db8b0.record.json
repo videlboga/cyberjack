@@ -1,0 +1,12 @@
+{
+  "id": "1a21e65a0508ce53e15db8b0",
+  "name": "p_item_onaho",
+  "kind": "item",
+  "source": "h/common/01.unity3d",
+  "sourceIdentity": "CAB-60f6266f512d305311b3a96386ef8bd8:-2283452912302862402",
+  "native": "native/1a21e65a0508ce53e15db8b0.json.gz",
+  "nodes": 8,
+  "meshes": 1,
+  "skins": 1,
+  "model": "models/p_item_onaho-1a21e65a0508ce53e15db8b0.glb"
+}

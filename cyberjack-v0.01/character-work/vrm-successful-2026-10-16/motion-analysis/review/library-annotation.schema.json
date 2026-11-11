@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Motion library annotation v1",
+  "type": "object",
+  "required": [
+    "format",
+    "id",
+    "annotationFingerprint",
+    "source",
+    "quality",
+    "body",
+    "parts",
+    "dynamics",
+    "contacts",
+    "goals",
+    "usage",
+    "annotationEvidence"
+  ],
+  "properties": {
+    "format": {
+      "const": "motion-library-annotations-v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{24}$"
+    },
+    "annotationFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "asset",
+        "geometryFingerprint"
+      ],
+      "properties": {
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": [
+        "sourceStatus",
+        "measured",
+        "standalonePreviewCompatible",
+        "runtimeValidated"
+      ],
+      "properties": {
+        "runtimeValidated": {
+          "const": false
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "measured": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "coverage"
+            ]
+          }
+        }
+      ],
+      "$comment": "Coverage is required for measured humanoid clips; absent for unmeasured or non-humanoid records."
+    },
+    "body": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "parts": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "contacts": {
+      "type": "object",
+      "required": [
+        "hypotheses",
+        "samples",
+        "assumptionOnly"
+      ],
+      "properties": {
+        "assumptionOnly": {
+          "const": true
+        }
+      }
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "goalId",
+          "start",
+          "end",
+          "evidence"
+        ],
+        "properties": {
+          "goalId": {
+            "type": "string"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0
+          },
+          "evidence": {
+            "enum": [
+              "whole-clip-majority",
+              "sampled-target-window"
+            ]
+          }
+        }
+      }
+    },
+    "anatomy": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "annotationEvidence": {
+      "type": "object",
+      "properties": {
+        "nameUsedAsGroundTruth": {
+          "const": false
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

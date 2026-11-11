@@ -1,0 +1,42 @@
+{
+  "file": {
+    "path": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/character-work/rin-kkbp-session-2026-10-14/Rin_KKBP_v1.vrm",
+    "bytes": 138685184
+  },
+  "vrm": {
+    "specFamily": "vrm1",
+    "specVersion": "1.0"
+  },
+  "ok": true,
+  "errorCount": 0,
+  "warningCount": 3,
+  "infoCount": 1,
+  "findings": [
+    {
+      "severity": "info",
+      "code": "META_THUMBNAIL_MISSING",
+      "message": "no thumbnail image is embedded"
+    },
+    {
+      "severity": "warning",
+      "code": "TRIANGLE_BUDGET_EXCEEDED",
+      "message": "total triangles 115248 exceed the configured limit 70000"
+    },
+    {
+      "severity": "warning",
+      "code": "FILE_SIZE_LIMIT_EXCEEDED",
+      "message": "file is 138685184 bytes and exceeds the configured limit 52428800"
+    },
+    {
+      "severity": "warning",
+      "code": "MATERIAL_BUDGET_EXCEEDED",
+      "message": "material count 41 exceeds the configured limit 16"
+    }
+  ],
+  "limits": {
+    "max_triangles": 70000,
+    "max_total_bytes": 52428800,
+    "max_texture_size": 4096,
+    "max_materials": 16
+  }
+}

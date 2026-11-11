@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Пилот VLM: контактные листы клипов</title>
+<script type="importmap">
+{"imports":{
+  "three":"../viewer/node_modules/three/build/three.module.js",
+  "three/addons/":"../viewer/node_modules/three/examples/jsm/"
+}}
+</script>
+<style>body{margin:0;background:#111;color:#ddd;font:13px system-ui}canvas{display:block}#st{padding:8px;color:#7a9}</style>
+</head>
+<body>
+<div id="st">загрузка…</div>
+<canvas id="sheet" width="1200" height="1200"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin, VRMUtils} from '../viewer/node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+
+const W = 400, H = 400;          // ячейка листа
+const COLS = 3, ROWS = 3;
+const IDENT = new THREE.Quaternion();
+const status = document.getElementById('st');
+
+const VRM_KEY = {
+  'Hips':'hips','Spine':'spine','Chest':'chest','Upper Chest':'upperChest','Neck':'neck','Head':'head',
+  'Left shoulder':'leftShoulder','Left arm':'leftUpperArm','Left elbow':'leftLowerArm','Left wrist':'leftHand',
+  'Right shoulder':'rightShoulder','Right arm':'rightUpperArm','Right elbow':'rightLowerArm','Right wrist':'rightHand',
+  'Left leg':'leftUpperLeg','Left knee':'leftLowerLeg','Left ankle':'leftFoot','Left toe':'leftToes',
+  'Right leg':'rightUpperLeg','Right knee':'rightLowerLeg','Right ankle':'rightFoot','Right toe':'rightToes',
+};
+const FINGERS = {'Thumb':['ThumbMetacarpal','ThumbProximal','ThumbDistal'],
+  'IndexFinger':['IndexProximal','IndexIntermediate','IndexDistal'],
+  'MiddleFinger':['MiddleProximal','MiddleIntermediate','MiddleDistal'],
+  'RingFinger':['RingProximal','RingIntermediate','RingDistal'],
+  'LittleFinger':['LittleProximal','LittleIntermediate','LittleDistal']};
+function vrmKey(unityName) {
+  if (VRM_KEY[unityName]) return VRM_KEY[unityName];
+  const m = /^(.+?)(\d)_([LR])$/.exec(unityName);
+  if (m && FINGERS[m[1]]) {
+    const idx = Number(m[2]) - 1;
+    return (m[3] === 'L' ? 'left' : 'right') + FINGERS[m[1]][idx];
+  }
+  return null;
+}
+const mirrored = q => new THREE.Quaternion(q.x, -q.y, -q.z, q.w);
+
+const [rigDoc, boneMap] = await Promise.all([
+  fetch('../animations/source_rigs.json').then(r => r.json()),
+  fetch('../viewer/vrm_studio_assets/bone-map.json').then(r => r.json()),
+]);
+const rigBones = rigDoc.rigs.find(r => r.name === 'p_cf_body_bone').bones;
+const srcByName = new Map(rigBones.map(b => [b.name, b]));
+const srcOrder = [];
+const seen = new Set();
+function addSrc(name) {
+  if (!name || seen.has(name)) return;
+  const b = srcByName.get(name);
+  if (!b) return;
+  seen.add(name);
+  if (b.parent) addSrc(b.parent);
+  srcOrder.push(b);
+}
+for (const b of rigBones) addSrc(b.name);
+const restWorld = new Map();
+for (const b of srcOrder) {
+  const q = new THREE.Quaternion().fromArray(b.rotation);
+  const pw = b.parent ? restWorld.get(b.parent) : IDENT.clone();
+  restWorld.set(b.name, pw.clone().multiply(q));
+}
+
+// одна сцена, один аватар — на весь батч (одинаковая одежда и свет)
+const loader = new GLTFLoader();
+loader.register(parser => new VRMLoaderPlugin(parser));
+const gltf = await loader.loadAsync('../characters/mira/Mira_outfit_03_toes.vrm');
+const vrmModel = gltf.userData.vrm;
+const vrm = vrmModel.scene;
+VRMUtils.removeUnnecessaryVertices(vrm);
+// combineSkeletons выбросил невзвешенные кости пальцев и переиндексировал скин — отключено
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x141821);
+scene.add(vrm);
+scene.add(new THREE.AmbientLight(0xffffff, 1.25));
+const keyL = new THREE.DirectionalLight(0xffffff, 2.1); keyL.position.set(1.4, 2.4, 2.2); scene.add(keyL);
+const fillL = new THREE.DirectionalLight(0x9fb4ff, 0.9); fillL.position.set(-2, 1.4, 1.2); scene.add(fillL);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6),
+  new THREE.MeshStandardMaterial({color: 0x2b3040, roughness: 0.95}));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+scene.updateMatrixWorld(true);
+
+const bindings = [];
+for (const [srcName, vrmName] of Object.entries(boneMap)) {
+  const key = vrmKey(vrmName);
+  const node = key ? vrmModel.humanoid.getRawBoneNode(key) : null;
+  if (!node || !restWorld.has(srcName)) continue;
+  const sw = mirrored(restWorld.get(srcName));
+  bindings.push({srcName, node, sourceRestInverse: sw.invert(),
+                 targetRestWorld: node.getWorldQuaternion(new THREE.Quaternion())});
+}
+
+// пальцы ног: у каждого SkinnedMesh свой скелет (после combineSkeletons), поэтому
+// ищем кости в скелете КАЖДОГО меша, а не по имени в сцене — иначе двигаем не тот узел
+let curlK = 0.9;
+let lastGroundShift = 0;
+let groundOn = true;
+let ikOn = true;
+const toeBindings = [];
+vrm.traverse(o => {
+  if (!o.isSkinnedMesh) return;
+  const bones = o.skeleton.bones;
+  for (const side of ['L', 'R']) {
+    const baseNode = bones.find(b => new RegExp(`toes_${side}$|${side === 'L' ? 'Left_toe' : 'Right_toe'}$`).test(b.name));
+    if (!baseNode) continue;
+    const baseRest = baseNode.getWorldQuaternion(new THREE.Quaternion()).invert();
+    for (const b of bones) {
+      if (!new RegExp(`^k_f_toe${side}_0\\d$`).test(b.name)) continue;
+      toeBindings.push({node: b, baseNode, baseRest, restLocal: b.quaternion.clone()});
+    }
+  }
+});
+for (const tb of toeBindings) {
+  const srcName = tb.node.name;                       // совпадает с именем кости рига k_f_toe*_0N
+  if (!restWorld.has(srcName)) continue;
+  const sw = mirrored(restWorld.get(srcName));
+  bindings.push({srcName, node: tb.node, sourceRestInverse: sw.invert(),
+                 targetRestWorld: tb.node.getWorldQuaternion(new THREE.Quaternion()),
+                 isToe: true});
+}
+console.log('пальцев привязано:', toeBindings.length, '· биндингов с пальцами:', bindings.filter(b => b.isToe).length);
+
+const hipsBind = bindings.find(b => b.srcName === 'cf_j_hips');
+if (hipsBind) hipsBind.node.userData.restPos = hipsBind.node.position.clone();
+
+const cell = document.createElement('canvas');
+cell.width = W; cell.height = H;
+const renderer = new THREE.WebGLRenderer({canvas: cell, antialias: true, preserveDrawingBuffer: true});
+renderer.setSize(W, H, false);
+renderer.setPixelRatio(1);
+const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 20);
+
+
+// Двухзвенный IK ноги: бедро (thigh) → колено (leg01) → стопа (leg03).
+// Задача: посадить стопу на пол, не ломая позу — двигаем колено в плоскости,
+// заданной текущим положением колена (pole), пересчитываем углы аналитически.
+const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3();
+const _q1 = new THREE.Quaternion();
+
+function footContact(nodes, side) {
+  const ankle = nodes[`cf_j_leg03_${side}`], ball = nodes[`cf_j_toes_${side}`];
+  if (!ankle || !ball) return null;
+  const a = ankle.getWorldPosition(new THREE.Vector3());
+  const b = ball.getWorldPosition(new THREE.Vector3());
+  return {ankle: a, ball: b, minY: Math.min(a.y - 0.045, b.y - 0.020)};
+}
+
+function solveLegIK(nodes, side) {
+  const thigh = nodes[`cf_j_thigh00_${side}`];
+  const knee = nodes[`cf_j_leg01_${side}`];
+  const ankle = nodes[`cf_j_leg03_${side}`];
+  const ball = nodes[`cf_j_toes_${side}`];
+  if (!thigh || !knee || !ankle || !ball) return;
+
+  const c0 = footContact(nodes, side);
+  if (!c0) return;
+  // Правило контакта: проникновение в пол — поднимаем; небольшой зазор — дожимаем;
+  // высоко поднятая стопа (фаза шага) не трогается, иначе исчезает сам шаг.
+  const gap = c0.minY;
+  let drop = 0;
+  if (gap < -0.004) drop = -gap;              // провал: поднять
+  else if (gap > 0 && gap < 0.015) drop = -gap; // почти касается: дожать
+  else return;
+
+  const H = thigh.getWorldPosition(new THREE.Vector3());
+  const K = knee.getWorldPosition(new THREE.Vector3());
+  const A = ankle.getWorldPosition(new THREE.Vector3());
+  const l1 = H.distanceTo(K), l2 = K.distanceTo(A);
+  const target = A.clone(); target.y += drop;
+
+  // недостижимую цель подтягиваем к пределу длины ноги
+  const d = H.distanceTo(target);
+  const maxD = (l1 + l2) * 0.995;
+  if (d > maxD) target.copy(H).add(target.clone().sub(H).multiplyScalar(maxD / d));
+  const dd = Math.max(1e-4, H.distanceTo(target));
+
+  // плоскость: направление на цель + текущий вынос колена (pole)
+  const dir = target.clone().sub(H).divideScalar(dd);
+  const pole = K.clone().sub(H).addScaledVector(dir, -K.clone().sub(H).dot(dir));
+  if (pole.lengthSq() < 1e-8) pole.set(0, 0, 1);
+  pole.normalize();
+
+  const cosA = Math.max(-1, Math.min(1, (l1 * l1 + dd * dd - l2 * l2) / (2 * l1 * dd)));
+  const sinA = Math.sqrt(Math.max(0, 1 - cosA * cosA));
+  const kneeTarget = H.clone().addScaledVector(dir, l1 * cosA).addScaledVector(pole, l1 * sinA);
+
+  // повернуть бедро: текущее направление колена → новое
+  const curThigh = K.clone().sub(H).normalize();
+  const newThigh = kneeTarget.clone().sub(H).normalize();
+  _q1.setFromUnitVectors(curThigh, newThigh);
+  const worldQ = thigh.getWorldQuaternion(new THREE.Quaternion());
+  const parentQ = thigh.parent ? thigh.parent.getWorldQuaternion(new THREE.Quaternion()) : new THREE.Quaternion();
+  thigh.quaternion.copy(parentQ.invert().multiply(_q1.clone().multiply(worldQ)));
+  thigh.updateMatrixWorld(true);
+  knee.updateMatrixWorld(true);
+
+  // повернуть голень: колено уже на месте, доводим пятку до цели
+  const A2 = ankle.getWorldPosition(new THREE.Vector3());
+  const curShin = A2.clone().sub(kneeTarget).normalize();
+  const newShin = target.clone().sub(kneeTarget).normalize();
+  _q1.setFromUnitVectors(curShin, newShin);
+  const shinQ = knee.getWorldQuaternion(new THREE.Quaternion());
+  const kneeParentQ = knee.parent ? knee.parent.getWorldQuaternion(new THREE.Quaternion()) : new THREE.Quaternion();
+  knee.quaternion.copy(kneeParentQ.invert().multiply(_q1.clone().multiply(shinQ)));
+  knee.updateMatrixWorld(true);
+}
+
+function poseAt(clip, time) {
+  const tracks = new Map(clip.tracks.map(t => [t.bone, t]));
+  const frames = Math.min(...clip.tracks.map(t => t.rotations.length / 4));
+  const f = Math.max(0, Math.min(frames - 1, Math.round(time * clip.fps)));
+  const worlds = new Map();
+  for (const b of srcOrder) {
+    const tr = tracks.get(b.name);
+    const q = tr ? new THREE.Quaternion().fromArray(tr.rotations, f * 4)
+                 : new THREE.Quaternion().fromArray(b.rotation);
+    const pw = b.parent ? worlds.get(b.parent) : IDENT;
+    worlds.set(b.name, pw.clone().multiply(q));
+  }
+  for (const bind of bindings) {
+    const world = worlds.get(bind.srcName);
+    const target = mirrored(world).multiply(bind.sourceRestInverse).multiply(bind.targetRestWorld);
+    const parentWorld = bind.node.parent ? bind.node.parent.getWorldQuaternion(new THREE.Quaternion()) : IDENT;
+    bind.node.quaternion.copy(parentWorld.invert().multiply(target));
+    bind.node.updateMatrixWorld(true);
+  }
+  // вертикаль таза: rotation-only клип не опускает таз, поэтому без этого присед
+  // и сидение физически невозможны — фигура «стоит с согнутыми коленями»
+  if (hipsBind && hipsBind.node.userData.restPos) {
+    const tr = (tracks.get('cf_j_hips') || {}).translations;
+    const rest = hipsBind.node.userData.restPos;
+    if (tr && tr.length >= 3) {
+      const fi = Math.max(0, Math.min(tr.length / 3 - 1, Math.round(time * clip.fps)));
+      hipsBind.node.position.set(rest.x + tr[fi * 3], rest.y + tr[fi * 3 + 1], rest.z + tr[fi * 3 + 2]);
+    } else {
+      hipsBind.node.position.copy(rest);
+    }
+  }
+  // сгиб пальцев: своей анимации у них нет (в H-клипах ноль, в CMU её вообще нет),
+  // гнём пропорционально повороту плюсны — это даёт перекат и толчок
+  const toeTracks = new Set(clip.tracks.filter(t => /^k_f_toe/.test(t.bone)).map(t => t.bone));
+  for (const t of toeBindings) {
+    if (toeTracks.has(t.node.name)) continue;         // у клипа есть своя анимация пальцев
+    const q = t.baseNode.getWorldQuaternion(new THREE.Quaternion());
+    const dq = t.baseRest.clone().multiply(q);
+    const ang = 2 * Math.acos(Math.min(1, Math.abs(dq.w)));
+    t.node.quaternion.copy(t.restLocal)
+      .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(-1, 0, 0), curlK * ang));
+  }
+  scene.updateMatrixWorld(true);
+
+  // ---- IK ног: сажаем стопы на пол по отдельности (опорная нога фиксируется)
+  if (ikOn) {
+    const nodes = {};
+    for (const b of bindings) nodes[b.srcName] = b.node;
+    for (const side of ['L', 'R']) for (let i = 0; i < 3; i++) solveLegIK(nodes, side);
+    scene.updateMatrixWorld(true);
+  }
+
+  // ---- контакт с полом: стопа ставится FK, поэтому фигура «плавает» или проваливается.
+  // Опускаем/поднимаем таз так, чтобы самая низкая точка стопы касалась пола (y = 0).
+  if (hipsBind && hipsBind.node.userData.restPos) {
+    const v = new THREE.Vector3();
+    // опорные точки тела с приблизительным радиусом: в лежачей позе ниже стоп
+    // оказываются таз, грудь или голова — по одним стопам фигуру нельзя ставить на пол
+    const POINTS = [
+      ['cf_j_leg03_L', 0.045], ['cf_j_leg03_R', 0.045],
+      ['cf_j_toes_L', 0.020], ['cf_j_toes_R', 0.020],
+      ['cf_j_leg01_L', 0.055], ['cf_j_leg01_R', 0.055],
+      ['cf_j_thigh00_L', 0.075], ['cf_j_thigh00_R', 0.075],
+      ['cf_j_hips', 0.095], ['cf_j_spine03', 0.105],
+      ['cf_j_head', 0.115], ['cf_j_hand_L', 0.035], ['cf_j_hand_R', 0.035],
+    ];
+    let minY = Infinity;
+    for (const [src, r] of POINTS) {
+      const b = bindings.find(x => x.srcName === src);
+      if (!b) continue;
+      b.node.getWorldPosition(v);
+      minY = Math.min(minY, v.y - r);
+    }
+    if (groundOn && Number.isFinite(minY) && Math.abs(minY) > 0.002) {
+      hipsBind.node.position.y -= minY;
+      scene.updateMatrixWorld(true);
+      lastGroundShift = -minY;
+    } else {
+      lastGroundShift = 0;
+    }
+  }
+}
+
+const VIEWS = {
+  full:   {front: [[0, 1.0, 3.1], [0, 0.9, 0]],   side: [[3.1, 1.0, 0.25], [0, 0.9, 0]]},
+  close:  {front: [[0, 1.3, 1.7], [0, 1.15, 0]],  side: [[1.7, 1.3, 0.2], [0, 1.15, 0]]},
+  feet:   {front: [[0, 0.22, 0.85], [0, 0.10, 0]], side: [[0.85, 0.22, 0.12], [0, 0.10, 0]]},
+  toes:   {front: [[0, 0.09, 0.36], [0, 0.035, 0]], side: [[0.36, 0.09, 0.05], [0, 0.035, 0]],
+           top:   [[0.02, 0.42, 0.16], [0, 0.02, 0.05]]},
+};
+
+function frameCamera(aspectMode, view = 'front') {
+  const v = (VIEWS[aspectMode] || VIEWS.full)[view] || (VIEWS[aspectMode] || VIEWS.full).front;
+  camera.position.set(v[0][0], v[0][1], v[0][2]);
+  camera.lookAt(v[1][0], v[1][1], v[1][2]);
+}
+
+const sheet = document.getElementById('sheet');
+const ctx = sheet.getContext('2d');
+
+window.__sheets = {
+  ready: true,
+  bones: bindings.length,
+  skinInfo() {
+    const out = {toeInSkeleton: [], namedToeIsBone: null, meshes: 0, verts: 0};
+    vrm.traverse(o => { if (o.isSkinnedMesh) out.meshes++; });
+    let any = null;
+    vrm.traverse(o => { if (o.isSkinnedMesh && !any) any = o; });
+    if (any) {
+      out.verts = any.geometry.attributes.position.count;
+      out.toeInSkeleton = any.skeleton.bones.filter(b => /toe/i.test(b.name)).map(b => b.name);
+      const named = vrm.getObjectByName('k_f_toeL_00');
+      out.namedToeIsBone = named ? named.isBone : (named ? 'node' : 'нет');
+      out.namedToeInSkeleton = named ? any.skeleton.bones.includes(named) : false;
+      out.skinIndex = any.geometry.attributes.skinIndex ? Array.from(any.geometry.attributes.skinIndex.array.slice(0, 8)) : null;
+      out.skinWeight = any.geometry.attributes.skinWeight ? Array.from(any.geometry.attributes.skinWeight.array.slice(0, 8)) : null;
+      out.skeletonBones = any.skeleton.bones.length;
+    }
+    return out;
+  },
+  meshToeStats() {
+    const out = [];
+    vrm.traverse(o => {
+      if (!o.isSkinnedMesh) return;
+      const si = o.geometry.attributes.skinIndex, sw = o.geometry.attributes.skinWeight;
+      if (!si || !sw) return;
+      const bones = o.skeleton.bones;
+      const toeSlots = new Set(bones.map((b, i) => (/toe/i.test(b.name) ? i : -1)).filter(i => i >= 0));
+      let n = 0;
+      for (let v = 0; v < si.count; v++) {
+        for (let k = 0; k < 4; k++) {
+          if (toeSlots.has(si.getComponent(v, k)) && sw.getComponent(v, k) > 0.05) { n++; break; }
+        }
+      }
+      out.push({name: o.name, verts: si.count, bones: bones.length, toeVerts: n,
+                toeNames: bones.filter(b => /toe/i.test(b.name)).map(b => b.name).slice(0, 6)});
+    });
+    return out;
+  },
+  setCurl(k) { curlK = k; },
+  setGround(on) { groundOn = !!on; },
+  setIK(on) { ikOn = !!on; },
+  boneMapList() {
+    const v = new THREE.Vector3();
+    return bindings.filter(b => /leg03|foot|toes|hips|leg01/.test(b.srcName)).map(b => {
+      b.node.getWorldPosition(v);
+      return {src: b.srcName, node: b.node.name, y: +v.y.toFixed(3)};
+    });
+  },
+  footHeights(clip, t) {
+    poseAt(clip, t);
+    const v = new THREE.Vector3();
+    const out = {shift: lastGroundShift};
+    for (const side of ['L', 'R']) {
+      const ankle = bindings.find(b => b.srcName === `cf_j_leg03_${side}`);
+      const ball = bindings.find(b => b.srcName === `cf_j_toes_${side}`);
+      if (ankle) { ankle.node.getWorldPosition(v); out['heel' + side] = +(v.y - 0.045).toFixed(4); }
+      if (ball) { ball.node.getWorldPosition(v); out['ball' + side] = +(v.y - 0.020).toFixed(4); }
+    }
+    return out;
+  },
+  toeInfo() {
+    const out = {count: toeBindings.length, angles: []};
+    for (const tb of toeBindings) {
+      const q = tb.baseNode.getWorldQuaternion(new THREE.Quaternion());
+      const dq = tb.baseRest.clone().multiply(q);
+      out.angles.push(Math.round(2 * Math.acos(Math.min(1, Math.abs(dq.w))) * 57.3));
+    }
+    return out;
+  },
+  probe(clip, t) {
+    poseAt(clip, t);
+    const out = {};
+    for (const b of bindings) {
+      const n = b.node;
+      const v = new THREE.Vector3();
+      n.getWorldPosition(v);
+      out[b.srcName] = [Number(v.x.toFixed(3)), Number(v.y.toFixed(3)), Number(v.z.toFixed(3))];
+    }
+    return out;
+  },
+  async renderFrame(clip, t, aspectMode = 'feet', view = 'front') {
+    sheet.width = W; sheet.height = H;
+    ctx.fillStyle = '#141821'; ctx.fillRect(0, 0, W, H);
+    frameCamera(aspectMode, view);
+    poseAt(clip, Math.min(clip.duration - 1 / clip.fps, t));
+    renderer.render(scene, camera);
+    ctx.drawImage(cell, 0, 0);
+    return sheet.toDataURL('image/png');
+  },
+  async renderClip(clip, times, aspectMode = 'full', views = 'both') {
+    const per = times.length;
+    const cols = Math.min(COLS, per), rows = Math.ceil(per / cols);
+    const viewList = views === 'both' ? ['front', 'side'] : ['front'];
+    sheet.width = W * cols; sheet.height = H * rows * viewList.length;
+    ctx.fillStyle = '#141821'; ctx.fillRect(0, 0, sheet.width, sheet.height);
+    for (let v = 0; v < viewList.length; v++) {
+      frameCamera(aspectMode, viewList[v]);
+      for (let i = 0; i < per; i++) {
+        poseAt(clip, Math.min(clip.duration - 1 / clip.fps, times[i]));
+        renderer.render(scene, camera);
+        const x = (i % cols) * W, y = (Math.floor(i / cols) + v * rows) * H;
+        ctx.drawImage(cell, x, y);
+        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(x, y, 74, 30);
+        ctx.fillStyle = '#9fe'; ctx.font = 'bold 20px system-ui';
+        ctx.fillText(`#${i + 1}`, x + 10, y + 22);
+      }
+      // подпись ряда
+      if (viewList.length > 1) {
+        const label = viewList[v] === 'front' ? 'спереди' : 'сбоку';
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(sheet.width - 150, v * rows * H + 6, 144, 32);
+        ctx.fillStyle = '#ffd9a0'; ctx.font = 'bold 20px system-ui';
+        ctx.fillText(label, sheet.width - 138, v * rows * H + 30);
+      }
+    }
+    return sheet.toDataURL('image/png');
+  },
+};
+status.textContent = `готово · костей на VRM ${bindings.length}`;
+</script>
+</body>
+</html>

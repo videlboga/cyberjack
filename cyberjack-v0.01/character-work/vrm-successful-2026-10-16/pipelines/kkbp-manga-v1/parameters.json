@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "approved_on": "Mira, outfit 00",
+  "space": "linear RGB",
+  "palette": {
+    "hair": {
+      "mix": 0.28,
+      "color": [
+        0.17,
+        0.18,
+        0.21
+      ],
+      "shadow": [
+        0.58,
+        0.6,
+        0.69
+      ]
+    },
+    "cloth": {
+      "mix": 0.16,
+      "color": [
+        0.23,
+        0.25,
+        0.31
+      ],
+      "shadow": [
+        0.58,
+        0.6,
+        0.71
+      ]
+    },
+    "skin": {
+      "mix": 0,
+      "color": [
+        0.96,
+        0.9,
+        0.9
+      ],
+      "shadow": [
+        1,
+        1,
+        1
+      ],
+      "mode": "preserve-source-material"
+    },
+    "face": {
+      "mix": 0.015,
+      "color": [
+        0.98,
+        0.94,
+        0.94
+      ],
+      "shadow": [
+        0.94,
+        0.88,
+        0.9
+      ]
+    }
+  },
+  "shadow": {
+    "blender_direction": [
+      -0.45,
+      -0.65,
+      0.6
+    ],
+    "gltf_direction": [
+      -0.45,
+      0.6,
+      0.65
+    ],
+    "hard_threshold": 0.45,
+    "face_soft_range": [
+      0.1,
+      0.75
+    ],
+    "skin_policy": "No synthetic ramp; preserve original material shading and chroma"
+  },
+  "outline": {
+    "width_m": 0.0008,
+    "color_linear": [
+      0.035,
+      0.032,
+      0.045
+    ],
+    "regions": [
+      "hair",
+      "cloth"
+    ]
+  },
+  "facial_control": "deduplicate shared morphTargetInfluences arrays by identity before writing weights",
+  "revision": "source-skin-baseline-rollback",
+  "skin_policy": {
+    "mode": "source-material-no-filter",
+    "normal_scale": "authored",
+    "shading_toony": "authored",
+    "uv_filter": false,
+    "anatomical_filter": false,
+    "status": "regression rollback; knee appearance unresolved"
+  }
+}
