@@ -10,6 +10,7 @@
 <option value="070">070 · консоль (полулёжа)</option>
 <option value="078">078 · платформа (на предплечьях)</option>
 <option value="087">087 · станок (верхом)</option>
+<option value="080">080 · кресло-под (сидя, колени врозь)</option>
 </select></label>
 <label>Персонаж <select id="char">
 <option value="x20/outfits/Rin_outfit_00.vrm">Rin · комплект 00</option>
@@ -22,11 +23,19 @@
 <label><input id="ghost" type="checkbox" checked> Подложка: машина-оригинал + фигура</label>
 <label><input id="machineVisible" type="checkbox" checked> Чистая механика</label>
 <label><input id="markers" type="checkbox"> Маркеры (якорь, габарит фигуры)</label>
-<label>Сдвиг X, м <output id="oox">0</output><input id="ox" type="range" min="-0.5" max="0.5" step="0.005" value="0"></label>
-<label>Сдвиг Y, м <output id="ooy">0</output><input id="oy" type="range" min="-0.5" max="0.5" step="0.005" value="0"></label>
-<label>Сдвиг Z, м <output id="ooz">0</output><input id="oz" type="range" min="-0.5" max="0.5" step="0.005" value="0"></label>
+<label>Сдвиг X, м <output id="oox">0</output><input id="ox" type="range" min="-1.5" max="1.5" step="0.005" value="0"></label>
+<label>Сдвиг Y, м <output id="ooy">0</output><input id="oy" type="range" min="-1.5" max="1.5" step="0.005" value="0"></label>
+<label>Сдвиг Z, м <output id="ooz">0</output><input id="oz" type="range" min="-1.5" max="1.5" step="0.005" value="0"></label>
 <label>Поворот <output id="oyaw">0°</output><input id="yaw" type="range" min="-180" max="180" step="5" value="0"></label>
-<label>Масштаб ×<output id="osm">1.0</output><input id="sm" type="range" min="0.6" max="1.5" step="0.01" value="1"></label>
+<label>Масштаб ×<output id="osm">1.0</output><input id="sm" type="range" min="0.3" max="2.5" step="0.01" value="1"></label>
+<label>Машина ×<output id="omsm">1.0</output><input id="msm" type="range" min="0.35" max="1.6" step="0.01" value="1"></label>
+<fieldset id="layerbox" style="border:1px solid #596678;border-radius:6px;padding:8px;margin:10px 0">
+<legend style="font-size:12px">Слой контроллера</legend>
+<label style="margin:4px 0">X <output id="olx">0.5</output><input id="lx" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+<label style="margin:4px 0">Y <output id="oly">0.5</output><input id="ly" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+<label style="margin:4px 0">Вес <output id="olw">1.00</output><input id="lw" type="range" min="0" max="1" step="0.01" value="1"></label>
+<p id="layerinfo" style="font-size:11px;color:#9fb3c8">слой не задан (&amp;layer=...)</p>
+</fieldset>
 <button id="frame">Показать целиком</button>
 <p id="status" role="status">Загрузка…</p>
 </aside><main id="stage"></main>
@@ -50,6 +59,50 @@ new ResizeObserver(()=>{renderer.setSize(stage.clientWidth,stage.clientHeight);c
 const clock=new T.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.033);vrm&&vrm.update(dt);controls.update();renderer.render(scene,camera)});
 function contentBox(){content.updateMatrixWorld(true);const b=new T.Box3();content.traverse(n=>{if(n.isMesh&&n.visible)b.union(new T.Box3().setFromObject(n,true))});return b}
 function setCam(az,el,distMul){const b=contentBox();const c=b.getCenter(new T.Vector3()),s=b.getSize(new T.Vector3()),r=Math.max(...s.toArray())||1;const a=T.MathUtils.degToRad(az),e=T.MathUtils.degToRad(el??18),d=(distMul??2.2)*r;camera.position.set(c.x+d*Math.cos(e)*Math.sin(a),c.y+d*Math.sin(e),c.z+d*Math.cos(e)*Math.cos(a));controls.target.copy(c);controls.update()}
+window.__mpVrmGet=()=>vrm;
+window.__mpConvTest=(boneName,deg)=>{const n=vrm.humanoid.getNormalizedBoneNode(boneName),r=vrm.humanoid.getRawBoneNode(boneName);if(!n||!r)return null;const rest=vrm.humanoid.normalizedRestPose?.[boneName];const before=[r.quaternion.x,r.quaternion.y,r.quaternion.z,r.quaternion.w];const h=deg*Math.PI/360;n.quaternion.set(Math.sin(h),0,0,Math.cos(h));vrm.scene.updateMatrixWorld(true);vrm.update(0);const after=[r.quaternion.x,r.quaternion.y,r.quaternion.z,r.quaternion.w];const rq=rest&&rest.rotation?[rest.rotation.x,rest.rotation.y,rest.rotation.z,rest.rotation.w]:null;n.quaternion.set(0,0,0,1);vrm.update(0);return {before,after,restRotation:rq,restKeys:rest?Object.keys(rest):null};};
+window.__mpFaceProbe=()=>{
+  if(!vrm)return null;
+  const headNode=vrm.humanoid.getNormalizedBoneNode('head');
+  const hp=headNode.getWorldPosition(new T.Vector3());
+  const neckP=vrm.humanoid.getNormalizedBoneNode('neck').getWorldPosition(new T.Vector3());
+  const v=new T.Vector3(); const acc={}; 
+  vrm.scene.traverse(n=>{
+    if(!n.isSkinnedMesh)return;
+    const mats=Array.isArray(n.material)?n.material:[n.material];
+    const mi=n.geometry.groups&&n.geometry.groups.length?n.geometry.groups:null;
+    const pos=n.geometry.attributes.position;
+    const step=Math.max(1,Math.floor(pos.count/6000));
+    for(let i=0;i<pos.count;i+=step){
+      v.fromBufferAttribute(pos,i);
+      n.applyBoneTransform(i,v); v.applyMatrix4(n.matrixWorld);
+      if(v.distanceTo(hp)>0.16)continue;
+      // material of this vertex
+      let idx=0;
+      if(mi){for(const g of mi){if(i>=g.start&&i<g.start+g.count){idx=g.materialIndex;break}}}
+      const nm=(mats[idx]&&mats[idx].name||'?').toLowerCase();
+      const key=nm.replace(/[0-9]+$/,'');
+      if(!acc[key])acc[key]={n:0,c:[0,0,0]};
+      acc[key].n++; acc[key].c[0]+=v.x; acc[key].c[1]+=v.y; acc[key].c[2]+=v.z;
+    }
+  });
+  const out={head:hp.toArray().map(x=>+x.toFixed(3)),neck:neckP.toArray().map(x=>+x.toFixed(3)),mats:{}};
+  for(const [k,a] of Object.entries(acc)){
+    const c=a.c.map(x=>+(x/a.n).toFixed(3));
+    const d=c.map((x,i)=>+(x-out.head[i]).toFixed(3));
+    out.mats[k]={verts:a.n,centroid:c,deltaFromHead:d};
+  }
+  return out;
+};
+window.__mpWorldQuat=(name)=>{const n=vrm&&vrm.humanoid.getNormalizedBoneNode(name);if(!n)return null;const q=new T.Quaternion();n.getWorldQuaternion(q);return [q.x,q.y,q.z,q.w];};
+window.__mpNodeQuatByName=(name)=>{let r=null;vrm&&vrm.scene.traverse(n=>{if(!r&&n.name===name)r=[n.quaternion.x,n.quaternion.y,n.quaternion.z,n.quaternion.w]});return r};
+window.__mpNodePosByName=(name)=>{let r=null;vrm&&vrm.scene.traverse(n=>{if(!r&&n.name===name)r=n.getWorldPosition(new T.Vector3()).toArray()});return r};
+window.__mpSetNodeQuatByName=(name,q)=>{let hit=false;vrm&&vrm.scene.traverse(n=>{if(!hit&&n.name===name){n.quaternion.set(q[0],q[1],q[2],q[3]);hit=true}});return hit};
+window.__mpSetLocalQuat=(name,q)=>{const n=vrm&&vrm.humanoid.getNormalizedBoneNode(name);if(!n)return;n.quaternion.set(q[0],q[1],q[2],q[3]);vrm.scene.updateMatrixWorld(true);};
+window.__mpSegLocalDir=(name,child)=>{const na=vrm&&vrm.humanoid.getNormalizedBoneNode(name),nc=vrm&&vrm.humanoid.getNormalizedBoneNode(child);if(!na||!nc)return null;const q=new T.Quaternion();na.getWorldQuaternion(q);const v=new T.Vector3().subVectors(nc.getWorldPosition(new T.Vector3()),na.getWorldPosition(new T.Vector3())).applyQuaternion(q.clone().invert());v.normalize();return [v.x,v.y,v.z];};
+window.__mpRestAll=()=>{if(!vrm)return;for(const n of ['hips','spine','chest','upperChest','neck','head','leftShoulder','leftUpperArm','leftLowerArm','leftHand','rightShoulder','rightUpperArm','rightLowerArm','rightHand','leftUpperLeg','leftLowerLeg','leftFoot','rightUpperLeg','rightLowerLeg','rightFoot']){const b=vrm.humanoid.getNormalizedBoneNode(n);if(b)b.quaternion.set(0,0,0,1)}vrm.scene.updateMatrixWorld(true);vrm.update(0);};
+window.__mpSetQuats=(q)=>{for(const [b,v] of Object.entries(q)){const n=vrm&&vrm.humanoid.getNormalizedBoneNode(b);if(n)n.quaternion.set(v[0],v[1],v[2],v[3]);}if(vrm){vrm.scene.updateMatrixWorld(true);vrm.update(0);}};
+window.__mpBonePos=(name)=>{const n=vrm.humanoid.getNormalizedBoneNode(name);return n?n.getWorldPosition(new T.Vector3()).toArray():null;};
 window.__mp={ready:false,setCam,frameAll,
   debugProbe:()=>{
     const out={rootChildren:root.children.length,vrm:!!vrm,pose:!!pose,machineChildren:machineGroup.children.length,refChildren:refGroup.children.length};
@@ -67,6 +120,9 @@ window.__mp={ready:false,setCam,frameAll,
       for(const bn of ['head','leftLowerArm','leftHand','leftFoot','rightFoot','leftKnee']){}
       const mk=(nm)=>{const n=vrm.humanoid.getNormalizedBoneNode(nm);return n?n.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3)):null};
       bp.head=mk('head');bp.handL=mk('leftHand');bp.handR=mk('rightHand');bp.footL=mk('leftFoot');bp.footR=mk('rightFoot');
+      bp.neck=mk('neck');bp.chest=mk('chest');bp.elbowL=mk('leftLowerArm');bp.elbowR=mk('rightLowerArm');
+      bp.kneeL=mk('leftLowerLeg');bp.kneeR=mk('rightLowerLeg');bp.shoulderL=mk('leftUpperArm');bp.shoulderR=mk('rightUpperArm');
+      bp.hips=mk('hips');bp.ankleL=mk('leftFoot');bp.ankleR=mk('rightFoot');
       out.bones=bp;
       out.headW=head?head.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3)):null;
       out.rootWPos=root.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3));
@@ -78,7 +134,7 @@ window.__mp={ready:false,setCam,frameAll,
   }};
 if(QS.get('cam'))(()=>{const az=QS.get('camaz')||'35',el=QS.get('camel')||'18';setTimeout(()=>setCam(+az,+el,+((QS.get('camdist')||'2.2'))),2600)})();
 // URL-управление контролами для QA-харнесса
-for(const [key,id] of [['ox','ox'],['oy','oy'],['oz','oz'],['yaw','yaw'],['sm','sm']]){
+for(const [key,id] of [['ox','ox'],['oy','oy'],['oz','oz'],['yaw','yaw'],['sm','sm'],['msm','msm'],['lx','lx'],['ly','ly'],['lw','lw']]){
   const v=QS.get(key);if(v!=null){const el2=$('#'+id);if(el2){el2.value=v;el2.dispatchEvent(new Event('input'))}}
 }
 if(QS.get('ghost')==='0'){$('#ghost').checked=false}
@@ -97,7 +153,7 @@ async function reload(){
   const [machine, ref, vj, avatar] = await Promise.all([
     new GLTFLoader().loadAsync(`${lib}models/SexMachineModel-${mid}.glb`),
     new GLTFLoader().loadAsync(`${lib}reference-full/SexMachineModel-${mid}.glb`),
-    fetch(`${lib}figure-poses/pose-SexMachineModel-${mid}.json`).then(r=>{if(!r.ok)throw Error('pose '+r.status);return r.json()}),
+    fetch(`${lib}figure-poses/${QS.get('pose')||('pose-SexMachineModel-'+mid+'.json')}?v=`+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('pose '+r.status);return r.json()}),
     loader.loadAsync(char)
   ]);
   // машина: непрозрачная копия (режим чистой механики)
@@ -128,9 +184,12 @@ function applyPose(recenter){
   root.scale.setScalar(scale||keepScale);
   root.position.set(pose.hipsPoint[0]+ +$('#ox').value, pose.hipsPoint[1]-hy*scale+ +$('#oy').value, pose.hipsPoint[2]+ +$('#oz').value);
   for(const [bone,q] of Object.entries(pose.quats)){if(QS.get('pose')==='0')break;const b=vrm.humanoid.getNormalizedBoneNode(bone);if(b)b.quaternion.set(q[0],q[1],q[2],q[3])}
+  // масштаб машины (и ghost) вокруг точки таза: сиденье остаётся под персонажем
+  const mv=+(($('#msm')&&$('#msm').value)||1);
+  for(const g of [machineGroup,refGroup]){g.scale.setScalar(mv);g.position.set(pose.hipsPoint[0]*(1-mv),pose.hipsPoint[1]*(1-mv),pose.hipsPoint[2]*(1-mv));}
   root.rotation.y=T.MathUtils.degToRad((+$('#yaw').value)+(pose.yawFix||0));
   root.updateMatrixWorld(true);vrm.update(0);
-  for(const id of ['ox','oy','oz','yaw','sm']){const o=$('#o'+(id==='yaw'?'yaw':id==='sm'?'sm':'o'+id));if(o)o.textContent=$('#'+id).value+(id==='yaw'?'°':id==='sm'?'':'')}
+  for(const id of ['ox','oy','oz','yaw','sm','msm']){const o=$('#o'+(id==='yaw'?'yaw':id==='sm'?'sm':id==='msm'?'msm':'o'+id));if(o)o.textContent=$('#'+id).value+(id==='yaw'?'°':(id==='sm'||id==='msm')?'':'')}
   // маркеры
   if(marked){scene.remove(marked);marked=null}
   if($('#markers').checked){
@@ -142,11 +201,26 @@ function applyPose(recenter){
     scene.add(marked);
   }
 }
-['ox','oy','oz','yaw','sm'].forEach(id=>{ $('#'+id).oninput=applyPose });
+// маркеры фиксаторов машины (?fix=1): выступ под пах, арки, валик, шестигранные гнёзда
+const FIXPTS={peg:[2.061,1.555,-3.547],archL:[2.105,1.292,-3.677],archR:[2.105,1.292,-3.417],roller:[2.044,1.232,-3.548],hexL:[2.403,1.889,-3.676],hexR:[2.403,1.889,-3.418]};
+if(QS.get('fix')==='1'){const g=new T.Group();for(const [k,p] of Object.entries(FIXPTS)){const col=k.startsWith('hex')?0xff00cc:k==='peg'?0xff8800:k.startsWith('arch')?0x00bbff:0x00bb55;const m=new T.Mesh(new T.SphereGeometry(0.018,14,14),new T.MeshBasicMaterial({color:col}));m.position.set(p[0],p[1],p[2]);g.add(m);}scene.add(g);}
+// ---- слой контроллера: 2D-блендинг статичных поз (KK blend tree), как в игре
+let layerData=null;
+const LAYERFILE=QS.get('layer');
+function slerpQ(a,b,t){let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3];let bb=b.slice();if(d<0){d=-d;bb=bb.map(v=>-v)}if(d>0.9995)return a.map((v,i)=>v+(bb[i]-v)*t);const th=Math.acos(Math.min(1,d)),sn=Math.sin(th),w1=Math.sin((1-t)*th)/sn,w2=Math.sin(t*th)/sn;return a.map((v,i)=>v*w1+bb[i]*w2)}
+function blendPoses(kids,weights,key){const sum=weights.reduce((a,b)=>a+b,0)||1;let acc=null,accW=0;kids.forEach((c,i)=>{const cq=key==='quats'?c.quats[c._bone]:c.extra&&c.extra[c._bone];if(!cq)return;const t=weights[i]/sum;acc=acc?slerpQ(acc,cq,t/(accW+t)):cq.slice();accW+=t});return acc}
+function applyLayerQuats(){if(!vrm||!pose||!layerData)return;if(vrm.springBoneManager){vrm.springBoneManager=null}const lx=+(($('#lx')||{}).value??0.5),ly=+(($('#ly')||{}).value??0.5),lw=+(($('#lw')||{}).value??1);const kids=(layerData.children||[]).filter(c=>c.quats);const weights=kids.map(c=>{const dx=((c.position&&c.position.x)??0.5)-lx,dy=((c.position&&c.position.y)??0.5)-ly;return 1/(dx*dx+dy*dy+1e-4)});
+ window.__mpRestAll();window.__mpSetLocalQuat('hips',pose.quats.hips);
+ for(const bone of Object.keys(pose.quats)){if(bone==='hips')continue;kids.forEach(c=>{c._bone=bone});const acc=blendPoses(kids,weights,'quats');const base=pose.quats[bone]||[0,0,0,1];const q=acc?slerpQ(base,acc,lw):base;window.__mpSetLocalQuat(bone,q)}
+ const extraNames=(kids[0]&&kids[0].extra)?Object.keys(kids[0].extra):[];for(const nm of extraNames){kids.forEach(c=>{c._bone=nm});const acc=blendPoses(kids,weights,'extra');if(acc)window.__mpSetNodeQuatByName(nm,acc)}
+ vrm.scene.updateMatrixWorld(true);vrm.update(0);
+ const o1=$('#olx'),o2=$('#oly'),o3=$('#olw');if(o1)o1.textContent=lx.toFixed(2);if(o2)o2.textContent=ly.toFixed(2);if(o3)o3.textContent=lw.toFixed(2)}
+async function loadLayerFile(){if(!LAYERFILE){return}try{layerData=await fetch(`./scene-objects/skp-vol03/figure-poses/${LAYERFILE}?v=`+Date.now(),{cache:'no-store'}).then(r=>r.json());const info=$('#layerinfo');if(info)info.textContent=(layerData.layer||'слой')+' · поз: '+((layerData.children||[]).filter(c=>c.quats).length)+' · кости: humanoid + '+(((layerData.children||[])[0]||{}).extra?Object.keys(layerData.children[0].extra).length:0)+' extra';applyLayerQuats()}catch(e){const info=$('#layerinfo');if(info)info.textContent='слой: '+e.message}}
+['ox','oy','oz','yaw','sm','msm'].forEach(id=>{ $('#'+id).oninput=applyPose });['lx','ly','lw'].forEach(id=>{const el=$('#'+id);if(el)el.oninput=()=>applyLayerQuats()});
 $('#ghost').onchange=()=>{refGroup.visible=$('#ghost').checked};
 $('#machineVisible').onchange=()=>{machineGroup.visible=$('#machineVisible').checked};
 $('#markers').onchange=applyPose;
 $('#machine').onchange=reload;$('#char').onchange=reload;
 $('#frame').onclick=frameAll;
-reload().then(()=>{window.__mp.ready=true}).catch(e=>{$('#status').textContent='Ошибка: '+e.message;window.__mp={ready:false,error:e.message};console.error(e)});
+loadLayerFile().then(()=>reload()).then(()=>{window.__mp.ready=true}).catch(e=>{$('#status').textContent='Ошибка: '+e.message;window.__mp={ready:false,error:e.message};console.error(e)});
 </script></html>

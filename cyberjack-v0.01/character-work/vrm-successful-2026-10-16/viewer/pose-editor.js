@@ -1,6 +1,19 @@
 import * as THREE from 'three';
 import {TransformControls} from 'three/addons/controls/TransformControls.js';
 import {registerPoseAvatar,capturePose,applySnapshot,setWorldRotation,moveJoint,sampleFrames,upsertFrame,encodeProject,decodeProject,exportVrma} from './pose-editor-core.js';
+// Защита от испорченных данных (NaN / безумный масштаб), иначе поза «взрывается».
+function sanitizeProject(p){
+  const fixT=t=>{
+    if(!t)return;
+    if(Array.isArray(t.q)){t.q=t.q.map(v=>Number.isFinite(v)?v:0);const l=Math.hypot(...t.q);if(l<1e-6)t.q=[0,0,0,1];else t.q=t.q.map(v=>v/l);}
+    if(Array.isArray(t.p))t.p=t.p.map(v=>Number.isFinite(v)?v:0);
+    if(Array.isArray(t.s))t.s=t.s.map(v=>Number.isFinite(v)&&v>0.05&&v<20?v:1);
+  };
+  const fixPose=a=>{if(!a)return;fixT(a.root);for(const n of Object.values(a.nodes||{}))fixT(n);};
+  for(const key of (p.frames||[]))for(const a of Object.values(key.poses||{}))fixPose(a);
+  for(const a of Object.values(p.poses||{}))fixPose(a);
+  return p;
+}
 
 const names={hips:'Таз',spine:'Позвоночник',chest:'Грудь',upperChest:'Верх груди',neck:'Шея',head:'Голова',leftShoulder:'Левая ключица',rightShoulder:'Правая ключица',leftUpperArm:'Левое плечо',rightUpperArm:'Правое плечо',leftLowerArm:'Левый локоть',rightLowerArm:'Правый локоть',leftHand:'Левая кисть',rightHand:'Правая кисть',leftUpperLeg:'Левое бедро',rightUpperLeg:'Правое бедро',leftLowerLeg:'Левое колено',rightLowerLeg:'Правое колено',leftFoot:'Левая стопа',rightFoot:'Правая стопа',leftToes:'Левые пальцы ноги',rightToes:'Правые пальцы ноги',leftEye:'Левый глаз',rightEye:'Правый глаз'};
 function boneLabel(name){if(names[name])return names[name];return name.replace(/^left/,'Л. ').replace(/^right/,'П. ').replace('Thumb','Большой ').replace('Index','Указательный ').replace('Middle','Средний ').replace('Ring','Безымянный ').replace('Little','Мизинец ').replace('Metacarpal','основание').replace('Proximal','1').replace('Intermediate','2').replace('Distal','3');}
@@ -34,10 +47,21 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
     <small>JSON сохраняет всех участников и свободные сдвиги. VRMA — выбранного персонажа, вращения и положение таза.</small>
    </details>
   </div>
-  <button class="pe-restore" hidden>Восстановить черновик</button><p class="pe-status" role="status">Выберите позу и включите редактор.</p>`;
+  <button class="pe-restore" hidden>Восстановить черновик</button><button class="pe-cleardraft">Сбросить черновик</button><p class="pe-status" role="status">Выберите позу и включите редактор.</p>`;
   host.append(section);
   const $=s=>section.querySelector(s),inputs=['x','y','z'].map(a=>$('.pe-'+a));
+  let applyToAll=false;  // по умолчанию правка живёт в своём ключе
+  const allRow=document.createElement('label');
+  allRow.style.cssText='display:flex;gap:6px;align-items:center;margin:4px 0;font-size:12px';
+  allRow.innerHTML='<input class="pe-all" type="checkbox"> Правки во все ключи';
+  allRow.title='Сдвиг/поворот модели или сустава применяется ко всем ключам клипа';
+  ($('.pe-mode')?.closest('label')||$('.pe-enable')?.closest('label')||section.firstElementChild)?.after(allRow);
+  const allChk=allRow.querySelector('.pe-all');
+  allChk.onchange=()=>{applyToAll=allChk.checked;};
   const badge=document.createElement('div');badge.className='pe-stage-badge';badge.hidden=true;renderer.domElement.parentElement.append(badge);
+  const quickTools=document.createElement('div');quickTools.className='pe-quick-tools';quickTools.hidden=true;quickTools.setAttribute('role','group');quickTools.setAttribute('aria-label','Инструменты суставов');quickTools.innerHTML='<span>Суставы</span><button type="button" data-mode="rotate" title="Вращение · R">Вращение <kbd>R</kbd></button><button type="button" data-mode="ik" title="Перемещение с IK · G">Перемещение <kbd>G</kbd></button><button type="button" data-mode="free" title="Свободный сдвиг без сохранения длин">Свободный сдвиг</button><select aria-label="Оси у сцены"><option value="local">Локальные оси</option><option value="world">Мировые оси</option></select>';renderer.domElement.parentElement.append(quickTools);
+  let quickState='';function syncQuickTools(){const key=[active,objectFocus,$('.pe-mode').value,$('.pe-space').value].join('|');if(key===quickState)return;quickState=key;quickTools.hidden=!active||objectFocus;for(const b of quickTools.querySelectorAll('[data-mode]')){const selected=b.dataset.mode===$('.pe-mode').value;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected))}quickTools.querySelector('select').value=$('.pe-space').value;}
+  for(const b of quickTools.querySelectorAll('[data-mode]'))b.onclick=()=>{$('.pe-mode').value=b.dataset.mode;$('.pe-mode').dispatchEvent(new Event('change'));syncQuickTools()};quickTools.querySelector('select').onchange=e=>{$('.pe-space').value=e.target.value;$('.pe-space').dispatchEvent(new Event('change'));syncQuickTools()};
   let objectFocus=false;
   let active=false,playing=false,project=fresh(),records=new Map(),actorId='main',selected='hips',dirty=false;
   let lastActors='',undo=[],redo=[],dragStart=null,disposed=false,message='',autosaveTimer=null,baselineSource=null,jointCommit=null,jointTimer=null,pendingDraft=null;
@@ -54,6 +78,66 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
   function captureAll(){return Object.fromEntries([...records].map(([id,r])=>[id,capturePose(r)]));}
   function applyAll(){for(const [id,r] of records){const p=project.poses[id];if(p)applySnapshot(r,p);}}
   function remember(){undo.push({project:clone(project),dirty});if(undo.length>30)undo.shift();redo=[];updateButtons();}
+  // Сдвиг/поворот ВСЕЙ модели — свойство актёра в клипе, а не одной кости: переносим дельту
+  // во все ключи, иначе на других ключах персонаж остаётся на старом месте.
+  // Перенос правки отдельного сустава во все ключи: локальная дельта поворота/смещения
+  // применяется к тому же суставу в каждом ключе (различия между ключами сохраняются).
+  function applyBoneDeltaToKeys(name,before){
+    const r=records.get(actorId);if(!r||!before)return 0;
+    const id=r.human[name]||name,n=r.nodes.get(id);if(!n)return 0;
+    const dq=n.quaternion.clone().multiply(new THREE.Quaternion().fromArray(before.q).invert()).normalize();
+    const dp=[n.position.x-before.p[0],n.position.y-before.p[1],n.position.z-before.p[2]];
+    const rotChanged=Math.abs(dq.w)<0.999999, posChanged=dp.some(v=>Math.abs(v)>1e-6);
+    if(!rotChanged&&!posChanged)return 0;
+    let changed=0;
+    for(const key of project.frames){
+      const t=key.poses&&key.poses[actorId]&&key.poses[actorId].nodes&&key.poses[actorId].nodes[id];
+      if(!t)continue;
+      if(rotChanged){const kq=new THREE.Quaternion().fromArray(t.q);t.q=dq.clone().multiply(kq).normalize().toArray();}
+      if(posChanged)for(let i=0;i<3;i++)t.p[i]+=dp[i];
+      changed++;
+    }
+    if(changed){dirty=true;drawTimeline&&drawTimeline();}
+    return changed;
+  }
+  function transformOf(n){return {p:n.position.toArray(),q:n.quaternion.toArray(),s:n.scale.toArray()};}
+  function deltaBetween(base,live){
+    if(!base||!live)return null;const d={};
+    const dp=[live.p[0]-base.p[0],live.p[1]-base.p[1],live.p[2]-base.p[2]];
+    if(dp.some(v=>Math.abs(v)>1e-6))d.p=dp;
+    const dq=new THREE.Quaternion().fromArray(live.q).multiply(new THREE.Quaternion().fromArray(base.q).invert()).toArray();
+    if(Math.abs(new THREE.Quaternion().fromArray(dq).w)<0.999999)d.q=dq;
+    const ds=[live.s[0]/(base.s[0]||1),live.s[1]/(base.s[1]||1),live.s[2]/(base.s[2]||1)];
+    if(ds.some(v=>Math.abs(v-1)>1e-6))d.s=ds;
+    return (d.p||d.q||d.s)?d:null;
+  }
+  // Путь-независимая синхронизация: сравниваем ЖИВОЙ корень с рабочей позой и переносим разницу
+  // во все ключи. Работает и для гизмо, и для числовых полей, и после любой внешней правки.
+  function syncRootToKeys(){
+    const r=records.get(actorId);if(!r||!active)return 0;
+    const base=project.poses&&project.poses[actorId]&&project.poses[actorId].root;
+    const live=transformOf(r.vrm.scene);
+    const d=deltaBetween(base,live);
+    if(!d)return 0;
+    const n=applyRootDeltaToKeys(d);
+    if(project.poses[actorId])project.poses[actorId].root=live;
+    return n;
+  }
+  function applyRootDeltaToKeys(d){
+    if(!d||(!d.p&&!d.q&&!d.s))return 0;
+    let changed=0;
+    for(const key of project.frames){
+      const pose=key.poses&&key.poses[actorId];
+      if(!pose||!pose.root)continue;
+      if(d.p)for(let i=0;i<3;i++)pose.root.p[i]+=d.p[i];
+      if(d.q){const kq=new THREE.Quaternion().fromArray(pose.root.q);kq.premultiply(new THREE.Quaternion().fromArray(d.q)).normalize();pose.root.q=kq.toArray();}
+      if(d.s)for(let i=0;i<3;i++)pose.root.s[i]*=d.s[i];
+      changed++;
+    }
+    if(changed)dirty=true;
+    return changed;
+  }
+
   function changeDone(text='Поза изменена. Добавьте или обновите ключ.'){
     project.poses=captureAll();dirty=true;playing=false;updateButtons();updateFields();status(text);queueSave();
   }
@@ -124,7 +208,7 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
     status(active?'Поза зафиксирована. Выберите сустав на модели или в списке.':'Редактор выключен. Исходное движение снова управляет моделью.');
   }
   function seek(time){
-    commitJoint();
+    commitJoint();if(applyToAll)syncRootToKeys();
     if(dirty)remember();
     playing=false;project.time=THREE.MathUtils.clamp(Number(time)||0,0,project.duration);
     const sampled=sampleFrames(project.frames,project.time,project.interpolation);if(sampled){project.poses=sampled;dirty=false;applyAll();}
@@ -135,6 +219,7 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
     const n=name==='__root'?r?.vrm.scene:r?.nodes.get(r.human[name]);
     const mode=context.mode||$('.pe-mode').value,space=context.space||$('.pe-space').value;
     if(!n)throw Error('Сустав не выбран');if(!values.every(Number.isFinite))throw Error('Введите конечные числа');
+    const beforeT=(name!=='__root'&&applyToAll)?{p:n.position.toArray(),q:n.quaternion.toArray(),s:n.scale.toArray()}:null;
     remember();playing=false;
     if(mode==='rotate'){
       const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(...values.map(THREE.MathUtils.degToRad),'XYZ'));
@@ -144,12 +229,14 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
       const result=moveJoint(r,name,target,{free:mode==='free'});
       if(result.clamped)status('Цель ограничена длиной конечности.');
     }
+    if(name==='__root'){if(applyToAll&&syncRootToKeys())status('Сдвиг модели перенесён на все ключи: '+project.frames.length);}
+    else if(beforeT&&applyToAll){const n2=applyBoneDeltaToKeys(name,beforeT);if(n2)status('Правка сустава перенесена на все ключи: '+n2);}
     changeDone();syncProxy();
   }
   function commitJoint(){if(!jointCommit)return;clearTimeout(jointTimer);const pending=jointCommit;jointCommit=null;alter(pending.values,pending);}
   function download(data,type,extension){const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=url;a.download=(project.name.replace(/[^\p{L}\p{N}_ -]/gu,'').trim()||'pose-clip')+extension;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-  function addKey(){commitJoint();remember();playing=false;project.poses=captureAll();project.frames=upsertFrame(project.frames,project.time,project.poses);dirty=false;drawTimeline();status('Ключ сохранён: '+project.time.toFixed(3)+' с');queueSave();}
-  function load(doc){syncActors();const next=decodeProject(doc,records);remember();project=next;pauseSource();enable(true,{preserve:true});applyAll();syncUi();status('Клип открыт: '+project.name);queueSave();}
+  function addKey(){commitJoint();if(applyToAll)syncRootToKeys();remember();playing=false;project.poses=captureAll();project.frames=upsertFrame(project.frames,project.time,project.poses);dirty=false;drawTimeline();status('Ключ сохранён: '+project.time.toFixed(3)+' с');queueSave();}
+  function load(doc){syncActors();const next=sanitizeProject(decodeProject(doc,records));remember();project=next;pauseSource();enable(true,{preserve:true});applyAll();syncUi();status('Клип открыт: '+project.name);queueSave();}
   $('.pe-enable').onchange=safe(e=>enable(e.target.checked));
   $('.pe-actor').onchange=safe(()=>{commitJoint();actorId=$('.pe-actor').value;boneOptions();});$('.pe-bone').onchange=safe(()=>selectBone($('.pe-bone').value));
   $('.pe-mode').onchange=safe(()=>{commitJoint();gizmo.setMode($('.pe-mode').value==='rotate'?'rotate':'translate');syncProxy();updateFields();});
@@ -171,8 +258,17 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
   $('.pe-vrma').onclick=safe(()=>{if(dirty)addKey();const bytes=exportVrma(record(),project.frames,actorId,project.interpolation,project.duration);download(bytes,'model/gltf-binary','.vrma');status('VRMA выбранного персонажа скачан.');});
   $('.pe-import').onclick=()=>$('.pe-file').click();$('.pe-file').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>20*1024*1024)throw Error('Размер клипа больше 20 МБ');load(JSON.parse(await file.text()));}catch(error){status(error.message,true);}finally{e.target.value='';}};
   $('.pe-restore').onclick=safe(()=>{const text=localStorage.getItem(STORE);if(!text)throw Error('Черновик не найден');load(JSON.parse(text));});
+  $('.pe-cleardraft').onclick=safe(()=>{commitJoint();remember();playing=false;try{localStorage.removeItem(STORE);}catch{}pendingDraft=null;project=fresh();project.poses=captureAll();baselineSource=clone(project.poses);dirty=false;syncUi();queueSave();status('Черновик сброшен, клип создан заново');});
   try{$('.pe-restore').hidden=!localStorage.getItem(STORE);}catch{}
-  gizmo.addEventListener('dragging-changed',e=>{controls.enabled=!e.value;if(e.value){remember();playing=false;dragStart=clone(project.poses);}else if(dragStart){dragStart=null;changeDone();syncProxy();}});
+  gizmo.addEventListener('dragging-changed',e=>{controls.enabled=!e.value;if(e.value){remember();playing=false;dragStart=clone(project.poses);}else if(dragStart){
+      if(selected==='__root'){if(applyToAll&&syncRootToKeys())status('Сдвиг модели перенесён на все ключи: '+project.frames.length);}
+      else if(applyToAll){
+        const rr=records.get(actorId),id=rr&&(rr.human[selected]||selected);
+        const beforeSnap=dragStart[actorId]&&dragStart[actorId].nodes&&id?dragStart[actorId].nodes[id]:null;
+        if(beforeSnap){const n2=applyBoneDeltaToKeys(selected,beforeSnap);if(n2)status('Правка сустава перенесена на все ключи: '+n2);}
+      }
+      dragStart=null;changeDone();syncProxy();
+    }});
   gizmo.addEventListener('objectChange',safe(()=>{
     if(!active||!gizmo.dragging)return;const n=selectedNode();
     if($('.pe-mode').value==='rotate')setWorldRotation(n,proxy.quaternion);
@@ -185,18 +281,18 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
     const hit=raycaster.intersectObjects(markers.children,false)[0];if(hit){selectBone(hit.object.userData.bone);event.preventDefault();}
   }
   renderer.domElement.addEventListener('pointerdown',choose);
-  function keyboard(e){if(!active||e.target.closest('input,select,textarea,[contenteditable=true]'))return;
+  function keyboard(e){if(!active||objectFocus||e.repeat||e.target.closest('input,select,textarea,[contenteditable=true]'))return;
     if((e.ctrlKey||e.metaKey)&&e.code==='KeyZ'){e.preventDefault();$(e.shiftKey?'.pe-redo':'.pe-undo').click();}
-    else if(e.code==='KeyR'){$('.pe-mode').value='rotate';$('.pe-mode').onchange();}
-    else if(e.code==='KeyG'){$('.pe-mode').value='ik';$('.pe-mode').onchange();}
+    else if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.code==='KeyR'){$('.pe-mode').value='rotate';$('.pe-mode').onchange();}
+    else if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.code==='KeyG'){$('.pe-mode').value='ik';$('.pe-mode').onchange();}
     else if(e.code==='KeyK'){e.preventDefault();safe(addKey)();}
   }
   window.addEventListener('keydown',keyboard);
   function saveOnExit(){try{commitJoint();if(pendingDraft)localStorage.setItem(STORE,pendingDraft);}catch{}}
   window.addEventListener('pagehide',saveOnExit);
   function update(dt=0){
-    if(disposed)return;syncActors();badge.hidden=!active;if(!active){helper.visible=false;markers.visible=false;return;}
-    badge.textContent=(playing?'Клип · '+project.name+' · '+project.time.toFixed(2)+' с':'Редактор · '+boneLabel(selected==='__root'?'Вся модель':selected));
+    if(disposed)return;syncActors();syncQuickTools();badge.hidden=!active;if(!active){helper.visible=false;markers.visible=false;return;}
+    badge.textContent=objectFocus?'Редактор · объект сцены':(playing?'Клип · '+project.name+' · '+project.time.toFixed(2)+' с':'Редактор · '+boneLabel(selected==='__root'?'Вся модель':selected));
     if(playing){project.time+=dt;if(project.time>project.duration){if(project.loop)project.time%=project.duration;else{project.time=project.duration;playing=false;}}project.poses=sampleFrames(project.frames,project.time,project.interpolation)||project.poses;$('.pe-time').value=String(project.time);$('.pe-seconds').value=project.time.toFixed(3);$('.pe-count').textContent=`${project.frames.length} ключ. · ${project.time.toFixed(2)} с`;updateButtons();}
     applyAll();markers.visible=!objectFocus&&$('.pe-markers').checked;
     if(playing)updateFields();
@@ -214,8 +310,9 @@ export function createPoseEditor({scene,camera,renderer,controls,host,getAvatars
     }catch(e){project=previous;enable(true,{preserve:true});applyAll();throw e;}
   }
   syncActors();
-  return {section,importSource,get objectFocus(){return objectFocus;},setObjectFocus(value){commitJoint();objectFocus=Boolean(value);playing=false;syncProxy();},commit(){commitJoint();if(dirty||!project.frames.length)addKey();return encodeProject(project,records);},get active(){return active;},get state(){return {active,playing,actor:actorId,bone:selected,time:project.time,duration:project.duration,keys:project.frames.map(k=>k.time),dirty,message};},update,enable,seek,selectBone,addKey,load,
+  return {section,importSource,get objectFocus(){return objectFocus;},setObjectFocus(value){commitJoint();objectFocus=Boolean(value);playing=false;syncProxy();},commit(){commitJoint();if(applyToAll)syncRootToKeys();if(dirty||!project.frames.length)addKey();return encodeProject(project,records);},get active(){return active;},get state(){return {active,playing,actor:actorId,bone:selected,time:project.time,duration:project.duration,keys:project.frames.map(k=>k.time),dirty,message};},update,enable,seek,selectBone,addKey,load,
     exportProject:()=>encodeProject(project,records),
-    destroy(){saveOnExit();disposed=true;clearTimeout(autosaveTimer);clearTimeout(jointTimer);gizmo.detach();gizmo.dispose();scene.remove(helper,proxy,markers);sphere.dispose();material.dispose();renderer.domElement.removeEventListener('pointerdown',choose);window.removeEventListener('keydown',keyboard);window.removeEventListener('pagehide',saveOnExit);badge.remove();section.remove();}
+    __debug:()=>({gizmo,proxy,get selected(){return selected},get dragStart(){return dragStart},get actorId(){return actorId},get frames(){return project.frames},get poses(){return project.poses},record:()=>record()}),
+    destroy(){saveOnExit();disposed=true;clearTimeout(autosaveTimer);clearTimeout(jointTimer);gizmo.detach();gizmo.dispose();scene.remove(helper,proxy,markers);sphere.dispose();material.dispose();renderer.domElement.removeEventListener('pointerdown',choose);window.removeEventListener('keydown',keyboard);window.removeEventListener('pagehide',saveOnExit);badge.remove();quickTools.remove();section.remove();}
   };
 }
