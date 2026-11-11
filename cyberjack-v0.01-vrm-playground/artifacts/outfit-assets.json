@@ -1,0 +1,62 @@
+[
+  {
+    "file": "kai-outfit-00.vrm",
+    "bytes": 63080188,
+    "materials": 20
+  },
+  {
+    "file": "kai-outfit-01.vrm",
+    "bytes": 59789652,
+    "materials": 17
+  },
+  {
+    "file": "kai-outfit-02.vrm",
+    "bytes": 58510216,
+    "materials": 19
+  },
+  {
+    "file": "kai-outfit-03.vrm",
+    "bytes": 58147812,
+    "materials": 18
+  },
+  {
+    "file": "mira-outfit-00.vrm",
+    "bytes": 82748564,
+    "materials": 24
+  },
+  {
+    "file": "mira-outfit-01.vrm",
+    "bytes": 74689400,
+    "materials": 20
+  },
+  {
+    "file": "mira-outfit-02.vrm",
+    "bytes": 85187528,
+    "materials": 18
+  },
+  {
+    "file": "mira-outfit-03.vrm",
+    "bytes": 71350376,
+    "materials": 16
+  },
+  {
+    "file": "rin-outfit-00.vrm",
+    "bytes": 75031532,
+    "materials": 23
+  },
+  {
+    "file": "rin-outfit-01.vrm",
+    "bytes": 78924108,
+    "materials": 18
+  },
+  {
+    "file": "rin-outfit-02.vrm",
+    "bytes": 71626596,
+    "materials": 19
+  },
+  {
+    "file": "rin-outfit-03.vrm",
+    "bytes": 69060616,
+    "materials": 16
+  }
+]

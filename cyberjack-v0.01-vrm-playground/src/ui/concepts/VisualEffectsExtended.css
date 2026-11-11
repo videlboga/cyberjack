@@ -1,0 +1,411 @@
+/* Pulse: panels breathe together in a measured cycle. */
+.fx-pulse .fx-action-cut {
+  left: 10%;
+  bottom: 12%;
+  width: 62%;
+  height: 28%;
+  clip-path: polygon(3% 5%, 100% 0, 96% 96%, 0 88%);
+  animation: fx-pulse-panel 2.45s ease both;
+}
+.fx-pulse .fx-face-cut {
+  right: 8%;
+  top: 17%;
+  animation: fx-pulse-face 2.45s ease both;
+}
+.fx-pulse .fx-context {
+  left: 12%;
+  bottom: 34%;
+}
+.fx-pulse .fx-resolution {
+  right: 9%;
+  bottom: 11%;
+}
+@keyframes fx-pulse-panel {
+  0%,
+  8% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.985);
+  }
+  44% {
+    transform: scale(1.008);
+  }
+  58% {
+    transform: scale(0.985);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1.008);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+@keyframes fx-pulse-face {
+  0%,
+  25% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  36% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  64% {
+    transform: scale(1.006);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Electric: exposure breaks into brief, hard photographic beats. */
+.fx-electric .fx-action-cut {
+  left: 7%;
+  top: 31%;
+  width: 68%;
+  height: 34%;
+  clip-path: polygon(0 8%, 94% 0, 100% 82%, 7% 100%);
+  animation: fx-electric-panel 1.8s steps(1, end) both;
+}
+.fx-electric .fx-face-cut {
+  right: 6%;
+  top: 14%;
+  width: 33%;
+  height: 40%;
+  animation: fx-electric-face 1.8s steps(1, end) both;
+}
+.fx-electric .fx-context {
+  left: 8%;
+  bottom: 26%;
+}
+.fx-electric .fx-resolution {
+  right: 7%;
+  bottom: 9%;
+}
+@keyframes fx-electric-panel {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateX(-8%);
+  }
+  10%,
+  15% {
+    opacity: 1;
+    filter: contrast(1.55) brightness(1.18);
+    transform: translateX(1%);
+  }
+  16%,
+  21% {
+    opacity: 0.15;
+  }
+  22%,
+  31% {
+    opacity: 1;
+    filter: contrast(1.25);
+    transform: translateX(-0.8%);
+  }
+  32%,
+  41% {
+    opacity: 0.25;
+  }
+  42%,
+  68% {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fx-electric-face {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  21%,
+  28% {
+    opacity: 1;
+    filter: contrast(1.5);
+  }
+  29%,
+  38% {
+    opacity: 0.12;
+  }
+  39%,
+  72% {
+    opacity: 1;
+    filter: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Cold: the action panel settles and holds; saturation drains instead of adding diagrams. */
+.fx-cold .fx-action-cut {
+  left: 9%;
+  bottom: 11%;
+  width: 66%;
+  height: 30%;
+  clip-path: polygon(0 0, 96% 5%, 100% 94%, 4% 100%);
+  animation: fx-cold-panel 2.6s ease both;
+}
+.fx-cold .fx-face-cut {
+  right: 8%;
+  top: 17%;
+  animation: fx-cold-face 2.6s ease both;
+}
+.fx-cold .fx-context {
+  left: 11%;
+  bottom: 35%;
+}
+.fx-cold .fx-resolution {
+  right: 9%;
+  bottom: 10%;
+}
+@keyframes fx-cold-panel {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateY(10%);
+    filter: saturate(1);
+  }
+  22% {
+    opacity: 1;
+    transform: none;
+  }
+  45%,
+  78% {
+    opacity: 1;
+    filter: saturate(0.28) contrast(1.12);
+    transform: scale(0.992);
+  }
+  100% {
+    opacity: 0;
+    filter: saturate(0.2);
+  }
+}
+@keyframes fx-cold-face {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateY(6%);
+  }
+  42%,
+  80% {
+    opacity: 1;
+    transform: none;
+    filter: saturate(0.42);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Heat: the image expands upward and becomes warmer/softer over time. */
+.fx-heat .fx-action-cut {
+  left: 10%;
+  bottom: 8%;
+  width: 64%;
+  height: 36%;
+  clip-path: polygon(4% 8%, 100% 0, 94% 100%, 0 91%);
+  transform-origin: center bottom;
+  animation: fx-heat-panel 2.65s ease both;
+}
+.fx-heat .fx-face-cut {
+  right: 8%;
+  top: 15%;
+  animation: fx-heat-face 2.65s ease both;
+}
+.fx-heat .fx-context {
+  left: 12%;
+  bottom: 39%;
+}
+.fx-heat .fx-resolution {
+  right: 9%;
+  bottom: 9%;
+}
+@keyframes fx-heat-panel {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateY(14%) scaleY(0.78);
+    filter: saturate(0.8);
+  }
+  24% {
+    opacity: 1;
+    transform: none;
+  }
+  48%,
+  80% {
+    opacity: 1;
+    transform: translateY(-2%) scale(1.018);
+    filter: saturate(1.28) contrast(0.94);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5%) scale(1.025);
+    filter: blur(1px);
+  }
+}
+@keyframes fx-heat-face {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateY(8%);
+  }
+  43%,
+  80% {
+    opacity: 1;
+    transform: none;
+    filter: saturate(1.15);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(1px);
+  }
+}
+
+/* Sharp: a narrow photographic cut enters and disappears before the face catches up. */
+.fx-action-cut--top-crop > img:first-child {
+  object-position: center top;
+  transform: none;
+}
+.fx-action-cut--bottom-crop > img:first-child {
+  object-position: center bottom;
+  transform: none;
+}
+.fx-action-cut--feet-pinch > img:first-child {
+  object-position: center 85%;
+  transform: none;
+}
+.fx-sharp .fx-action-cut {
+  left: 17%;
+  top: 35%;
+  width: 61%;
+  height: 17%;
+  clip-path: polygon(0 18%, 100% 0, 96% 83%, 3% 100%);
+  animation: fx-sharp-panel 1.85s cubic-bezier(0.1, 0.85, 0.12, 1) both;
+}
+.fx-sharp .fx-face-cut {
+  right: 7%;
+  top: 17%;
+  width: 31%;
+  height: 38%;
+  animation: fx-sharp-face 1.85s both;
+}
+.fx-sharp .fx-context {
+  left: 19%;
+  top: 28%;
+  bottom: auto;
+}
+.fx-sharp .fx-resolution {
+  right: 8%;
+  bottom: 11%;
+}
+@keyframes fx-sharp-panel {
+  0%,
+  9% {
+    opacity: 0;
+    transform: translateX(-38%);
+  }
+  14%,
+  55% {
+    opacity: 1;
+    transform: none;
+    filter: contrast(1.25);
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: translateX(12%);
+  }
+}
+@keyframes fx-sharp-face {
+  0%,
+  28% {
+    opacity: 0;
+    transform: translateX(16%);
+  }
+  39%,
+  76% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Restraint: action and reaction close in from opposite sides, then remain locked. */
+.fx-restraint .fx-action-cut {
+  left: 6%;
+  top: 29%;
+  width: 58%;
+  height: 39%;
+  clip-path: polygon(0 3%, 100% 0, 94% 100%, 5% 94%);
+  animation: fx-restraint-action 2.7s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+.fx-restraint .fx-face-cut {
+  right: 6%;
+  top: 20%;
+  width: 34%;
+  height: 42%;
+  clip-path: polygon(7% 0, 100% 5%, 93% 100%, 0 94%);
+  animation: fx-restraint-face 2.7s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+.fx-restraint .fx-context {
+  left: 8%;
+  bottom: 25%;
+}
+.fx-restraint .fx-resolution {
+  right: 7%;
+  bottom: 9%;
+}
+@keyframes fx-restraint-action {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateX(-24%);
+  }
+  25%,
+  82% {
+    opacity: 1;
+    transform: translateX(4%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(4%);
+  }
+}
+@keyframes fx-restraint-face {
+  0%,
+  12% {
+    opacity: 0;
+    transform: translateX(28%);
+  }
+  29%,
+  82% {
+    opacity: 1;
+    transform: translateX(-5%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-5%);
+  }
+}

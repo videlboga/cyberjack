@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "model": "compatible-interaction-combinations",
+  "characters": 3,
+  "families": 9,
+  "combinationsPerCharacter": 742,
+  "totalPlannedAssets": 2226,
+  "sparseFallbackAssets": 252,
+  "byFamily": [
+    {
+      "family": "vibration",
+      "combinationsPerCharacter": 98,
+      "totalAssets": 294
+    },
+    {
+      "family": "sex_machine",
+      "combinationsPerCharacter": 98,
+      "totalAssets": 294
+    },
+    {
+      "family": "electrostimulation",
+      "combinationsPerCharacter": 105,
+      "totalAssets": 315
+    },
+    {
+      "family": "exposure",
+      "combinationsPerCharacter": 70,
+      "totalAssets": 210
+    },
+    {
+      "family": "foot",
+      "combinationsPerCharacter": 29,
+      "totalAssets": 87
+    },
+    {
+      "family": "oral",
+      "combinationsPerCharacter": 100,
+      "totalAssets": 300
+    },
+    {
+      "family": "penetration",
+      "combinationsPerCharacter": 108,
+      "totalAssets": 324
+    },
+    {
+      "family": "capsule",
+      "combinationsPerCharacter": 50,
+      "totalAssets": 150
+    },
+    {
+      "family": "lesbian",
+      "combinationsPerCharacter": 84,
+      "totalAssets": 252
+    }
+  ]
+}

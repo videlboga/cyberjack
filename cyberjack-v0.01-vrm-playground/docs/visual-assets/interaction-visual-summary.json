@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "model": "sparse-interaction-overrides",
+  "families": 9,
+  "variants": 32,
+  "assetsPerCharacter": 84,
+  "totalPlannedAssets": 252,
+  "existingActionsLinked": 11,
+  "plannedActions": 24,
+  "existingItemsLinked": 7,
+  "plannedItems": 3
+}

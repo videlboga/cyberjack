@@ -1,0 +1,76 @@
+/* No written sound effects; the existing game audio carries that layer. */
+.fx-cinematic .fx-sound-word {
+  display: none !important;
+}
+
+/* Vibration stays compositionally stable and trembles continuously inside its panels. */
+.fx-vibration .fx-action-cut,
+.fx-vibration .fx-face-cut {
+  animation: fx-vibration-panel-life 2.5s ease both !important;
+}
+
+.fx-vibration .fx-action-cut > img:not(.fx-vibration-echo) {
+  transform: scale(1.004);
+  filter: blur(.18px);
+  animation: fx-vibration-image .18s linear .28s 11;
+}
+
+.fx-vibration .fx-face-cut > img:not(.fx-face-echo) {
+  transform: scale(1.003);
+  animation: fx-vibration-face-image .2s linear .38s 9;
+}
+
+.fx-vibration .fx-vibration-echo,
+.fx-vibration .fx-face-echo {
+  display: none;
+}
+
+.fx-vibration .fx-vibration-echo.echo-a {
+  animation: fx-vibration-echo-a .14s linear .3s 13 alternate;
+}
+
+.fx-vibration .fx-vibration-echo.echo-b {
+  animation: fx-vibration-echo-b .14s linear .34s 13 alternate;
+}
+
+.fx-vibration .fx-face-echo {
+  animation: fx-vibration-face-echo .17s linear .42s 10 alternate;
+}
+
+@keyframes fx-vibration-panel-life {
+  0%, 8% { opacity: 0; }
+  16%, 78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes fx-vibration-image {
+  0% { transform: translate(-.8px,.2px) scale(1.004); }
+  20% { transform: translate(.6px,-.6px) scale(1.004); }
+  40% { transform: translate(-.25px,.75px) scale(1.004); }
+  60% { transform: translate(.8px,.1px) scale(1.004); }
+  80% { transform: translate(-.55px,-.5px) scale(1.004); }
+  100% { transform: translate(-.8px,.2px) scale(1.004); }
+}
+
+@keyframes fx-vibration-face-image {
+  0% { transform: translate(-.4px,.1px) scale(1.003); }
+  25% { transform: translate(.35px,-.3px) scale(1.003); }
+  50% { transform: translate(.1px,.4px) scale(1.003); }
+  75% { transform: translate(-.35px,-.25px) scale(1.003); }
+  100% { transform: translate(-.4px,.1px) scale(1.003); }
+}
+
+@keyframes fx-vibration-echo-a {
+  from { opacity: .07; transform: translate(-1.1px,-.35px) scale(1.002); }
+  to { opacity: .16; transform: translate(1.1px,.35px) scale(1.002); }
+}
+
+@keyframes fx-vibration-echo-b {
+  from { opacity: .14; transform: translate(.8px,-.25px) scale(1.001); }
+  to { opacity: .05; transform: translate(-.8px,.25px) scale(1.001); }
+}
+
+@keyframes fx-vibration-face-echo {
+  from { opacity: .11; transform: translateX(-.8px); }
+  to { opacity: .2; transform: translateX(.8px); }
+}

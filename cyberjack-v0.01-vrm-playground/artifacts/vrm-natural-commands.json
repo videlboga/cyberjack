@@ -1,0 +1,77 @@
+[
+  {
+    "text": "Сядь, пожалуйста",
+    "expected": "pose_sitting",
+    "actual": "pose_sitting",
+    "pass": true,
+    "intent": {
+      "type": "change_pose",
+      "targetPoseId": "pose_sitting"
+    },
+    "model": "explicit-posture-command-v1"
+  },
+  {
+    "text": "Подними обе руки вверх",
+    "expected": "posture_arms_up",
+    "actual": "posture_arms_up",
+    "pass": true,
+    "intent": {
+      "type": "activate_context",
+      "targetContextId": "posture_arms_up"
+    },
+    "model": "explicit-posture-command-v1"
+  },
+  {
+    "text": "Опусти руки",
+    "expected": "posture_arms_down",
+    "actual": "posture_arms_down",
+    "pass": true,
+    "intent": {
+      "type": "activate_context",
+      "targetContextId": "posture_arms_down"
+    },
+    "model": "explicit-posture-command-v1"
+  },
+  {
+    "text": "Вытяни руки перед собой",
+    "expected": "posture_arms_front",
+    "actual": "posture_arms_front",
+    "pass": true,
+    "intent": {
+      "type": "activate_context",
+      "targetContextId": "posture_arms_front"
+    },
+    "model": "explicit-posture-command-v1"
+  },
+  {
+    "text": "Поверни голову налево",
+    "expected": "posture_head_left",
+    "actual": "posture_head_left",
+    "pass": true,
+    "intent": {
+      "type": "activate_context",
+      "targetContextId": "posture_head_left"
+    },
+    "model": "explicit-posture-command-v1"
+  },
+  {
+    "text": "Не поднимай руки",
+    "expected": null,
+    "actual": null,
+    "pass": true,
+    "intent": {
+      "type": "none"
+    },
+    "model": "deepseek/deepseek-v4-flash+perplexity/pplx-embed-v1-0.6b"
+  },
+  {
+    "text": "Я подниму руки",
+    "expected": null,
+    "actual": null,
+    "pass": true,
+    "intent": {
+      "type": "none"
+    },
+    "model": "deepseek/deepseek-v4-flash+perplexity/pplx-embed-v1-0.6b"
+  }
+]

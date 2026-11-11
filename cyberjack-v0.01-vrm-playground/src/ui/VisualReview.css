@@ -1,0 +1,9 @@
+.avatar-review-trigger{position:absolute;z-index:5;right:10px;top:10px;padding:7px 9px;border:1px solid #58766e;background:rgba(11,25,22,.9);color:#b9ddd4;font-size:8px;cursor:pointer}
+.avatar-review-trigger:hover{border-color:#72d6bd}
+.visual-review-drawer>img{width:100%;height:230px;margin-top:12px;object-fit:contain;background:#080d0f}
+.visual-review-drawer>code{display:block;margin-top:8px;overflow-wrap:anywhere;color:#71858a;font-size:7px;line-height:1.4}
+.visual-review-decisions,.visual-review-issues{display:flex;flex-wrap:wrap;gap:5px}
+.visual-review-decisions button,.visual-review-issues button{padding:7px 8px}
+.visual-review-decisions button.active,.visual-review-issues button.active{border-color:#72d6bd;background:#17342d;color:#c0e8dd}
+.visual-review-drawer textarea{width:100%;min-height:90px;box-sizing:border-box;padding:9px;border:1px solid #394d52;background:#091114;color:#c4cfd2;font:inherit;resize:vertical}
+.visual-review-save{width:100%;margin-top:10px;border-color:#72d6bd!important;background:#19372f!important;color:#c5eee3!important}

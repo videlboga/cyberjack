@@ -1,0 +1,25 @@
+{
+  "version": 4,
+  "model": "device-visual",
+  "characters": ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01"],
+  "phases": ["sustain", "intense", "peak"],
+  "affectsByPhase": {
+    "sustain": ["neutral", "receptive", "guarded", "high_positive", "high_negative"],
+    "intense": ["receptive", "guarded", "high_positive", "high_negative", "subspace"],
+    "peak": ["high_positive", "high_negative", "subspace", "climax"]
+  },
+  "wardrobes": ["nude", "underwear", "device_outfit"],
+  "devices": [
+    { "id": "sex_machine", "configurations": ["stirrups", "restrained", "suspended", "milking", "hmd", "mind_control"] },
+    { "id": "sensory_capsule", "legacyFamily": "capsule", "configurations": ["hmd", "machine", "electric", "glory"] },
+    { "id": "electric_chair", "legacyFamily": "electrostimulation", "configurations": ["chair"] },
+    { "id": "vibration_machine", "legacyFamily": "vibration", "configurations": ["machine"] },
+    { "id": "tickle_stocks", "legacyFamily": "foot", "configurations": ["stocks_tickle"] }
+  ],
+  "migration": {
+    "sourceRoot": "/character-images/interactions-expanded",
+    "legacyRestraint": "machine",
+    "optionalConfigurations": ["sensory_capsule/glory"]
+  },
+  "assetConvention": "/character-images/devices-v4/$character/$device/$configuration/$wardrobe__$affect__$phase.png"
+}

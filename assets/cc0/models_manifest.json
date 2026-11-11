@@ -1,0 +1,90 @@
+{
+  "license": "CC0",
+  "source": "polyhaven.com",
+  "models": [
+    {
+      "id": "medical_box",
+      "role": "медбокс: аптечка на стену, медблок и калибровочная",
+      "file": "models/medical_box/medical_box_1k.gltf",
+      "bytes": 1975384
+    },
+    {
+      "id": "chemistry_set",
+      "role": "химия: колбы и реагенты, калибровочная и склад",
+      "file": "models/chemistry_set/chemistry_set_1k.gltf",
+      "bytes": 3206159
+    },
+    {
+      "id": "steel_frame_shelves_01",
+      "role": "стеллаж: склад, техузел, медблок",
+      "file": "models/steel_frame_shelves_01/steel_frame_shelves_01_1k.gltf",
+      "bytes": 1597356
+    },
+    {
+      "id": "metal_office_desk",
+      "role": "стол: пост наблюдения, комната персонала",
+      "file": "models/metal_office_desk/metal_office_desk_1k.gltf",
+      "bytes": 1606530
+    },
+    {
+      "id": "metal_stool_01",
+      "role": "табурет: рабочие места у станций",
+      "file": "models/metal_stool_01/metal_stool_01_1k.gltf",
+      "bytes": 2286960
+    },
+    {
+      "id": "tool_cart",
+      "role": "тележка инструментов: ремонтный бокс, станции",
+      "file": "models/tool_cart/tool_cart_1k.gltf",
+      "bytes": 3172460
+    },
+    {
+      "id": "wheelchair_01",
+      "role": "кресло-каталка: медблок",
+      "file": "models/wheelchair_01/wheelchair_01_1k.gltf",
+      "bytes": 1748394
+    },
+    {
+      "id": "utility_box_01",
+      "role": "настенный щиток: технические узлы всех комнат",
+      "file": "models/utility_box_01/utility_box_01_1k.gltf",
+      "bytes": 1977061
+    },
+    {
+      "id": "security_camera_01",
+      "role": "камера наблюдения: пост, коридоры",
+      "file": "models/security_camera_01/security_camera_01_1k.gltf",
+      "bytes": 1759323
+    },
+    {
+      "id": "plastic_crate_01",
+      "role": "контейнер: склад, перевозка образцов",
+      "file": "models/plastic_crate_01/plastic_crate_01_1k.gltf",
+      "bytes": 3188865
+    },
+    {
+      "id": "drawer_cabinet",
+      "role": "тумба с ящиками: калибровочная, пост",
+      "file": "models/drawer_cabinet/drawer_cabinet_1k.gltf",
+      "bytes": 1143429
+    },
+    {
+      "id": "clipboard",
+      "role": "планшет с бумагами: рабочие поверхности",
+      "file": "models/clipboard/clipboard_1k.gltf",
+      "bytes": 1786921
+    },
+    {
+      "id": "desk_lamp_arm_01",
+      "role": "лампа на кронштейне: столы и посты",
+      "file": "models/desk_lamp_arm_01/desk_lamp_arm_01_1k.gltf",
+      "bytes": 2875984
+    },
+    {
+      "id": "projector_screen",
+      "role": "экран: пост наблюдения, камера",
+      "file": "models/projector_screen/projector_screen_1k.gltf",
+      "bytes": 3108259
+    }
+  ]
+}

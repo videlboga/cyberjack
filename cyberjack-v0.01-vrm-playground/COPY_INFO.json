@@ -1,0 +1,22 @@
+{
+  "source": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01",
+  "copy": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01-vrm-playground",
+  "created": "2026-10-18",
+  "ui": "http://127.0.0.1:5174/manga?focus=S-AV-01",
+  "apiPort": 3002,
+  "database": "cyberjack.sqlite",
+  "shared": [
+    "node_modules",
+    "public media directories",
+    "VRM source assets"
+  ],
+  "codeChanges": [
+    "src/ui/VrmGameStage.tsx",
+    "src/ui/VrmGameStage.css",
+    "src/ui/CalibrationPrototype.tsx",
+    "src/ui/CampaignApp.tsx",
+    "public/vrm-stage/",
+    "vite.config.ts",
+    "src/api/server.ts"
+  ]
+}

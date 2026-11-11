@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-19T14:28:30.547Z",
+  "totalAssets": 1176,
+  "perCharacter": 392,
+  "breakdown": {
+    "characters": 3,
+    "poses": 7,
+    "clothing": 7,
+    "restraints": 1,
+    "states": 8
+  }
+}

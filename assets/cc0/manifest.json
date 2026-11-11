@@ -1,0 +1,78 @@
+{
+  "license": "CC0",
+  "source": "polyhaven.com",
+  "textures": [
+    {
+      "id": "interior_tiles",
+      "role": "пол: крупная плитка",
+      "maps": {
+        "diffuse": "ok",
+        "normal": "ok",
+        "roughness": "ok",
+        "ao": "ok"
+      }
+    },
+    {
+      "id": "metal_plate_02",
+      "role": "металл: панели, кромки, рамки",
+      "maps": {
+        "diffuse": "ok",
+        "normal": "ok",
+        "roughness": "ok",
+        "ao": "ok"
+      }
+    },
+    {
+      "id": "painted_concrete",
+      "role": "стены: окрашенные панели",
+      "maps": {
+        "diffuse": "ok",
+        "normal": "ok",
+        "roughness": "ok",
+        "ao": "ok"
+      }
+    },
+    {
+      "id": "ceiling_interior",
+      "role": "потолок и потолочные панели",
+      "maps": {
+        "diffuse": "ok",
+        "normal": "ok",
+        "roughness": "ok",
+        "ao": "ok"
+      }
+    },
+    {
+      "id": "leather_white",
+      "role": "обивка: матрас, сиденья",
+      "maps": {
+        "diffuse": "ok",
+        "normal": "ok",
+        "roughness": "ok",
+        "ao": "ok"
+      }
+    },
+    {
+      "id": "grey_tiles",
+      "role": "тёмные вставки, цоколи, швы",
+      "maps": {
+        "diffuse": "ok",
+        "normal": "ok",
+        "roughness": "ok",
+        "ao": "ok"
+      }
+    }
+  ],
+  "hdris": [
+    {
+      "id": "blocky_photo_studio",
+      "role": "студийный свет для помещений",
+      "file": "/home/cyberkitty/Projects/cyberjack/assets/cc0/hdr/blocky_photo_studio_1k.hdr"
+    },
+    {
+      "id": "studio_small_09",
+      "role": "мягкий студийный свет для крупных планов",
+      "file": "/home/cyberkitty/Projects/cyberjack/assets/cc0/hdr/studio_small_09_1k.hdr"
+    }
+  ]
+}

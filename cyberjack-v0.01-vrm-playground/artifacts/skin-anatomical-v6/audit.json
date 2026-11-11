@@ -1,0 +1,191 @@
+[
+  {
+    "character": "mira",
+    "style": {
+      "preset": "blender",
+      "strength": 1,
+      "skinPolicy": "anatomical-joints-v6",
+      "skinFilterRadius": 0.01545110545428138,
+      "skinJoints": [
+        {
+          "mesh": "model_10",
+          "vertices": 9100,
+          "joints": [
+            {
+              "side": "left",
+              "center": [
+                0.07815144956688466,
+                0.48927896516964076,
+                -0.015616541582402974
+              ],
+              "radius": 0.19291206540238542,
+              "vertices": 320
+            },
+            {
+              "side": "right",
+              "center": [
+                -0.07811171060373207,
+                0.49037656813445474,
+                -0.015616574631651208
+              ],
+              "radius": 0.19336557095464904,
+              "vertices": 324
+            }
+          ]
+        }
+      ],
+      "skinNormals": [
+        {
+          "name": "KK cf_m_body",
+          "encoding": "unity-packed-like",
+          "attenuate": true,
+          "packedFraction": 1,
+          "samples": 1024
+        }
+      ],
+      "materials": 23,
+      "blenderMaterials": 7,
+      "outlineMeshes": 16
+    },
+    "normalCheck": {
+      "packed": {
+        "encoding": "unity-packed-like",
+        "attenuate": true,
+        "packedFraction": 1,
+        "samples": 1024
+      },
+      "regular": {
+        "encoding": "tangent-rgb-or-unclassified",
+        "attenuate": false,
+        "packedFraction": 0,
+        "samples": 1024
+      }
+    }
+  },
+  {
+    "character": "rin",
+    "style": {
+      "preset": "blender",
+      "strength": 1,
+      "skinPolicy": "anatomical-joints-v6",
+      "skinFilterRadius": 0.014516029572935126,
+      "skinJoints": [
+        {
+          "mesh": "model_10",
+          "vertices": 9303,
+          "joints": [
+            {
+              "side": "left",
+              "center": [
+                0.0737415184826319,
+                0.46024701593917755,
+                -0.014735337667697647
+              ],
+              "radius": 0.1814535048373553,
+              "vertices": 328
+            },
+            {
+              "side": "right",
+              "center": [
+                -0.07370399064902294,
+                0.4602454370886282,
+                -0.014735338452394097
+              ],
+              "radius": 0.18144723448602282,
+              "vertices": 328
+            }
+          ]
+        }
+      ],
+      "skinNormals": [
+        {
+          "name": "KK cf_m_body",
+          "encoding": "unity-packed-like",
+          "attenuate": true,
+          "packedFraction": 1,
+          "samples": 1024
+        }
+      ],
+      "materials": 23,
+      "blenderMaterials": 7,
+      "outlineMeshes": 16
+    },
+    "normalCheck": {
+      "packed": {
+        "encoding": "unity-packed-like",
+        "attenuate": true,
+        "packedFraction": 1,
+        "samples": 1024
+      },
+      "regular": {
+        "encoding": "tangent-rgb-or-unclassified",
+        "attenuate": false,
+        "packedFraction": 0,
+        "samples": 1024
+      }
+    }
+  },
+  {
+    "character": "kai",
+    "style": {
+      "preset": "blender",
+      "strength": 1,
+      "skinPolicy": "anatomical-joints-v6",
+      "skinFilterRadius": 0.016200078020822007,
+      "skinJoints": [
+        {
+          "mesh": "model_10",
+          "vertices": 6637,
+          "joints": [
+            {
+              "side": "left",
+              "center": [
+                0.08230826277713651,
+                0.5137217462425572,
+                -0.016447187038320474
+              ],
+              "radius": 0.202504462426893,
+              "vertices": 329
+            },
+            {
+              "side": "right",
+              "center": [
+                -0.0822663760676887,
+                0.5137200777919334,
+                -0.01644718037726842
+              ],
+              "radius": 0.20249748809365717,
+              "vertices": 329
+            }
+          ]
+        }
+      ],
+      "skinNormals": [
+        {
+          "name": "KK cm_m_body",
+          "encoding": "unity-packed-like",
+          "attenuate": true,
+          "packedFraction": 1,
+          "samples": 1024
+        }
+      ],
+      "materials": 23,
+      "blenderMaterials": 7,
+      "outlineMeshes": 16
+    },
+    "normalCheck": {
+      "packed": {
+        "encoding": "unity-packed-like",
+        "attenuate": true,
+        "packedFraction": 1,
+        "samples": 1024
+      },
+      "regular": {
+        "encoding": "tangent-rgb-or-unclassified",
+        "attenuate": false,
+        "packedFraction": 0,
+        "samples": 1024
+      }
+    }
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "character": "mira",
+  "outfit": "03",
+  "ready": true,
+  "style": {
+    "preset": "blender",
+    "strength": 1,
+    "materials": 23,
+    "blenderMaterials": 7,
+    "outlineMeshes": 16
+  },
+  "presence": {
+    "tension": 0.014819456499325909,
+    "fatigue": 0.0019912428067638895,
+    "affinity": 0.5568943449234364,
+    "breaths": 12.113788815893345,
+    "mode": "relaxed",
+    "targetMode": "relaxed"
+  },
+  "posture": {
+    "base": "act_present_feet",
+    "arms": "free",
+    "legs": "free",
+    "head": "left",
+    "blockedArms": false,
+    "weight": 0,
+    "yaw": 0.31554257814850467
+  },
+  "library": {
+    "phase": "idle",
+    "label": "Базовый клип"
+  },
+  "camera": {
+    "focusId": "systemic",
+    "cinematic": false,
+    "tool": null,
+    "transitioning": false,
+    "distance": 3.604247494276718
+  },
+  "clip": "Base_feet",
+  "emotion": "excited",
+  "replyId": "45",
+  "talking": true,
+  "boundBones": 154,
+  "grounding": {
+    "floorY": 0,
+    "mode": "body",
+    "samples": 1725,
+    "rootY": -0.5262406287583811,
+    "offset": -0.5262406287583811,
+    "minimum": 0
+  },
+  "reaction": null
+}

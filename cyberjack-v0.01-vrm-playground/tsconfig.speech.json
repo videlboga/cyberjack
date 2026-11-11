@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": [
+    "src/services/characterSpeechExecutor.ts",
+    "src/services/characterSpeechDelivery.ts",
+    "src/services/characterSpeechStimulus.ts"
+  ]
+}

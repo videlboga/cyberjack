@@ -1,0 +1,288 @@
+.fx-process-tempo,
+.fx-process-kinds {
+  display: grid;
+  gap: 3px;
+  margin-top: 4px;
+}
+.fx-process-tempo {
+  grid-template-columns: repeat(3, 1fr);
+}
+.fx-process-kinds {
+  grid-template-columns: repeat(2, 1fr);
+}
+.fx-process-tempo button,
+.fx-process-kinds button {
+  min-width: 0;
+  padding: 6px 2px;
+  font-size: 6px;
+}
+.fx-sustained {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --process-cycle: 1.35s;
+}
+.fx-sustained--slow {
+  --process-cycle: 2s;
+}
+.fx-sustained--fast {
+  --process-cycle: 0.78s;
+}
+.fx-process-window {
+  position: absolute;
+  z-index: 1;
+  left: 7%;
+  bottom: 14%;
+  width: 34%;
+  height: 19%;
+  overflow: hidden;
+  opacity: 1;
+  background: var(--ji-bg);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ji-line) 78%, transparent);
+  animation: fx-window-enter 0.42s ease both;
+}
+.fx-sustained--compact .fx-process-window {
+  bottom: 23%;
+  width: 27%;
+  height: 15.5%;
+}
+.fx-process-window img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fx-process-window__base {
+  z-index: 1;
+  opacity: 1 !important;
+  filter: saturate(0.82) contrast(1.04);
+}
+.fx-process-window__motion {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.fx-process-window__motion img {
+  will-change: transform, filter;
+}
+.fx-process-window__motion--echo {
+  z-index: 3;
+}
+.fx-sustained .active-process-visual {
+  z-index: 5;
+  right: 5%;
+  bottom: 10%;
+  left: auto;
+  width: auto;
+  min-width: 190px;
+  padding: 6px 9px;
+  grid-template-columns: 7px minmax(0, 1fr) auto;
+  background: color-mix(in srgb, var(--ji-bg) 82%, transparent);
+  box-shadow: inset 2px 0 color-mix(in srgb, var(--ji-lcd) 70%, transparent);
+}
+.fx-sustained .active-process-visual > em {
+  font-size: 6px;
+  letter-spacing: 0.06em;
+}
+
+/* The frame never moves. Only a masked photographic region carries the rhythm. */
+.fx-sustained--friction .fx-process-window__motion {
+  clip-path: polygon(0 33%, 100% 25%, 100% 72%, 0 80%);
+}
+.fx-sustained--friction .fx-process-window__motion img {
+  animation: fx-window-friction var(--process-cycle)
+    cubic-bezier(0.42, 0, 0.3, 1) infinite;
+}
+.fx-sustained--friction .fx-process-window__motion--echo {
+  display: none;
+}
+.fx-sustained--vibration .fx-process-window__motion {
+  clip-path: polygon(0 22%, 100% 19%, 100% 43%, 0 46%);
+}
+.fx-sustained--vibration .fx-process-window__motion--echo {
+  clip-path: polygon(0 58%, 100% 55%, 100% 78%, 0 81%);
+}
+.fx-sustained--vibration .fx-process-window__motion img {
+  animation: fx-window-vibration calc(var(--process-cycle) / 8) linear infinite;
+}
+.fx-sustained--pulse .fx-process-window__motion {
+  clip-path: ellipse(48% 42% at 51% 55%);
+  opacity: 0.68;
+}
+.fx-sustained--pulse .fx-process-window__motion img {
+  animation: fx-window-pulse var(--process-cycle) ease-in-out infinite;
+}
+.fx-sustained--pulse .fx-process-window__motion--echo {
+  display: none;
+}
+.fx-sustained--electric .fx-process-window__motion {
+  display: none;
+}
+.fx-sustained--electric .fx-process-window {
+  opacity: 1;
+  animation: none;
+}
+.fx-process-electric-branches {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 1;
+  filter: drop-shadow(0 0 3px rgba(68, 206, 255, 0.62))
+    drop-shadow(0 0 7px rgba(66, 176, 255, 0.3));
+}
+.fx-process-electric-branches path {
+  fill: none;
+  stroke: rgba(143, 232, 255, 0.68);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.fx-sustained--electric .fx-process-window::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  opacity: 0;
+  background: rgba(118, 224, 255, 0.12);
+  mix-blend-mode: screen;
+  animation: fx-electric-afterflash calc(var(--process-cycle) * 1.55) ease-out
+    infinite;
+  pointer-events: none;
+}
+.fx-electric-branch {
+  opacity: 0;
+}
+.fx-electric-branch--a {
+  animation: fx-electric-branch-a calc(var(--process-cycle) * 1.55) linear
+    infinite;
+}
+.fx-electric-branch--b {
+  animation: fx-electric-branch-b calc(var(--process-cycle) * 1.55) linear
+    infinite;
+}
+.fx-electric-branch--c {
+  animation: fx-electric-branch-c calc(var(--process-cycle) * 1.55) linear
+    infinite;
+}
+.fx-electric-branch--b path {
+  stroke-width: 1.35;
+}
+.fx-electric-branch--c path {
+  stroke-width: 1.1;
+}
+
+@keyframes fx-window-enter {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes fx-window-friction {
+  0%,
+  100% {
+    transform: translateY(-1.2%) scale(1.008);
+  }
+  48% {
+    transform: translateY(1.2%) scale(1.008);
+  }
+  72% {
+    transform: translateY(0.2%) scale(1.004);
+  }
+}
+@keyframes fx-window-vibration {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.004);
+  }
+  25% {
+    transform: translate(0.8px, -0.45px) scale(1.004);
+  }
+  50% {
+    transform: translate(-0.65px, 0.5px) scale(1.004);
+  }
+  75% {
+    transform: translate(0.4px, 0.35px) scale(1.004);
+  }
+}
+@keyframes fx-window-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: contrast(1);
+  }
+  48% {
+    transform: scale(1.018);
+    filter: contrast(1.07);
+  }
+  72% {
+    transform: scale(1.006);
+    filter: contrast(1.025);
+  }
+}
+@keyframes fx-electric-branch-a {
+  0%,
+  29%,
+  43%,
+  100% {
+    opacity: 0;
+  }
+  31% {
+    opacity: 0.7;
+  }
+  35%,
+  39% {
+    opacity: 0.64;
+  }
+}
+@keyframes fx-electric-branch-b {
+  0%,
+  33%,
+  47%,
+  100% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.67;
+  }
+  39%,
+  43% {
+    opacity: 0.56;
+  }
+}
+@keyframes fx-electric-branch-c {
+  0%,
+  37%,
+  50%,
+  100% {
+    opacity: 0;
+  }
+  39% {
+    opacity: 0.6;
+  }
+  43%,
+  46% {
+    opacity: 0.5;
+  }
+}
+@keyframes fx-electric-afterflash {
+  0%,
+  46%,
+  53%,
+  100% {
+    opacity: 0;
+  }
+  48% {
+    opacity: 0.72;
+  }
+}

@@ -1,0 +1,55 @@
+[
+  {
+    "text": "Сядь, пожалуйста",
+    "contexts": [
+      "pose_sitting"
+    ],
+    "pass": true
+  },
+  {
+    "text": "Подними обе руки вверх",
+    "contexts": [
+      "pose_sitting",
+      "posture_arms_up"
+    ],
+    "pass": true
+  },
+  {
+    "text": "Опусти руки",
+    "contexts": [
+      "pose_sitting",
+      "posture_arms_down"
+    ],
+    "pass": true
+  },
+  {
+    "text": "Вытяни руки перед собой",
+    "contexts": [
+      "pose_sitting",
+      "posture_arms_front"
+    ],
+    "pass": true
+  },
+  {
+    "text": "Поверни голову налево",
+    "contexts": [
+      "pose_sitting",
+      "posture_head_left"
+    ],
+    "pass": true
+  },
+  {
+    "text": "Не поднимай руки",
+    "contexts": [
+      "pose_sitting"
+    ],
+    "pass": true
+  },
+  {
+    "text": "Я подниму руки",
+    "contexts": [
+      "pose_sitting"
+    ],
+    "pass": true
+  }
+]

@@ -1,0 +1,47 @@
+/* Keep the complete character visible in the fixed demo viewport. */
+.fx-lab.campaign-shell {
+  width: 100% !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.fx-stage .character-stage {
+  height: 100% !important;
+  min-height: 0 !important;
+  transform: none !important;
+}
+
+.fx-stage .calibration-avatar-frame {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  transform: none !important;
+}
+
+.fx-stage .calibration-character-image {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 3vh 3vw 5vh;
+  box-sizing: border-box;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+.fx-lab
+  .fx-stage.calibration-workbench
+  .character-stage
+  .calibration-avatar-frame
+  > .calibration-character-image {
+  inset: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  transform-origin: center center;
+}

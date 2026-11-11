@@ -1,0 +1,737 @@
+{
+  "version": 1,
+  "status": "specification",
+  "description": "Матрица продолжительной близости, построенная от игровых механик. Не включает секс-машину и капсулу: они остаются отдельными устройствами.",
+  "characters": [
+    "S-AV-01",
+    "NPC-LAB-01",
+    "NPC-CAND-01",
+    "NPC-SUMI-01",
+    "NPC-ELI-01",
+    "NPC-MAI-01",
+    "NPC-RIN-01"
+  ],
+  "assetConvention": "public/character-images/intimacy/$character/$family/$variant/$wardrobe__$limb_restraint__$face_equipment__$affect__$phase.png",
+  "principles": [
+    "Одноразовые действия используют визуально-звуковой эффект и не требуют отдельного кадра.",
+    "Изображение удерживается только активным продолжительным контекстом.",
+    "Целевая зона, инструмент и направление взаимодействия должны храниться в контексте, а не угадываться по позе.",
+    "Характер активации берётся из явного activationBalance, а не из одного принятия.",
+    "Одежда в сцене близости описывает доступ к зоне: underwear_displaced означает сдвинутое, а не надетое без изменений бельё.",
+    "Фиксация конечностей и оборудование лица являются разными осями.",
+    "Для каждой комбинации сначала утверждается sustain; остальные фазы наследуют композицию и seed."
+  ],
+  "axes": {
+    "initiators": [
+      {
+        "id": "calibrator",
+        "description": "Взаимодействие с Калибратором; второй участник может быть показан частично."
+      },
+      {
+        "id": "assistant",
+        "description": "Действие присутствующего персонажа по указанию Калибратора."
+      },
+      {
+        "id": "device_or_toy",
+        "description": "Контакт поддерживается предметом без отдельного второго персонажа."
+      }
+    ],
+    "targets": [
+      "lips",
+      "chest",
+      "nipples",
+      "vulva",
+      "clitoris",
+      "vagina",
+      "anus",
+      "buttocks"
+    ],
+    "wardrobes": [
+      {
+        "id": "nude",
+        "source": [
+          "nude"
+        ]
+      },
+      {
+        "id": "underwear_displaced",
+        "source": [
+          "underwear",
+          "calibration_set",
+          "jumpsuit"
+        ]
+      },
+      {
+        "id": "stockings_displaced",
+        "source": [
+          "dress_stockings",
+          "stockings"
+        ]
+      },
+      {
+        "id": "open_top",
+        "source": [
+          "lab_gown",
+          "dress"
+        ],
+        "allowedFamilies": [
+          "manual",
+          "kissing",
+          "breastplay"
+        ]
+      }
+    ],
+    "limbRestraints": [
+      {
+        "id": "free",
+        "source": [
+          "none"
+        ]
+      },
+      {
+        "id": "wrists",
+        "source": [
+          "handcuffs",
+          "restraint_belt"
+        ]
+      },
+      {
+        "id": "spread",
+        "source": [
+          "ankle_cuffs",
+          "table_straps",
+          "restraint_frame"
+        ]
+      }
+    ],
+    "faceEquipment": [
+      {
+        "id": "none",
+        "source": []
+      },
+      {
+        "id": "blindfold",
+        "source": [
+          "blindfold"
+        ]
+      },
+      {
+        "id": "gag",
+        "source": [
+          "gag"
+        ],
+        "incompatibleFamilies": [
+          "oral",
+          "kissing"
+        ]
+      },
+      {
+        "id": "blindfold_gag",
+        "source": [
+          "blindfold",
+          "gag"
+        ],
+        "incompatibleFamilies": [
+          "oral",
+          "kissing"
+        ],
+        "priority": 2
+      }
+    ],
+    "phases": [
+      {
+        "id": "sustain",
+        "condition": "контекст активен, обычный темп"
+      },
+      {
+        "id": "intense",
+        "condition": "быстрый темп или tension >= 65"
+      },
+      {
+        "id": "peak",
+        "condition": "tension >= 85, но оргазм ещё не произошёл"
+      },
+      {
+        "id": "release",
+        "condition": "оргазм в текущем тике"
+      },
+      {
+        "id": "recovery",
+        "condition": "рефрактерный период после оргазма"
+      }
+    ],
+    "affectsByPhase": {
+      "sustain": [
+        "guarded",
+        "receptive",
+        "mixed"
+      ],
+      "intense": [
+        "high_positive",
+        "high_negative",
+        "mixed_overload",
+        "subspace"
+      ],
+      "peak": [
+        "climax",
+        "high_negative",
+        "mixed_overload"
+      ],
+      "release": [
+        "climax"
+      ],
+      "recovery": [
+        "afterglow",
+        "distressed",
+        "exhausted"
+      ]
+    }
+  },
+  "families": [
+    {
+      "id": "manual",
+      "priority": 0,
+      "purpose": "Покрыть уже существующее действие finger_insertion и внешнюю ручную стимуляцию.",
+      "contexts": {
+        "start": [
+          "finger_insertion",
+          "act_start_manual_stimulation"
+        ],
+        "modify": [
+          "act_increase_friction",
+          "act_decrease_friction"
+        ],
+        "stop": [
+          "act_end_sexual_contact"
+        ]
+      },
+      "variants": [
+        {
+          "id": "clitoral",
+          "targets": [
+            "clitoris",
+            "vulva"
+          ],
+          "poses": [
+            "lying",
+            "sitting_spread",
+            "standing"
+          ],
+          "initiators": [
+            "calibrator",
+            "assistant"
+          ]
+        },
+        {
+          "id": "vaginal_fingering",
+          "targets": [
+            "vagina"
+          ],
+          "poses": [
+            "lying",
+            "sitting_spread",
+            "all_fours"
+          ],
+          "initiators": [
+            "calibrator",
+            "assistant"
+          ]
+        },
+        {
+          "id": "anal_fingering",
+          "targets": [
+            "anus"
+          ],
+          "poses": [
+            "all_fours",
+            "lying",
+            "standing"
+          ],
+          "initiators": [
+            "calibrator",
+            "assistant"
+          ]
+        }
+      ],
+      "generationTier": {
+        "p0": [
+          "nude/free/none",
+          "underwear_displaced/free/none",
+          "underwear_displaced/wrists/blindfold"
+        ],
+        "p1": [
+          "stockings_displaced/free/none",
+          "nude/spread/blindfold",
+          "underwear_displaced/spread/gag"
+        ],
+        "p2": [
+          "remaining-compatible"
+        ]
+      },
+      "fallback": [
+        "lesbian.fingering_kiss.$phase",
+        "base.$pose.$wardrobe.$equipment.$affect"
+      ]
+    },
+    {
+      "id": "penetration",
+      "priority": 0,
+      "purpose": "Различать зону и инструмент; существующая матрица различает только позу.",
+      "contexts": {
+        "start": [
+          "act_start_penetration"
+        ],
+        "modify": [
+          "act_increase_friction",
+          "act_decrease_friction"
+        ],
+        "peak": [
+          "act_sexual_climax"
+        ],
+        "stop": [
+          "act_end_sexual_contact"
+        ]
+      },
+      "variants": [
+        {
+          "id": "vaginal_missionary",
+          "target": "vagina",
+          "pose": "lying",
+          "instruments": [
+            "penis",
+            "dildo"
+          ]
+        },
+        {
+          "id": "vaginal_doggy",
+          "target": "vagina",
+          "pose": "all_fours",
+          "instruments": [
+            "penis",
+            "dildo"
+          ]
+        },
+        {
+          "id": "vaginal_standing",
+          "target": "vagina",
+          "pose": "standing",
+          "instruments": [
+            "penis",
+            "dildo"
+          ],
+          "phases": [
+            "sustain",
+            "peak",
+            "release"
+          ]
+        },
+        {
+          "id": "anal_missionary",
+          "target": "anus",
+          "pose": "lying",
+          "instruments": [
+            "penis",
+            "dildo"
+          ]
+        },
+        {
+          "id": "anal_doggy",
+          "target": "anus",
+          "pose": "all_fours",
+          "instruments": [
+            "penis",
+            "dildo"
+          ]
+        },
+        {
+          "id": "anal_standing",
+          "target": "anus",
+          "pose": "standing",
+          "instruments": [
+            "penis",
+            "dildo"
+          ],
+          "phases": [
+            "sustain",
+            "peak",
+            "release"
+          ]
+        }
+      ],
+      "reuseExisting": {
+        "vaginal_missionary": "interactions-expanded.$character.penetration.missionary",
+        "vaginal_doggy": "interactions-expanded.$character.penetration.doggy",
+        "vaginal_standing": "interactions-expanded.$character.penetration.standing"
+      },
+      "generationTier": {
+        "p0": [
+          "existing-vaginal-assets",
+          "anal_doggy:nude/free/none",
+          "anal_doggy:underwear_displaced/wrists/blindfold"
+        ],
+        "p1": [
+          "anal_missionary",
+          "anal_standing",
+          "dildo-visible-core-combinations"
+        ],
+        "p2": [
+          "remaining-compatible"
+        ]
+      },
+      "fallback": [
+        "penetration.$nearest_pose.$phase",
+        "base.$pose.$wardrobe.$equipment.$affect"
+      ]
+    },
+    {
+      "id": "oral",
+      "priority": 1,
+      "purpose": "Подключить уже сгенерированное оральное семейство и различать направление.",
+      "contexts": {
+        "start": [
+          "act_start_oral_giving",
+          "act_start_oral_receiving"
+        ],
+        "modify": [
+          "act_deepen_oral",
+          "act_change_oral_pace"
+        ],
+        "stop": [
+          "act_end_sexual_contact"
+        ]
+      },
+      "variants": [
+        {
+          "id": "giving_kneeling",
+          "direction": "character_gives",
+          "target": "lips",
+          "poses": [
+            "kneeling"
+          ]
+        },
+        {
+          "id": "giving_deep",
+          "direction": "character_gives",
+          "target": "lips",
+          "poses": [
+            "kneeling"
+          ],
+          "requiresModifier": "act_deepen_oral"
+        },
+        {
+          "id": "giving_assisted",
+          "direction": "character_gives",
+          "target": "lips",
+          "poses": [
+            "kneeling"
+          ],
+          "initiators": [
+            "assistant"
+          ],
+          "phases": [
+            "sustain",
+            "peak",
+            "release"
+          ]
+        },
+        {
+          "id": "receiving_facesitting",
+          "direction": "character_receives",
+          "targets": [
+            "vulva",
+            "clitoris"
+          ],
+          "poses": [
+            "lying"
+          ]
+        },
+        {
+          "id": "receiving_spread",
+          "direction": "character_receives",
+          "targets": [
+            "vulva",
+            "clitoris"
+          ],
+          "poses": [
+            "lying",
+            "sitting_spread"
+          ]
+        }
+      ],
+      "reuseExisting": {
+        "giving_kneeling": "interactions-expanded.$character.oral.kneeling",
+        "giving_deep": "interactions-expanded.$character.oral.deep",
+        "giving_assisted": "interactions-expanded.$character.oral.assisted",
+        "receiving_facesitting": "interactions-expanded.$character.lesbian.facesitting"
+      },
+      "generationTier": {
+        "p0": [
+          "connect-existing"
+        ],
+        "p1": [
+          "receiving_spread:nude/free/none",
+          "receiving_spread:underwear_displaced/spread/blindfold"
+        ],
+        "p2": [
+          "remaining-compatible"
+        ]
+      },
+      "fallback": [
+        "oral.giving_kneeling.$phase",
+        "base.kneeling.$wardrobe.$equipment.$affect"
+      ]
+    },
+    {
+      "id": "partner",
+      "priority": 1,
+      "purpose": "Действия одного персонажа с другим без привязки к полу второго участника.",
+      "contexts": {
+        "start": [
+          "act_start_partner_fingering",
+          "act_start_facesitting"
+        ],
+        "modify": [
+          "act_increase_friction",
+          "act_change_partner_position"
+        ],
+        "stop": [
+          "act_end_sexual_contact"
+        ]
+      },
+      "variants": [
+        {
+          "id": "fingering_kiss",
+          "targets": [
+            "vulva",
+            "clitoris",
+            "vagina"
+          ],
+          "poses": [
+            "lying",
+            "sitting"
+          ],
+          "requiresSecondCharacter": true
+        },
+        {
+          "id": "facesitting_receiving",
+          "targets": [
+            "vulva",
+            "clitoris"
+          ],
+          "poses": [
+            "lying"
+          ],
+          "requiresSecondCharacter": true
+        },
+        {
+          "id": "facesitting_giving",
+          "target": "lips",
+          "poses": [
+            "lying"
+          ],
+          "requiresSecondCharacter": true
+        }
+      ],
+      "reuseExisting": {
+        "fingering_kiss": "interactions-expanded.$character.lesbian.fingering_kiss",
+        "facesitting_receiving": "interactions-expanded.$character.lesbian.facesitting"
+      },
+      "generationTier": {
+        "p0": [
+          "connect-existing"
+        ],
+        "p1": [
+          "facesitting_giving",
+          "blindfold-core-combinations"
+        ],
+        "p2": [
+          "participant-specific-variants-if-needed"
+        ]
+      },
+      "fallback": [
+        "manual.vaginal_fingering.$phase",
+        "base.$pose.$wardrobe.$equipment.$affect"
+      ]
+    },
+    {
+      "id": "kissing",
+      "priority": 2,
+      "purpose": "Продолжительный близкий контакт без обязательной генитальной стимуляции.",
+      "contexts": {
+        "start": [
+          "act_start_makeout"
+        ],
+        "modify": [
+          "act_deepen_kiss",
+          "act_add_body_contact"
+        ],
+        "stop": [
+          "act_end_sexual_contact"
+        ]
+      },
+      "variants": [
+        {
+          "id": "close_kiss",
+          "target": "lips",
+          "poses": [
+            "standing",
+            "sitting",
+            "lying"
+          ],
+          "phases": [
+            "sustain",
+            "intense"
+          ]
+        },
+        {
+          "id": "kiss_with_touching",
+          "targets": [
+            "lips",
+            "chest",
+            "buttocks"
+          ],
+          "poses": [
+            "standing",
+            "sitting",
+            "lying"
+          ],
+          "phases": [
+            "sustain",
+            "intense",
+            "peak"
+          ]
+        }
+      ],
+      "generationTier": {
+        "p0": [],
+        "p1": [
+          "nude/free/none",
+          "underwear_displaced/free/none",
+          "open_top/wrists/blindfold"
+        ],
+        "p2": [
+          "remaining-compatible"
+        ]
+      },
+      "fallback": [
+        "base.$pose.$wardrobe.$equipment.$affect"
+      ]
+    },
+    {
+      "id": "toy",
+      "priority": 1,
+      "purpose": "Связать раздел Близость с уже существующими предметами и продолжительной вибрацией.",
+      "contexts": {
+        "start": [
+          "act_start_vibrator",
+          "act_activate_plug",
+          "act_start_dildo"
+        ],
+        "modify": [
+          "act_adjust_vibration",
+          "act_increase_friction",
+          "act_change_toy_target"
+        ],
+        "stop": [
+          "act_stop_vibrator",
+          "act_remove_plug",
+          "act_end_sexual_contact"
+        ]
+      },
+      "variants": [
+        {
+          "id": "external_vibrator",
+          "targets": [
+            "vulva",
+            "clitoris"
+          ],
+          "reuse": "interactions-expanded.$character.vibration.handheld"
+        },
+        {
+          "id": "internal_vibrator",
+          "targets": [
+            "vagina",
+            "anus"
+          ],
+          "reuse": "interactions-expanded.$character.vibration.internal"
+        },
+        {
+          "id": "dildo_vaginal",
+          "target": "vagina",
+          "poses": [
+            "lying",
+            "all_fours",
+            "sitting_spread"
+          ]
+        },
+        {
+          "id": "dildo_anal",
+          "target": "anus",
+          "poses": [
+            "lying",
+            "all_fours",
+            "standing"
+          ]
+        }
+      ],
+      "generationTier": {
+        "p0": [
+          "connect-existing-vibration"
+        ],
+        "p1": [
+          "dildo_vaginal",
+          "dildo_anal"
+        ],
+        "p2": [
+          "blindfold-and-gag-expansion"
+        ]
+      },
+      "fallback": [
+        "vibration.$nearest_variant.$phase",
+        "manual.$target.$phase",
+        "base.$pose.$wardrobe.$equipment.$affect"
+      ]
+    }
+  ],
+  "resolver": {
+    "interactionPriority": [
+      "partner",
+      "oral",
+      "penetration",
+      "manual",
+      "toy",
+      "kissing"
+    ],
+    "note": "При нескольких активных контекстах приоритет определяется последним начатым контекстом внутри одной категории; оборудование не должно автоматически перекрывать парное сексуальное взаимодействие.",
+    "candidateOrder": [
+      "exact-current-matrix",
+      "exact-existing-expanded-family",
+      "same-family-nearest-face-equipment",
+      "same-family-nearest-limb-restraint",
+      "same-family-nearest-wardrobe",
+      "same-family-nearest-affect",
+      "legacy-family-variant-phase",
+      "calibration-core-pose-clothing-equipment-affect",
+      "canonical-portrait"
+    ]
+  },
+  "mechanicsRequired": [
+    "Хранить initiatorId и optional partnerId в продолжительном контексте.",
+    "Хранить targetPointId отдельно от позы.",
+    "Хранить instrument: finger, penis, dildo, vibrator, tongue.",
+    "Разделить направление oral и facesitting: character_gives или character_receives.",
+    "Хранить pace: slow, steady, fast; действия изменения темпа не должны создавать отдельное конкурирующее взаимодействие.",
+    "Сохранять dischargeOutcome: positive_discharge, peak_overload, breakdown для release/recovery.",
+    "После оргазма показывать release один тик и recovery до снятия effect_refractory.",
+    "Выбирать главный визуальный контекст по семантическому приоритету и времени запуска, а не по порядку правил в коде."
+  ],
+  "implementationOrder": [
+    "Подключить существующие penetration, oral, lesbian и vibration без новой генерации.",
+    "Добавить метаданные продолжительного контекста и корректный приоритет резолвера.",
+    "Сгенерировать manual: clitoral, vaginal_fingering, anal_fingering.",
+    "Добавить blindfold к минимальному P0-набору ручных и проникающих сцен.",
+    "Сгенерировать anal penetration и receiving oral.",
+    "Добавить release/recovery и mixed_overload.",
+    "После проверки в игре расширять P1 и только затем P2."
+  ]
+}

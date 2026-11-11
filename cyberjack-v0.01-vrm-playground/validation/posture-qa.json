@@ -1,0 +1,191 @@
+[
+  {
+    "state": {
+      "character": "mira",
+      "ready": true,
+      "style": {
+        "preset": "blender",
+        "strength": 1,
+        "materials": 39,
+        "blenderMaterials": 15,
+        "outlineMeshes": 24
+      },
+      "presence": {
+        "tension": 0,
+        "fatigue": 0,
+        "affinity": 0.5,
+        "breaths": 12,
+        "mode": "relaxed",
+        "targetMode": "relaxed"
+      },
+      "posture": {
+        "base": "pose_standing",
+        "arms": "up",
+        "head": "forward",
+        "blockedArms": false,
+        "weight": 0.6165323437259684,
+        "yaw": 0
+      },
+      "camera": {
+        "focusId": "systemic",
+        "cinematic": false,
+        "tool": null,
+        "transitioning": false,
+        "distance": 3.604247494276718
+      },
+      "clip": "Stand_00_00",
+      "emotion": "neutral",
+      "replyId": "",
+      "talking": false,
+      "boundBones": 154,
+      "grounding": {
+        "floorY": 0,
+        "mode": "feet",
+        "samples": 73,
+        "rootY": -0.0003822255633553005,
+        "offset": -0.0003822255633553005,
+        "minimum": 0
+      },
+      "reaction": null
+    },
+    "legDelta": 0,
+    "hands": [
+      [
+        0.4094168052614846,
+        1.0581495350566061,
+        0.002365500704177105
+      ],
+      [
+        -0.337793010067536,
+        0.9525986043751963,
+        0.18060270244783047
+      ]
+    ]
+  },
+  {
+    "state": {
+      "character": "mira",
+      "ready": true,
+      "style": {
+        "preset": "blender",
+        "strength": 1,
+        "materials": 39,
+        "blenderMaterials": 15,
+        "outlineMeshes": 24
+      },
+      "presence": {
+        "tension": 0,
+        "fatigue": 0,
+        "affinity": 0.5,
+        "breaths": 12,
+        "mode": "relaxed",
+        "targetMode": "relaxed"
+      },
+      "posture": {
+        "base": "pose_sitting",
+        "arms": "up",
+        "head": "forward",
+        "blockedArms": false,
+        "weight": 0.9987795065075284,
+        "yaw": 0
+      },
+      "camera": {
+        "focusId": "systemic",
+        "cinematic": false,
+        "tool": null,
+        "transitioning": false,
+        "distance": 3.604247494276718
+      },
+      "clip": "Base_sitting",
+      "emotion": "neutral",
+      "replyId": "",
+      "talking": false,
+      "boundBones": 154,
+      "grounding": {
+        "floorY": 0,
+        "mode": "body",
+        "samples": 2507,
+        "rootY": -0.3945021980620086,
+        "offset": -0.3945021980620086,
+        "minimum": 0
+      },
+      "reaction": null
+    },
+    "legDelta": 0,
+    "hands": [
+      [
+        0.17799385590705835,
+        1.385246010539855,
+        0.04366897811874664
+      ],
+      [
+        -0.17936018570423354,
+        1.3820375694532958,
+        0.030381191297248776
+      ]
+    ]
+  },
+  {
+    "state": {
+      "character": "mira",
+      "ready": true,
+      "style": {
+        "preset": "blender",
+        "strength": 1,
+        "materials": 39,
+        "blenderMaterials": 15,
+        "outlineMeshes": 24
+      },
+      "presence": {
+        "tension": 0,
+        "fatigue": 0,
+        "affinity": 0.5,
+        "breaths": 12,
+        "mode": "relaxed",
+        "targetMode": "relaxed"
+      },
+      "posture": {
+        "base": "pose_lying_down",
+        "arms": "up",
+        "head": "forward",
+        "blockedArms": false,
+        "weight": 0.9999880347028264,
+        "yaw": 0
+      },
+      "camera": {
+        "focusId": "systemic",
+        "cinematic": false,
+        "tool": null,
+        "transitioning": false,
+        "distance": 3.604247494276718
+      },
+      "clip": "Base_lying",
+      "emotion": "neutral",
+      "replyId": "",
+      "talking": false,
+      "boundBones": 154,
+      "grounding": {
+        "floorY": 0,
+        "mode": "body",
+        "samples": 2507,
+        "rootY": -0.8002890178741047,
+        "offset": -0.8002890178741047,
+        "minimum": 0
+      },
+      "reaction": null
+    },
+    "legDelta": 0,
+    "hands": [
+      [
+        0.15798435109830994,
+        0.7090723886488143,
+        -0.23806173388167837
+      ],
+      [
+        -0.19175919058155205,
+        0.7129545218899778,
+        -0.22355880755149068
+      ]
+    ]
+  }
+]

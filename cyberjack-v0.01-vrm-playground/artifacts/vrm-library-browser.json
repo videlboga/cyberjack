@@ -1,0 +1,142 @@
+{
+  "state": {
+    "character": "mira",
+    "ready": true,
+    "style": {
+      "preset": "blender",
+      "strength": 1,
+      "materials": 39,
+      "blenderMaterials": 15,
+      "outlineMeshes": 24
+    },
+    "presence": {
+      "tension": 0,
+      "fatigue": 0,
+      "affinity": 0.5,
+      "breaths": 12,
+      "mode": "relaxed",
+      "targetMode": "relaxed"
+    },
+    "posture": {
+      "base": "pose_sitting",
+      "arms": "up",
+      "head": "forward",
+      "blockedArms": false,
+      "weight": 0.007635072059370196,
+      "yaw": 0
+    },
+    "library": {
+      "phase": "playing",
+      "label": "Библиотека · Female Sitting Pose 6",
+      "baseId": "e0259d6f372c87b464608b2c",
+      "donorId": "0d1652e21bcf6e93c01cec6c",
+      "quality": {
+        "accepted": true,
+        "reasons": [],
+        "support": {
+          "kind": "seat-assumed",
+          "assumed": true,
+          "anchor": "pelvis",
+          "label": "Предполагается сиденье: опора таза, ноги свободны"
+        },
+        "seatDrift": 0,
+        "samples": 73,
+        "plateauSamples": 61,
+        "achievedFraction": 1,
+        "baseEnergy": 0.000020611919159773274,
+        "donorEnergy": 2.8701906751843462,
+        "baseRootSpeed": 0,
+        "donorRootSpeed": 0.0027184869962745173,
+        "rootSpeedLimit": 0.05,
+        "rootTempoMismatch": false,
+        "energyLimit": 15,
+        "tempoMismatch": false,
+        "penetration": 0,
+        "rootLift": 0,
+        "requiredFootLift": 0,
+        "contextDrift": 0,
+        "sourceContext": 2.848157062908015,
+        "headingDrift": 0,
+        "protectedUpperDrift": 0,
+        "footSlide": 0,
+        "requiresStep": false,
+        "ground": 0.0021504803549875634,
+        "height": 1.5139682678815285
+      },
+      "fingerprint": "65800c6aad54f67b13b2b4c74f4f74aee5b6c7ca1f9e5e617d86c03e6ca08b4d"
+    },
+    "camera": {
+      "focusId": "systemic",
+      "cinematic": false,
+      "tool": null,
+      "transitioning": false,
+      "distance": 3.604247494276718
+    },
+    "clip": "Base_sitting",
+    "emotion": "neutral",
+    "replyId": "",
+    "talking": false,
+    "boundBones": 154,
+    "grounding": {
+      "floorY": 0,
+      "mode": "body",
+      "samples": 2507,
+      "rootY": -0.39447947074705186,
+      "offset": -0.39447947074705186,
+      "minimum": 0
+    },
+    "reaction": null
+  },
+  "released": {
+    "character": "mira",
+    "ready": true,
+    "style": {
+      "preset": "blender",
+      "strength": 1,
+      "materials": 39,
+      "blenderMaterials": 15,
+      "outlineMeshes": 24
+    },
+    "presence": {
+      "tension": 0,
+      "fatigue": 0,
+      "affinity": 0.5,
+      "breaths": 12,
+      "mode": "relaxed",
+      "targetMode": "relaxed"
+    },
+    "posture": {
+      "base": "pose_sitting",
+      "arms": "free",
+      "head": "forward",
+      "blockedArms": false,
+      "weight": 0.0011708762225233562,
+      "yaw": 0
+    },
+    "library": {
+      "phase": "idle",
+      "label": "Базовый клип"
+    },
+    "camera": {
+      "focusId": "systemic",
+      "cinematic": false,
+      "tool": null,
+      "transitioning": false,
+      "distance": 3.604247494276718
+    },
+    "clip": "Base_sitting",
+    "emotion": "neutral",
+    "replyId": "",
+    "talking": false,
+    "boundBones": 154,
+    "grounding": {
+      "floorY": 0,
+      "mode": "body",
+      "samples": 2507,
+      "rootY": -0.39484783546636776,
+      "offset": -0.39484783546636776,
+      "minimum": 0
+    },
+    "reaction": null
+  }
+}

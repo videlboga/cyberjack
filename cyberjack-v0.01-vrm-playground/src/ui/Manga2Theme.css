@@ -1,0 +1,1760 @@
+/* ============================================
+   MANGA 2 THEME — minimal ink-on-white
+   White backgrounds, thin black frames, no color.
+   COLORS ONLY — no layout changes.
+   Applied when [data-ui-theme="manga2"]
+   ============================================ */
+
+/* === CSS VARIABLES — override JI color vars === */
+html[data-ui-theme="manga2"] {
+  --m2-paper: #ffffff;
+  --m2-ink: #111111;
+  --m2-ink-soft: #555555;
+
+  --ji-bg: #ffffff !important;
+  --ji-panel: #ffffff !important;
+  --ji-raised: #f8f8f8 !important;
+  --ji-control: #f8f8f8 !important;
+  --ji-selected: #f0f0f0 !important;
+  --ji-text: #111111 !important;
+  --ji-secondary: #555555 !important;
+  --ji-muted: #555555 !important;
+  --ji-lcd: #111111 !important;
+  --ji-amber: #111111 !important;
+  --ji-danger: #111111 !important;
+  --ji-chart: #111111 !important;
+  --ji-chart-alt: #555555 !important;
+  --ji-chart-warm: #555555 !important;
+  --ji-chart-main: #111111 !important;
+  --ji-chart-marker: #555555 !important;
+  --ji-chart-violet: #555555 !important;
+  --ji-chart-track: #eeeeee !important;
+  --ji-chart-gap: #f5f5f5 !important;
+  --ji-chart-grid: #eeeeee !important;
+  --ji-border: #111111 !important;
+  --ji-line: #111111 !important;
+  --ji-accent: #111111 !important;
+  --ji-page: #ffffff !important;
+  --ji-surface: #ffffff !important;
+  --ji-surface-soft: #f8f8f8 !important;
+  --ring-color: #111111 !important;
+}
+
+/* === BASE === */
+html[data-ui-theme="manga2"] body {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+html[data-ui-theme="manga2"] .workspace-viewport,
+html[data-ui-theme="manga2"] .workspace-content {
+  background: #ffffff !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+/* === STATUS BAR === */
+html[data-ui-theme="manga2"] .campaign-statusbar {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-bottom: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-brand b { color: #111 !important; }
+html[data-ui-theme="manga2"] .campaign-brand span { color: #555 !important; }
+html[data-ui-theme="manga2"] .campaign-statusbar small { color: #555 !important; }
+html[data-ui-theme="manga2"] .campaign-statusbar strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .campaign-current strong,
+html[data-ui-theme="manga2"] .campaign-stat strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .campaign-stat.deadline strong,
+html[data-ui-theme="manga2"] .campaign-stat.credits strong { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .theme-switcher { background: #fff !important; }
+html[data-ui-theme="manga2"] .theme-switcher select {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-statusbar button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+/* === NAVIGATION === */
+html[data-ui-theme="manga2"] .campaign-frame { background: #fff !important; }
+
+html[data-ui-theme="manga2"] .campaign-nav {
+  background: #fff !important;
+  border-right: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section small {
+  color: #555 !important;
+  border-bottom: 1px solid #ccc !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button {
+  background: transparent !important;
+  color: #111 !important;
+  border: none !important;
+  border-left: 2px solid transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button:hover {
+  background: #f5f5f5 !important;
+  border-left-color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button.active {
+  background: #111 !important;
+  color: #fff !important;
+  border-left-color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button span { color: inherit !important; }
+html[data-ui-theme="manga2"] .campaign-nav section > button small { color: inherit !important; opacity: 0.7 !important; }
+html[data-ui-theme="manga2"] .campaign-nav section > button.active span,
+html[data-ui-theme="manga2"] .campaign-nav section > button.active small { color: #fff !important; }
+
+/* === MAIN CONTENT === */
+html[data-ui-theme="manga2"] .campaign-content {
+  background: #fff !important;
+  color: #111 !important;
+}
+
+/* === SCREEN HEADING === */
+html[data-ui-theme="manga2"] .screen-heading {
+  background: #fff !important;
+  border-bottom: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .screen-heading::after { content: none !important; display: none !important; }
+
+html[data-ui-theme="manga2"] .screen-heading p { color: #555 !important; }
+html[data-ui-theme="manga2"] .screen-heading h1 { color: #111 !important; text-shadow: none !important; }
+html[data-ui-theme="manga2"] .screen-heading span { color: #555 !important; }
+html[data-ui-theme="manga2"] .screen-heading > b { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .lab-capacity { border: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .lab-capacity small { color: #555 !important; }
+html[data-ui-theme="manga2"] .lab-capacity strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .lab-capacity span { color: #555 !important; }
+
+/* === LAB SECTIONS === */
+html[data-ui-theme="manga2"] .lab-section + .lab-section { border-top: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .lab-section > header small { color: #555 !important; }
+html[data-ui-theme="manga2"] .lab-section h2,
+html[data-ui-theme="manga2"] .management-section h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .lab-section > header > b { color: #555 !important; }
+
+/* === LAB PLAN (room buttons) === */
+html[data-ui-theme="manga2"] .lab-plan button,
+html[data-ui-theme="manga2"] .room-plan button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .lab-plan button:hover,
+html[data-ui-theme="manga2"] .room-plan button:hover { background: #f5f5f5 !important; }
+html[data-ui-theme="manga2"] .lab-plan button.active,
+html[data-ui-theme="manga2"] .room-plan button.active { background: #111 !important; color: #fff !important; }
+
+/* === ROOM DETAIL === */
+html[data-ui-theme="manga2"] .room-detail { background: #fff !important; }
+html[data-ui-theme="manga2"] .room-detail > header { border-bottom: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .room-detail h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .room-detail > header small { color: #555 !important; }
+html[data-ui-theme="manga2"] .room-detail > header p { color: #555 !important; }
+html[data-ui-theme="manga2"] .room-detail > header > b { color: #111 !important; }
+
+/* === ROOM DETAIL SECTIONS === */
+html[data-ui-theme="manga2"] .room-detail-section + .room-detail-section { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .room-detail-section h3 {
+  color: #111 !important;
+  border-bottom: 1px solid #ccc !important;
+}
+
+/* === ROOM PEOPLE CARDS === */
+html[data-ui-theme="manga2"] .room-people > article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .resident-avatar {
+  background: #f8f8f8 !important;
+  border: 1px solid #ccc !important;
+}
+
+html[data-ui-theme="manga2"] .resident-avatar img {
+  object-fit: contain !important;
+  object-position: center top !important;
+}
+
+html[data-ui-theme="manga2"] .room-people strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .room-people span { color: #555 !important; }
+
+/* === BUTTONS (generic) === */
+html[data-ui-theme="manga2"] .room-people > article button,
+html[data-ui-theme="manga2"] .resident-card > button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .room-people > article button:hover,
+html[data-ui-theme="manga2"] .resident-card > button:hover { background: #f5f5f5 !important; }
+
+html[data-ui-theme="manga2"] .resident-role {
+  border: 1px solid #ccc !important;
+  color: #555 !important;
+}
+
+/* === EQUIPMENT / OFFER / INVENTORY GRIDS === */
+html[data-ui-theme="manga2"] .equipment-grid article,
+html[data-ui-theme="manga2"] .offer-grid article,
+html[data-ui-theme="manga2"] .inventory-grid article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .equipment-grid strong,
+html[data-ui-theme="manga2"] .offer-grid strong,
+html[data-ui-theme="manga2"] .inventory-grid strong,
+html[data-ui-theme="manga2"] .journal-list strong { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .equipment-grid p,
+html[data-ui-theme="manga2"] .offer-grid p,
+html[data-ui-theme="manga2"] .inventory-grid p,
+html[data-ui-theme="manga2"] .journal-list p { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .equipment-grid footer span,
+html[data-ui-theme="manga2"] .offer-grid footer > b { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .equipment-grid button,
+html[data-ui-theme="manga2"] .offer-grid button,
+html[data-ui-theme="manga2"] .inventory-grid button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .equipment-grid button:hover,
+html[data-ui-theme="manga2"] .offer-grid button:hover { background: #f5f5f5 !important; }
+
+/* === CONTRACT LIST === */
+html[data-ui-theme="manga2"] .contract-office-list > article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+}
+
+html[data-ui-theme="manga2"] .contract-office-list article header strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .contract-office-list article header > b { color: #111 !important; }
+html[data-ui-theme="manga2"] .contract-office-list article > p { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .contract-requirements span {
+  background: #f5f5f5 !important;
+  color: #555 !important;
+  border: 1px solid #ccc !important;
+}
+
+html[data-ui-theme="manga2"] .contract-requirements span.met {
+  color: #111 !important;
+  background: #f0f0f0 !important;
+}
+
+html[data-ui-theme="manga2"] .contract-office-list article > button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+/* === CONTRACT FACTION GROUPING + REWARDS + PROGRESS === */
+html[data-ui-theme="manga2"] .contract-faction {
+  margin-top: 20px;
+}
+
+html[data-ui-theme="manga2"] .contract-faction-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 2px;
+  border-bottom: 2px solid #111;
+  margin-bottom: 12px;
+}
+
+html[data-ui-theme="manga2"] .contract-faction-head small {
+  color: #555;
+  letter-spacing: .16em;
+  font-weight: 700;
+  font-size: 9px;
+}
+
+html[data-ui-theme="manga2"] .contract-faction-head strong {
+  color: #111;
+  font-size: 14px;
+}
+
+html[data-ui-theme="manga2"] .contract-faction-head span {
+  margin-left: auto;
+  color: #111;
+  font-weight: 700;
+}
+
+html[data-ui-theme="manga2"] .contract-rewards {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+html[data-ui-theme="manga2"] .contract-rewards b {
+  color: #111;
+  font-size: 15px;
+}
+
+html[data-ui-theme="manga2"] .contract-rewards .reward-trust {
+  color: #555;
+  font-size: 11px;
+}
+
+html[data-ui-theme="manga2"] .contract-rewards .reward-items {
+  color: #555;
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+
+html[data-ui-theme="manga2"] .contract-progress {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+html[data-ui-theme="manga2"] .contract-progress small {
+  color: #555;
+  letter-spacing: .1em;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+html[data-ui-theme="manga2"] .contract-progress-bar {
+  height: 4px;
+  background: #eee;
+  border: 1px solid #ccc;
+}
+
+html[data-ui-theme="manga2"] .contract-progress-bar i {
+  display: block;
+  height: 100%;
+  background: #111;
+  transition: width .2s ease;
+}
+
+/* === JOURNAL === */
+html[data-ui-theme="manga2"] .journal-list article {
+  border-left: 2px solid #111 !important;
+  background: #fff !important;
+}
+
+/* === EMPTY / TOAST === */
+html[data-ui-theme="manga2"] .empty-screen { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .campaign-toast {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: 2px 2px 0 #111 !important;
+}
+
+/* === CALIBRATION WORKBENCH === */
+html[data-ui-theme="manga2"] .calibration-workbench {
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .workbench-header {
+  background: #fff !important;
+  border-bottom: 1px solid #111 !important;
+}
+
+html[data-ui-theme="manga2"] .workbench-header h1 { color: #111 !important; }
+html[data-ui-theme="manga2"] .workbench-header .eyebrow { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .workbench-header button,
+html[data-ui-theme="manga2"] .workbench-back {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .calibration-theme-switcher {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+/* State column */
+html[data-ui-theme="manga2"] .state-column { background: #fff !important; }
+html[data-ui-theme="manga2"] .state-column h3 { color: #555 !important; }
+html[data-ui-theme="manga2"] .core-readout span { background: #f8f8f8 !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .core-readout b { color: #111 !important; }
+html[data-ui-theme="manga2"] .goal-list div { background: #f8f8f8 !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .goal-list div.ok { color: #111 !important; }
+html[data-ui-theme="manga2"] .goal-list b { color: #111 !important; }
+html[data-ui-theme="manga2"] .context-list div { background: #f8f8f8 !important; border-left: 2px solid #111 !important; }
+html[data-ui-theme="manga2"] .context-list span { color: #555 !important; }
+html[data-ui-theme="manga2"] .context-list b { color: #111 !important; }
+html[data-ui-theme="manga2"] .muted { color: #555 !important; }
+
+/* Character column */
+html[data-ui-theme="manga2"] .character-column { background: #fff !important; }
+html[data-ui-theme="manga2"] .character-stage { border: none !important; background: #fff !important; }
+html[data-ui-theme="manga2"] .scene-caption {
+  background: rgba(255,255,255,0.92) !important;
+  border-left: 3px solid #111 !important;
+}
+html[data-ui-theme="manga2"] .scene-caption strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .scene-caption p { color: #555 !important; }
+html[data-ui-theme="manga2"] .monitor-status-strip {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 3px 0;
+  background: transparent !important;
+  border: none !important;
+}
+html[data-ui-theme="manga2"] .calibration-workbench .monitor-status-strip > .condition-main { display: flex !important; align-items: flex-start; gap: 6px; }
+html[data-ui-theme="manga2"] .calibration-workbench .monitor-status-strip > .condition-main > div { display: flex !important; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-contexts { display: flex !important; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-pose { display: flex; align-items: baseline; gap: 3px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-label { font-size: 7px; font-weight: 600; color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-label.muted { color: #999 !important; font-weight: 400; }
+html[data-ui-theme="manga2"] .condition-effect { font-size: 6px; color: #555 !important; }
+html[data-ui-theme="manga2"] .condition-effect.active { color: #111 !important; font-weight: 600; }
+html[data-ui-theme="manga2"] .condition-effect.muted { color: #ccc !important; }
+html[data-ui-theme="manga2"] .condition-effect.blocked { color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-group { display: flex; align-items: baseline; gap: 3px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-group > small { font-size: 5px; letter-spacing: 0.1em; color: #999 !important; text-transform: uppercase; }
+html[data-ui-theme="manga2"] .condition-list { display: flex; flex-wrap: wrap; gap: 2px 4px; }
+html[data-ui-theme="manga2"] .condition-item { display: inline-flex; align-items: baseline; gap: 2px; border: 1px solid #ccc !important; padding: 0 3px; background: #f8f8f8 !important; }
+html[data-ui-theme="manga2"] .condition-item.active { border-color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-item.active b { color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-item b { font-size: 7px; font-weight: 600; color: #555 !important; }
+html[data-ui-theme="manga2"] .condition-item i { font-style: normal; font-size: 6px; color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-item.muted { border: none !important; background: transparent !important; color: #ccc !important; }
+html[data-ui-theme="manga2"] .condition-item { flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-explanation { flex-basis: 100%; font-style: normal; font-size: 6px; line-height: 1.35; color: #555 !important; }
+html[data-ui-theme="manga2"] .context-explanation { display: block; font-size: 6px; line-height: 1.35; color: #555 !important; margin-top: 1px; }
+html[data-ui-theme="manga2"] .condition-changes { display: flex; align-items: baseline; gap: 3px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-changes > small { font-size: 5px; letter-spacing: 0.1em; color: #999 !important; text-transform: uppercase; }
+html[data-ui-theme="manga2"] .change-entry { display: inline-flex; align-items: baseline; gap: 2px; }
+html[data-ui-theme="manga2"] .change-entry b { font-size: 7px; font-weight: 600; color: #111 !important; }
+html[data-ui-theme="manga2"] .change-entry i { font-style: normal; font-size: 6px; color: #555 !important; }
+html[data-ui-theme="manga2"] .change-entry em { font-style: normal; font-size: 5px; color: #999 !important; }
+
+/* Operations column */
+html[data-ui-theme="manga2"] .operations-column { background: transparent !important; }
+html[data-ui-theme="manga2"] .operations-heading h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .operations-heading p { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .operation-list > button {
+  border: 1px solid #ccc !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .operation-list > button:hover { background: #f5f5f5 !important; }
+html[data-ui-theme="manga2"] .operation-list > button.selected { border-color: #111 !important; background: #f0f0f0 !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .operation-list > button.probed:after { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .selected-operation { border: 1px solid #111 !important; background: #fff !important; }
+
+html[data-ui-theme="manga2"] .strength-switch button,
+html[data-ui-theme="manga2"] .operation-actions button {
+  border: 1px solid #ccc !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .strength-switch button.active { border-color: #111 !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .operation-actions .execute {
+  border-color: #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+}
+
+/* Protocol */
+html[data-ui-theme="manga2"] .compact-protocol { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .protocol-toggle { color: #111 !important; }
+html[data-ui-theme="manga2"] .compact-protocol li { border-top: 1px solid #ccc !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .compact-protocol li small { color: #555 !important; }
+html[data-ui-theme="manga2"] .compact-step-tools button { border: 1px solid #ccc !important; background: #fff !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .protocol-run button { border-color: #111 !important; background: #111 !important; color: #fff !important; }
+
+/* Event strip */
+html[data-ui-theme="manga2"] .event-strip { background: #fff !important; border-top: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .event-strip > span { color: #555 !important; }
+html[data-ui-theme="manga2"] .event-strip p { color: #555 !important; }
+html[data-ui-theme="manga2"] .event-strip button { border: 1px solid #111 !important; background: #fff !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .event-strip.danger,
+html[data-ui-theme="manga2"] .event-strip.milestone { border-top-color: #111 !important; }
+
+/* === DRAWERS === */
+html[data-ui-theme="manga2"] .drawer-backdrop { background: rgba(255,255,255,0.8) !important; }
+
+html[data-ui-theme="manga2"] .side-drawer,
+html[data-ui-theme="manga2"] .bottom-drawer {
+  background: #fff !important;
+  border-color: #111 !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .side-drawer h2,
+html[data-ui-theme="manga2"] .bottom-drawer h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .side-drawer h3 { color: #111 !important; border-bottom: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .side-drawer p,
+html[data-ui-theme="manga2"] .side-drawer li,
+html[data-ui-theme="manga2"] .bottom-drawer p,
+html[data-ui-theme="manga2"] .bottom-drawer li { color: #111 !important; }
+html[data-ui-theme="manga2"] .side-drawer .technical { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .side-drawer button,
+html[data-ui-theme="manga2"] .bottom-drawer button,
+html[data-ui-theme="manga2"] .menu-drawer > button {
+  background: #fff !important;
+  border: 1px solid #111 !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .side-drawer button:hover,
+html[data-ui-theme="manga2"] .bottom-drawer button:hover,
+html[data-ui-theme="manga2"] .menu-drawer > button:hover { background: #f5f5f5 !important; }
+
+html[data-ui-theme="manga2"] .menu-drawer hr { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .menu-drawer .danger-action { border-color: #111 !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .bottom-drawer li { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .bottom-drawer li small,
+html[data-ui-theme="manga2"] .bottom-drawer li p { color: #555 !important; }
+
+/* === CHAT FEED === */
+html[data-ui-theme="manga2"] .character-chat,
+html[data-ui-theme="manga2"] .chat-feed { background: #fff !important; }
+
+/* === CALIBRATION SVG CHARTS — unified illustration language === */
+
+/* Panel frame: 1px black border, light interior */
+html[data-ui-theme="manga2"] .physiology-panel.legacy-physiology-panel,
+html[data-ui-theme="manga2"] .trend-instrument {
+  background: #f8f8f8 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .physiology-panel > section {
+  background: #f8f8f8 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .physiology-panel header { color: #111 !important; }
+
+/* Activation scale — no color, screentone via density */
+html[data-ui-theme="manga2"] .activation-scale { border: 1px solid #111 !important; background: #f8f8f8 !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-normal,
+html[data-ui-theme="manga2"] .activation-scale.level-high,
+html[data-ui-theme="manga2"] .activation-scale.level-edge {
+  background: #f8f8f8 !important;
+}
+/* The bar fill */
+html[data-ui-theme="manga2"] .activation-scale > div > i {
+  background: #5b8a72 !important;
+}
+/* The marker dot */
+html[data-ui-theme="manga2"] .activation-scale > div > em {
+  background: #e07b3c !important;
+  border: 1px solid #fff !important;
+}
+/* Scale labels */
+html[data-ui-theme="manga2"] .activation-scale footer span { color: #555 !important; }
+
+/* Pulse cardiogram — muted red */
+html[data-ui-theme="manga2"] .scope-trace-live {
+  stroke: #c44545 !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+html[data-ui-theme="manga2"] .pulse-cardiogram { background: #fff !important; }
+html[data-ui-theme="manga2"] .pulse-biosignal header span,
+html[data-ui-theme="manga2"] .pulse-biosignal header b { color: #111 !important; }
+html[data-ui-theme="manga2"] .pulse-biosignal header i { color: #555 !important; }
+
+/* Breathing — no color */
+html[data-ui-theme="manga2"] .breathing-biosignal header span,
+html[data-ui-theme="manga2"] .breathing-biosignal header b { color: #111 !important; }
+html[data-ui-theme="manga2"] .breathing-biosignal header i { color: #555 !important; }
+html[data-ui-theme="manga2"] .breathing-field { background: #fff !important; border: none !important; }
+html[data-ui-theme="manga2"] .breathing-field > i { background: #6b9bb5 !important; opacity: 0.3 !important; }
+html[data-ui-theme="manga2"] .breathing-field > em { background: #6b9bb5 !important; opacity: 0.15 !important; }
+
+/* Endurance card — outer frame only */
+html[data-ui-theme="manga2"] .endurance-card {
+  background: transparent !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .endurance-scale header span,
+html[data-ui-theme="manga2"] .endurance-scale header b { color: #111 !important; }
+html[data-ui-theme="manga2"] .endurance-scale > div { border: none !important; background: transparent !important; display: block !important; }
+html[data-ui-theme="manga2"] .endurance-scale > div > i { background: #5b8a72 !important; }
+
+/* Hide donut chart (::before) and "RES" label (::after) from JI theme */
+html[data-ui-theme="manga2"] .endurance-scale::before,
+html[data-ui-theme="manga2"] .endurance-scale::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Hide percentage text — shown by liquid wave */
+html[data-ui-theme="manga2"] .endurance-scale p strong { display: none !important; }
+
+/* Liquid chart container — no border, no background, no overlay */
+html[data-ui-theme="manga2"] .endurance-liquid-container {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  width: 120px !important;
+  height: 120px !important;
+  min-height: 120px !important;
+  display: block !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+html[data-ui-theme="manga2"] .endurance-liquid-container::after {
+  content: none !important;
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .endurance-liquid-container > div {
+  width: 120px !important;
+  height: 120px !important;
+}
+html[data-ui-theme="manga2"] .endurance-liquid-container canvas {
+  width: 120px !important;
+  height: 120px !important;
+}
+html[data-ui-theme="manga2"] .endurance-scale p span { color: #555 !important; }
+
+/* Endurance metrics (balance, overload) — no borders */
+html[data-ui-theme="manga2"] .endurance-metric {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+html[data-ui-theme="manga2"] .endurance-metric p span { color: #555 !important; }
+html[data-ui-theme="manga2"] .endurance-metric p b { color: #111 !important; }
+html[data-ui-theme="manga2"] .endurance-metric small { color: #555 !important; }
+
+/* Track + fill in endurance metrics — no border */
+html[data-ui-theme="manga2"] .endurance-metric__track {
+  border: none !important;
+  background: #eee !important;
+  border-radius: 0 !important;
+}
+html[data-ui-theme="manga2"] .endurance-metric__track > i {
+  background: #5b8a72 !important;
+}
+
+/* Endurance stack — vertical: heart, overload, pendulum, balance labels */
+html[data-ui-theme="manga2"] .endurance-card.endurance-stack {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: visible;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row span { color: #555 !important; font-size: 10px; }
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row b { color: #111 !important; font-size: 13px; font-weight: 700; }
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row small { color: #555 !important; font-size: 9px; }
+html[data-ui-theme="manga2"] .endurance-stack .endurance-pendulum-row {
+  display: flex;
+  justify-content: center;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-balance-labels {
+  display: flex;
+  justify-content: center;
+}
+
+/* Overload label only — no track bar, just text */
+html[data-ui-theme="manga2"] .overload-label-only {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+/* BalancePendulum under heart, overload to the right */
+html[data-ui-theme="manga2"] .endurance-card > .endurance-infographics > *:first-child {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+html[data-ui-theme="manga2"] .endurance-card .overload-label-only {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+html[data-ui-theme="manga2"] .overload-label-only p {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+}
+html[data-ui-theme="manga2"] .overload-label-only p span { color: #555 !important; font-size: 10px; }
+html[data-ui-theme="manga2"] .overload-label-only p b { color: #111 !important; font-size: 14px; font-weight: 700; }
+html[data-ui-theme="manga2"] .overload-label-only small { color: #555 !important; font-size: 9px; }
+
+/* === TREND INSTRUMENT SVG — unified === */
+
+/* Norm line: thin dashed gray */
+html[data-ui-theme="manga2"] .indicator-norm {
+  stroke: #999 !important;
+  stroke-width: 0.5 !important;
+  stroke-dasharray: 2 2 !important;
+  opacity: 1 !important;
+}
+
+/* Track: thin light gray */
+html[data-ui-theme="manga2"] .indicator-track {
+  stroke: #ddd !important;
+  stroke-width: 1 !important;
+}
+
+/* Current value marker: muted teal circle with white ring */
+html[data-ui-theme="manga2"] .indicator-current {
+  fill: #5b8a72 !important;
+  stroke: #fff !important;
+  stroke-width: 1 !important;
+}
+
+/* Acceptance (attitude): negative = muted red, positive = muted teal */
+html[data-ui-theme="manga2"] .acceptance-negative {
+  stroke: #c44545 !important;
+  stroke-width: 3 !important;
+  opacity: 1 !important;
+}
+html[data-ui-theme="manga2"] .acceptance-positive {
+  stroke: #5b8a72 !important;
+  stroke-width: 3 !important;
+}
+/* Chevron: thin black */
+html[data-ui-theme="manga2"] .acceptance-chevron {
+  stroke: #111 !important;
+  stroke-width: 1 !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
+
+/* Openness: frame light, opening teal fill, center line subtle */
+html[data-ui-theme="manga2"] .openness-frame {
+  fill: #fff !important;
+  stroke: #ccc !important;
+  stroke-width: 0.75 !important;
+}
+html[data-ui-theme="manga2"] .openness-opening {
+  fill: rgba(91,138,114,0.15) !important;
+  stroke: #5b8a72 !important;
+  stroke-width: 1 !important;
+}
+html[data-ui-theme="manga2"] .openness-center {
+  stroke: #ccc !important;
+  stroke-width: 0.5 !important;
+  opacity: 1 !important;
+}
+
+/* Plasticity: shadow subtle, ribbon muted purple, anchors muted purple */
+html[data-ui-theme="manga2"] .plasticity-shadow {
+  stroke: #ccc !important;
+  stroke-width: 4 !important;
+  opacity: 0.3 !important;
+}
+html[data-ui-theme="manga2"] .plasticity-ribbon {
+  stroke: #7a6ba5 !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+html[data-ui-theme="manga2"] .plasticity-anchor {
+  fill: #7a6ba5 !important;
+}
+
+/* Sensitivity: pulse line muted red */
+html[data-ui-theme="manga2"] .sensitivity-pulse {
+  stroke: #c44545 !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+
+/* === TREND LABELS — unified caption style === */
+html[data-ui-theme="manga2"] .trend-lane-label span,
+html[data-ui-theme="manga2"] .trend-lane-label b { color: #111 !important; }
+html[data-ui-theme="manga2"] .capsule-trend-reading span { color: #111 !important; }
+html[data-ui-theme="manga2"] .capsule-trend-reading small { color: #555 !important; }
+html[data-ui-theme="manga2"] .capsule-trend-reading em { color: #111 !important; }
+
+/* State trends container */
+html[data-ui-theme="manga2"] .state-trends,
+html[data-ui-theme="manga2"] .unified-state-trends {
+  border: 1px solid #111 !important;
+  background: #f8f8f8 !important;
+}
+
+/* === MONITOR / SESSION STRIP === */
+html[data-ui-theme="manga2"] .monitor-heading > div { background: #f8f8f8 !important; border: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .monitor-heading > div::before { background: #111 !important; }
+html[data-ui-theme="manga2"] .monitor-heading small,
+html[data-ui-theme="manga2"] .monitor-session-strip small { color: #555 !important; }
+html[data-ui-theme="manga2"] .monitor-heading strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .monitor-session-strip > div { background: #fff !important; border: none !important; }
+html[data-ui-theme="manga2"] .monitor-session-strip b { color: #111 !important; }
+
+/* === MONITOR OUTCOME / RESULT BLOCK === */
+html[data-ui-theme="manga2"] .monitor-outcome-stack { background: #f8f8f8 !important; border: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .operation-last-result,
+html[data-ui-theme="manga2"] .monitor-last-result {
+  background: #fff !important;
+  border: none !important;
+}
+html[data-ui-theme="manga2"] .monitor-last-result header small { color: #555 !important; }
+html[data-ui-theme="manga2"] .monitor-last-result header b { color: #111 !important; }
+
+/* === OBJECTIVE STRIP === */
+html[data-ui-theme="manga2"] .objective-strip { display: none !important; }
+
+/* Hide goal section only — keep result block */
+html[data-ui-theme="manga2"] .calibration-footer-goal,
+html[data-ui-theme="manga2"] .monitor-goal,
+html[data-ui-theme="manga2"] .footer-goal-picker,
+html[data-ui-theme="manga2"] .footer-goal-settings {
+  display: none !important;
+}
+
+/* === GOAL SETTINGS PANEL === */
+html[data-ui-theme="manga2"] .goal-settings-panel { background: #fff !important; border: 1px solid #111 !important; }
+
+/* === TREND INSTRUMENT === */
+html[data-ui-theme="manga2"] .trend-instrument { background: #fff !important; border: none !important; }
+
+/* === CAPSULE BIOMETRY — smaller heart + pendulum === */
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-card.endurance-stack {
+  min-height: 180px !important;
+  height: auto !important;
+  padding-top: 0 !important;
+  border: 1px solid #111 !important;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-scale {
+  margin-top: 0;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-scale > header {
+  margin-top: 0;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-liquid-container,
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-liquid-container > div,
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-liquid-container canvas {
+  width: 80px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg {
+  width: 70px !important;
+  height: 52px !important;
+}
+
+/* === AVATAR SWAP — clone overlay animation (no React, no VT API) === */
+
+/* DUAL AVATAR — opacity/filter controlled by Framer Motion animate prop */
+.calibration-secondary-avatar {
+  position: absolute;
+  left: 0;
+  bottom: 46px;
+  width: 38%;
+  height: 72%;
+  z-index: 3;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: visible;
+  pointer-events: auto;
+}
+.calibration-secondary-avatar img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+.calibration-secondary-avatar .portrait-fallback {
+  display: none;
+}
+/* dimmed class kept for logic, Framer Motion drives opacity/filter */
+
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-avatar-frame,
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-secondary-avatar {
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 64% !important;
+  height: 100% !important;
+  transform-origin: 50% 88% !important;
+  transition: transform .46s cubic-bezier(.22,1,.36,1), opacity .32s ease, filter .38s ease !important;
+  will-change: transform, opacity, filter;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-avatar-frame.active {
+  z-index: 8 !important;
+  opacity: 1 !important;
+  filter: grayscale(0) brightness(1) !important;
+  transform: translate3d(20%,0,0) scale(1) !important;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-avatar-frame.dimmed {
+  z-index: 2 !important;
+  opacity: .42 !important;
+  filter: grayscale(.72) brightness(.58) !important;
+  transform: translate3d(-24%,18px,0) scale(.82) !important;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-secondary-avatar.active {
+  z-index: 8 !important;
+  opacity: 1 !important;
+  filter: grayscale(0) brightness(1) !important;
+  transform: translate3d(20%,0,0) scale(1) !important;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-secondary-avatar.recessed {
+  z-index: 2 !important;
+  opacity: .42 !important;
+  filter: grayscale(.72) brightness(.58) !important;
+  transform: translate3d(-24%,18px,0) scale(.82) !important;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter {
+  position: relative;
+  isolation: isolate;
+  animation: manga-monitor-enter .58s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter::after {
+  content: "";
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(108deg,transparent 0 38%,rgba(17,17,17,.12) 46%,rgba(255,255,255,.82) 50%,transparent 58%),
+    repeating-linear-gradient(108deg,transparent 0 12px,rgba(17,17,17,.035) 13px 14px,transparent 15px 25px);
+  animation: manga-monitor-wipe .62s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter>.shared-calibration-biometrics {
+  animation: manga-monitor-detail .48s .06s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article {
+  animation: manga-monitor-detail .5s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(1) { animation-delay:.09s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(2) { animation-delay:.13s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(3) { animation-delay:.17s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(4) { animation-delay:.21s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.monitor-status-strip {
+  animation: manga-monitor-detail .5s .18s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes manga-monitor-enter {
+  from { opacity: .18; filter:blur(3px); transform:translate3d(0,8px,0) scale(.994); }
+  55% { opacity: 1; filter:blur(.35px); }
+  to { opacity:1; filter:blur(0); transform:translate3d(0,0,0) scale(1); }
+}
+@keyframes manga-monitor-detail {
+  from { opacity:0; transform:translate3d(-7px,0,0); }
+  to { opacity:1; transform:translate3d(0,0,0); }
+}
+@keyframes manga-monitor-wipe {
+  0% { opacity:0; transform:translateX(-48%); }
+  18% { opacity:.72; }
+  72% { opacity:.18; }
+  100% { opacity:0; transform:translateX(48%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui-theme="manga2"] .monitor-character-enter,
+  html[data-ui-theme="manga2"] .monitor-character-enter::after,
+  html[data-ui-theme="manga2"] .monitor-character-enter > * {
+    animation: none !important;
+  }
+}
+
+/* === LAB OVERVIEW — remove decorative dividers, add black card borders === */
+
+/* Влезание: персонажи — полоса 30% со скроллом, оборудование — 3 колонки со
+   скроллом, поручения — отдельный ряд. Перенесено из JI-темы (manga2 активна). */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail {
+  grid-template-columns: minmax(0,1fr);
+  /* Полоса персонажей: auto по контенту. Потолок — фиксированные 236px на
+     .room-people (2 ряда): при 1 ряде секция прижата к карточкам без дыры,
+     при 2+ рядах включается внутренний скролл. */
+  grid-template-rows: 58px auto minmax(0,1fr) auto;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people-section {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people {
+  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+  align-items: start;
+  align-content: start;
+  /* Потолок высоты списка персонажей: 2 ряда карточек (147px). При меньшем
+     числе персонажей секция прижата к контенту (дыры нет), при большем — скролл. */
+  max-height: 247px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+/* Карточка персонажа среднего размера: одна строка ~147px (портрет 104px). */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people > article {
+  min-height: 0 !important;
+  grid-template-columns: 104px minmax(0,1fr) !important;
+  padding: 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar {
+  width: 104px !important;
+  min-height: 118px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar img {
+  min-height: 118px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity > div:last-child {
+  padding: 5px 8px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions {
+  gap: 3px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions button {
+  min-height: 19px;
+  padding: 2px 6px !important;
+  font-size: 8px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment-section {
+  grid-column: 1;
+  grid-row: 3;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment {
+  /* 4 колонки: 7 устройств = 2 ряда; при 3 колонках нужно 3 ряда — не влезает
+     в нижнюю зону даже со сжатыми карточками. Ряды 132px под аватар 96px. */
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  grid-template-rows: none;
+  grid-auto-rows: minmax(124px,auto);
+}
+/* Occupied-строка: аватар крупный (96px, на всю высоту блока occupant) слева,
+   телеметрия справа. occ не сжимается flex'ом карточки — иначе аватар усыхает
+   до 28px и лицо не разглядеть. */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant {
+  min-height: 0;
+  flex: 0 0 auto;
+  grid-template-columns: 96px minmax(0,1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-avatar {
+  width: 96px;
+  min-height: 0;
+  align-self: stretch;
+  line-height: 0;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar img,
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar .character-portrait-image {
+  height: 100% !important;
+  min-height: 112px !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+}
+/* Компактная шапка карточки: без статуса-«small», имя 11px, описание скрыто —
+   карточка не выше 124px ряда. */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header strong {
+  font-size: 11px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy {
+  padding: 2px 6px 1px !important;
+  margin: 0 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header small {
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy > p {
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment footer button {
+  min-height: 20px !important;
+  padding: 2px 5px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant .device-card-telemetry {
+  padding: 2px 5px;
+  align-self: center;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry > div {
+  display: flex;
+  gap: 4px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry .lab-metric-bar {
+  flex: 1;
+  min-width: 0;
+  align-self: end;
+  display: grid;
+  grid-template-rows: auto 6px;
+  gap: 3px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3px;
+  height: 12px;
+  line-height: 1;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar header span {
+  color: #555 !important;
+  font-size: 8px !important;
+  letter-spacing: .06em;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar header b {
+  color: #111 !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar .track {
+  position: relative;
+  height: 6px;
+  background: #e6e6e6;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar .track > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #444;
+  transition: width .35s ease;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar .track > mark {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: #b0b0b0;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.amber .track > i { background: #c97870; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.mint .track > i { background: #5c9c85; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.blue .track > i { background: #6d95b8; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.violet .track > i { background: #9b86ad; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .staff-directive-section {
+  grid-column: 1;
+  grid-row: 4;
+  min-height: 0;
+  max-height: 180px;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .staff-directive-section .staff-directive-panel {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+/* Сжатие copy/footer карточек оборудования: JI-правила дают copy ~86px и footer
+   ~43px, из-за чего 3 ряда по 112px не влезают в нижнюю зону. Проверено живьём:
+   с этим блоком 7 карточек помещаются (overflow −31px). */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy header strong {
+  font-size: 11px;
+  line-height: 1.2;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy header small {
+  font-size: 6px;
+  line-height: 1.2;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy {
+  padding: 3px 6px;
+  margin: 0 6px 3px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy > p {
+  display: none;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module footer button {
+  min-height: 22px;
+  padding: 3px 6px;
+}
+
+/* Remove decorative section separators */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail-section + .room-detail-section { border-top: 0 !important; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail-section h3 { border-bottom: 0 !important; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-section + .lab-section { border-top: 0 !important; }
+
+/* Black borders on all cards — override JI theme border:0 */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people > article,
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment > article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Equipment cards: occupied get thicker left accent, available stay plain */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment > article.occupied {
+  border-left: 2px solid #111 !important;
+}
+
+/* Resident avatar: thin border */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .resident-avatar {
+  border: 1px solid #ccc !important;
+  background: #f8f8f8 !important;
+}
+
+/* === CHARACTER DIRECTORY — black borders + larger cards === */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  margin-bottom: 0 !important;
+  grid-template-columns: 72px minmax(0,1fr) !important;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-photo {
+  width: 72px !important;
+  height: 88px !important;
+  border: 0 !important;
+  background: #f8f8f8 !important;
+  font-size: 32px !important;
+}
+/* Hide "АКТИВ/ПЕРСОНАЛ" small label — duplicates group heading */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card small {
+  display: none !important;
+}
+/* Text block: padding since card padding is 0 */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card > div:not(.directory-photo) {
+  padding: 6px 8px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-photo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card strong {
+  font-size: 14px !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card span {
+  font-size: 9px !important;
+  color: #555 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card p {
+  font-size: 8px !important;
+  color: #555 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card i {
+  font-size: 8px !important;
+  color: #555 !important;
+}
+
+/* No-scroll: 3 columns, tighter section padding */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory > section {
+  display: block !important;
+  gap: 5px !important;
+  padding: 6px 10px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group h2 {
+  margin: 0 0 2px !important;
+}
+/* Hide "Открыть досье →" link — whole card is clickable */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card > i {
+  display: none !important;
+}
+/* Cards grid: 3 columns within each group */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  gap: 5px !important;
+}
+/* Group heading spans full width */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group h2 {
+  grid-column: 1 / -1 !important;
+  margin: 0 0 2px !important;
+}
+/* Gap between Активы and Персонал groups */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group {
+  margin-bottom: 14px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group:last-child {
+  margin-bottom: 0 !important;
+}
+/* Compact screen heading on directory screen */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading {
+  height: auto !important;
+  min-height: 48px !important;
+  padding: 8px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading > div {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading h1 {
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading p {
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading span {
+  font-size: 8px !important;
+}
+
+/* === MENTAL CHAIR — association-map intervention panel ===
+   Compact the panel so it sits lower and reads as a clean three-part row:
+   hint (small) | input (prominent) | run button (prominent). */
+html[data-ui-theme="manga2"] .campaign-shell .mental-work-canvas {
+  grid-template-rows: minmax(0,1fr) auto auto !important;
+  gap: 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel {
+  grid-template-columns: minmax(120px,.38fr) minmax(0,1fr) auto !important;
+  grid-template-rows: auto !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  align-items: center !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel header {
+  gap: 3px !important;
+  align-content: center !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel header small {
+  font-size: 7px !important;
+  letter-spacing: .12em !important;
+  color: #555 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel header b {
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel textarea {
+  min-height: 46px !important;
+  max-height: 72px !important;
+  height: auto !important;
+  padding: 8px 10px !important;
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel textarea::placeholder {
+  color: #888 !important;
+  /* Single-line placeholder centred vertically in the field */
+  line-height: 30px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel textarea:focus {
+  outline: 1px solid #111 !important;
+  outline-offset: -1px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel button {
+  min-width: 104px !important;
+  min-height: 46px !important;
+  padding: 9px 13px !important;
+  border: 1px solid #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel button:hover:not(:disabled) {
+  background: #fff !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel button:disabled {
+  opacity: .35 !important;
+  cursor: default !important;
+}
+
+/* === MENTAL CHAIR — association graph nodes & edges === */
+/* Hierarchy: tag nodes are small pills (concepts), association nodes are
+   larger cards (entities). Selected nodes get a hard ink highlight. */
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core {
+  width: 30% !important;
+  height: 40% !important;
+  max-width: 230px !important;
+  padding: 12px 14px !important;
+  border: 1.5px solid #111 !important;
+  box-shadow: 0 2px 0 #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core small {
+  font-size: 8px !important;
+  letter-spacing: .14em !important;
+  color: #666 !important;
+  border-bottom: 1px solid #ddd !important;
+  padding-bottom: 5px !important;
+  margin-bottom: 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core > b {
+  font-size: 13px !important;
+  color: #111 !important;
+  line-height: 1.25 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core p {
+  color: #555 !important;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-map {
+  background: #fbfbfb !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-edges .visible {
+  stroke: #333 !important;
+  stroke-width: 1px !important;
+  opacity: .9 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-edges g:hover .visible {
+  opacity: 1 !important;
+  stroke: #111 !important;
+  stroke-width: 1.3px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-edges g.selected .visible {
+  opacity: 1 !important;
+  stroke: #111 !important;
+  stroke-width: 1.8px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node {
+  font-family: inherit !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.tag {
+  border-radius: 999px !important;
+  border: 1px solid #aaa !important;
+  background: #fafafa !important;
+  color: #333 !important;
+  font-size: 7px !important;
+  width: auto !important;
+  min-height: 18px !important;
+  padding: 1px 7px !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.association {
+  border-radius: 3px !important;
+  border: 1.5px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  width: auto !important;
+  min-height: 26px !important;
+  height: auto !important;
+  max-width: 104px !important;
+  padding: 3px 7px !important;
+  box-shadow: 0 2px 0 #111 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node b {
+  display: block !important;
+  font-size: inherit !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.25 !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  overflow: visible !important;
+  max-height: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node:hover {
+  z-index: 5 !important;
+  transform: translate(-50%,-50%) scale(1.06) !important;
+  box-shadow: 0 2px 0 #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.selected {
+  z-index: 6 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 4px #111 !important;
+  transform: translate(-50%,-50%) scale(1.06) !important;
+  background: #111 !important;
+  color: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.selected b {
+  color: #fff !important;
+}
+/* Майнд-мэп интерпретаций (экран выбора эпизода в кресле). */
+html[data-ui-theme="manga2"] .campaign-shell .mental-view-toggle {
+  display: inline-flex !important;
+  gap: 4px !important;
+  margin-left: 10px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-view-toggle button {
+  font-size: 9px !important;
+  padding: 2px 8px !important;
+  border: 1px solid #aaa !important;
+  background: #fafafa !important;
+  color: #555 !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-view-toggle button.active {
+  background: #111 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap {
+  position: relative !important;
+  height: 100% !important;
+  min-height: 420px !important;
+  flex: 1 1 auto !important;
+  background: #fbfbfb !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  cursor: grab !important;
+  touch-action: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap:active {
+  cursor: grabbing !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-viewport {
+  position: absolute !important;
+  inset: 0 !important;
+  transform-origin: 0 0 !important;
+  will-change: transform !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-controls {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  display: flex !important;
+  gap: 4px !important;
+  z-index: 8 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-controls button {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  border: 1px solid #aaa !important;
+  background: #fff !important;
+  color: #111 !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 2px #0002 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-controls button:hover {
+  background: #f0f0f0 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-svg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-edge {
+  fill: none !important;
+  stroke: #d5d5d5 !important;
+  stroke-width: 1px !important;
+  vector-effect: non-scaling-stroke !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-edge.hierarchy {
+  stroke: #c9c9c9 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-edge.cross {
+  stroke: #b0b0b0 !important;
+  stroke-dasharray: 3 3 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node {
+  cursor: pointer !important;
+  animation: mind-appear .35s ease-out both !important;
+}
+@keyframes mind-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node-pill {
+  fill: #fff !important;
+  stroke: #111 !important;
+  stroke-width: 1.5px !important;
+  vector-effect: non-scaling-stroke !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview .mind-node-pill {
+  fill: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.relationships .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.biography .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.station .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.world_knowledge .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.accumulated .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.others .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.world .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.self .mind-node-pill {
+  fill: #f0f0f0 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.trait .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.episode .mind-node-pill {
+  fill: #fafafa !important;
+  stroke: #aaa !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.dirty .mind-node-pill {
+  stroke-dasharray: 3 2 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected .mind-node-pill {
+  fill: #111 !important;
+  stroke: #111 !important;
+  stroke-width: 2.5px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.dot .mind-node-pill {
+  fill: #999 !important;
+  stroke: #999 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node-float {
+  animation: mind-float 6s ease-in-out infinite !important;
+  animation-delay: var(--float-delay, 0s) !important;
+}
+@keyframes mind-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(var(--float-amp, 3px), calc(var(--float-amp, 3px) * -0.6)); }
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  fill: #111 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview .mind-node-label {
+  fill: #fff !important;
+  font-size: 13px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected .mind-node-label {
+  fill: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.trait .mind-node-label,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.episode .mind-node-label {
+  font-size: 9px !important;
+  fill: #333 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-detail {
+  position: absolute !important;
+  left: 8px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  background: #fff !important;
+  border: 1.5px solid #111 !important;
+  border-radius: 4px !important;
+  padding: 8px 10px !important;
+  box-shadow: 0 2px 0 #111 !important;
+  z-index: 7 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-detail header small {
+  font-size: 8px !important;
+  letter-spacing: .14em !important;
+  color: #666 !important;
+  text-transform: uppercase !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-detail header b {
+  display: block !important;
+  font-size: 12px !important;
+  color: #111 !important;
+  margin: 2px 0 4px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-detail p {
+  font-size: 10px !important;
+  color: #555 !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+}
+
+/* === ROOM SCENE (жилые камеры) — единый дизайн: чёрные рамки, без скруглений === */
+html[data-ui-theme="manga2"] .campaign-shell .room-scene {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-scene-shade {
+  background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.18) 55%, rgba(255,255,255,.42)) !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-scene-label {
+  border: 1px solid #111 !important;
+  border-left: 2px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-character-layer > button {
+  border-radius: 0 !important;
+  filter: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-character-layer > button > img {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-character-layer > button > span {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-compact-overlay {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-compact-overlay .room-equipment-switch {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-switch-track {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-switch-thumb {
+  border-radius: 0 !important;
+  background: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-switch.on .room-equipment-switch-thumb {
+  background: #111 !important;
+}

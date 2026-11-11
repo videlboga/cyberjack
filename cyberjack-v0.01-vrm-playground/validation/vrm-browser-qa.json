@@ -1,0 +1,20 @@
+{
+  "initial": {
+    "character": "mira",
+    "ready": true,
+    "clip": "Stand_00_00",
+    "emotion": "neutral",
+    "replyId": "",
+    "talking": true,
+    "boundBones": 137
+  },
+  "errors": [],
+  "http": [
+    [
+      404,
+      "http://127.0.0.1:5174/favicon.ico"
+    ]
+  ],
+  "fallback": true,
+  "reply": true
+}

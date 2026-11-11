@@ -1,0 +1,318 @@
+[
+  {
+    "side": "left",
+    "before": {
+      "left": {
+        "knee": 98.7458322821905,
+        "foot": [
+          0.14037990131967024,
+          0.04036809884668219,
+          0.36164063354037546
+        ],
+        "thigh": [
+          0.0781514392716777,
+          0.4968224501940816,
+          0.009809025972725548
+        ]
+      },
+      "right": {
+        "knee": 98.3751479643415,
+        "foot": [
+          -0.15686810629868492,
+          0.03933572835488153,
+          0.36041907035711235
+        ],
+        "thigh": [
+          -0.07811170694357424,
+          0.49682232864798614,
+          0.009809020937188263
+        ]
+      },
+      "hips": [
+        5.064066457468667e-9,
+        0.6528258972541531,
+        5.704350985137786e-9
+      ]
+    },
+    "after": {
+      "left": {
+        "knee": 0.9870814262906151,
+        "foot": [
+          0.005060652028696836,
+          0.4730091558828308,
+          0.8971116691401754
+        ],
+        "thigh": [
+          0.0781514392716777,
+          0.49682245048917134,
+          0.009809025972725548
+        ]
+      },
+      "right": {
+        "knee": 98.3751479643415,
+        "foot": [
+          -0.15686810629868492,
+          0.03933572864997126,
+          0.36041907035711235
+        ],
+        "thigh": [
+          -0.07811170694357424,
+          0.4968223289430759,
+          0.009809020937188263
+        ]
+      },
+      "hips": [
+        5.064066457468667e-9,
+        0.6528258975492428,
+        5.704350985137786e-9
+      ]
+    },
+    "state": {
+      "character": "mira",
+      "ready": true,
+      "style": {
+        "preset": "blender",
+        "strength": 1,
+        "materials": 39,
+        "blenderMaterials": 15,
+        "outlineMeshes": 24
+      },
+      "presence": {
+        "tension": 0,
+        "fatigue": 0,
+        "affinity": 0.5,
+        "breaths": 12,
+        "mode": "relaxed",
+        "targetMode": "relaxed"
+      },
+      "posture": {
+        "base": "pose_sitting",
+        "arms": "free",
+        "legs": "left_forward",
+        "head": "forward",
+        "blockedArms": false,
+        "weight": 0,
+        "yaw": 0
+      },
+      "library": {
+        "phase": "playing",
+        "label": "Библиотека · Other_03",
+        "baseId": "28a3169401858c6bd0c90276",
+        "donorId": "9e1549d323ab7f8987bf6b6f",
+        "quality": {
+          "accepted": true,
+          "reasons": [],
+          "support": {
+            "kind": "seat-assumed",
+            "assumed": true,
+            "anchor": "pelvis",
+            "label": "Предполагается сиденье: опора таза, ноги свободны"
+          },
+          "seatDrift": 0,
+          "samples": 42,
+          "plateauSamples": 30,
+          "achievedFraction": 1,
+          "baseEnergy": 0.00004547237777255866,
+          "donorEnergy": 0.006424098722549449,
+          "baseRootSpeed": 0,
+          "donorRootSpeed": 0.002000820175614863,
+          "rootSpeedLimit": 0.05,
+          "rootTempoMismatch": false,
+          "energyLimit": 15,
+          "tempoMismatch": false,
+          "penetration": 0.0013076546469226098,
+          "rootLift": 0,
+          "requiredFootLift": 0,
+          "contextDrift": 0,
+          "sourceContext": 5.6846764673038,
+          "headingDrift": 0,
+          "protectedUpperDrift": 0,
+          "footSlide": 2.853831925642095,
+          "requiresStep": false,
+          "ground": 0.026600498282581556,
+          "height": 1.5139682678815285
+        },
+        "fingerprint": "65800c6aad54f67b13b2b4c74f4f74aee5b6c7ca1f9e5e617d86c03e6ca08b4d"
+      },
+      "camera": {
+        "focusId": "systemic",
+        "cinematic": false,
+        "tool": null,
+        "transitioning": false,
+        "distance": 3.604247494276718
+      },
+      "clip": "Base_sitting",
+      "emotion": "neutral",
+      "replyId": "",
+      "talking": false,
+      "boundBones": 154,
+      "grounding": {
+        "floorY": 0,
+        "mode": "body",
+        "samples": 2507,
+        "rootY": -0.42332738080158727,
+        "offset": -0.42332738080158727,
+        "minimum": 0
+      },
+      "reaction": null
+    }
+  },
+  {
+    "side": "right",
+    "before": {
+      "left": {
+        "knee": 98.7458322821905,
+        "foot": [
+          0.14037990131967024,
+          0.04036809914177192,
+          0.36164063354037546
+        ],
+        "thigh": [
+          0.0781514392716777,
+          0.49682245048917134,
+          0.009809025972725548
+        ]
+      },
+      "right": {
+        "knee": 98.3751479643415,
+        "foot": [
+          -0.15686810629868492,
+          0.03933572864997126,
+          0.36041907035711235
+        ],
+        "thigh": [
+          -0.07811170694357424,
+          0.4968223289430759,
+          0.009809020937188263
+        ]
+      },
+      "hips": [
+        5.064066457468667e-9,
+        0.6528258975492428,
+        5.704350985137786e-9
+      ]
+    },
+    "after": {
+      "left": {
+        "knee": 98.7458322821905,
+        "foot": [
+          0.14037990131967024,
+          0.039131828602350704,
+          0.36164063354037546
+        ],
+        "thigh": [
+          0.0781514392716777,
+          0.4955861799497501,
+          0.009809025972725548
+        ]
+      },
+      "right": {
+        "knee": 13.98450835213174,
+        "foot": [
+          -0.018926630019080064,
+          0.3443520159226246,
+          0.8787883825970654
+        ],
+        "thigh": [
+          -0.07811170694357424,
+          0.49558605840365466,
+          0.009809020937188263
+        ]
+      },
+      "hips": [
+        5.064066457468667e-9,
+        0.6515896270098216,
+        5.704350985137786e-9
+      ]
+    },
+    "state": {
+      "character": "mira",
+      "ready": true,
+      "style": {
+        "preset": "blender",
+        "strength": 1,
+        "materials": 39,
+        "blenderMaterials": 15,
+        "outlineMeshes": 24
+      },
+      "presence": {
+        "tension": 0,
+        "fatigue": 0,
+        "affinity": 0.5,
+        "breaths": 12,
+        "mode": "relaxed",
+        "targetMode": "relaxed"
+      },
+      "posture": {
+        "base": "pose_sitting",
+        "arms": "free",
+        "legs": "right_forward",
+        "head": "forward",
+        "blockedArms": false,
+        "weight": 0,
+        "yaw": 0
+      },
+      "library": {
+        "phase": "playing",
+        "label": "Библиотека · GSleep_00",
+        "baseId": "28a3169401858c6bd0c90276",
+        "donorId": "625fc6b9487e177b61a200be",
+        "quality": {
+          "accepted": true,
+          "reasons": [],
+          "support": {
+            "kind": "seat-assumed",
+            "assumed": true,
+            "anchor": "pelvis",
+            "label": "Предполагается сиденье: опора таза, ноги свободны"
+          },
+          "seatDrift": 0,
+          "samples": 37,
+          "plateauSamples": 25,
+          "achievedFraction": 1,
+          "baseEnergy": 0.000036222551820737474,
+          "donorEnergy": 0.5673952567992294,
+          "baseRootSpeed": 0,
+          "donorRootSpeed": 0.0019076496437427828,
+          "rootSpeedLimit": 0.05,
+          "rootTempoMismatch": false,
+          "energyLimit": 15,
+          "tempoMismatch": false,
+          "penetration": 0.002045338965689175,
+          "rootLift": 0,
+          "requiredFootLift": 0,
+          "contextDrift": 0,
+          "sourceContext": 32.352759549921366,
+          "headingDrift": 0,
+          "protectedUpperDrift": 0,
+          "footSlide": 2.6293150353606913,
+          "requiresStep": false,
+          "ground": 0.026600498282581556,
+          "height": 1.5139682678815285
+        },
+        "fingerprint": "65800c6aad54f67b13b2b4c74f4f74aee5b6c7ca1f9e5e617d86c03e6ca08b4d"
+      },
+      "camera": {
+        "focusId": "systemic",
+        "cinematic": false,
+        "tool": null,
+        "transitioning": false,
+        "distance": 3.604247494276718
+      },
+      "clip": "Base_sitting",
+      "emotion": "neutral",
+      "replyId": "",
+      "talking": false,
+      "boundBones": 154,
+      "grounding": {
+        "floorY": 0,
+        "mode": "body",
+        "samples": 2507,
+        "rootY": -0.4245636513410085,
+        "offset": -0.4245636513410085,
+        "minimum": 0
+      },
+      "reaction": null
+    }
+  }
+]

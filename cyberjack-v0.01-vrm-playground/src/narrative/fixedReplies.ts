@@ -1,0 +1,769 @@
+import type { ReactionFrame } from './reactionFrame';
+import { buildCombinatorialReply } from './combinatorialReplies';
+import { INDIVIDUAL_REPLIES } from './individualReplies';
+
+/**
+ * Матрица фиксированных реплик для типовых состояний.
+ *
+ * Ядро сводит каждый тик к малому числу «драматических позиций». Матрица
+ * озвучивает два класса формульных реакций, где модель зацикливается:
+ *
+ *   1. Физиология (event:) — оргазм, срыв, перегрузка, удержание у грани,
+ *      истощение. Короткие выкрики, где нечего генерировать.
+ *
+ *   2. Повторяющееся обычное действие (repeat:) — то самое «третье поглаживание
+ *      шеи подряд», где модель выдаёт дословный повтор. Здесь нужны живые,
+ *      развивающиеся реплики: персонаж замечает повтор, привыкает, реагирует
+ *      глубже или начинает уставать.
+ *
+ * LLM остаётся как escape-hatch для случаев, где нужен конкретный смысл:
+ *   - наблюдатель (видит чужую реакцию, а не свою);
+ *   - незавершённые темы (вопрос/обещание);
+ *   - доминирующая компульсия (сложный внутренний конфликт);
+ *   - задан вопрос (нужен ответ, а не выкрик);
+ *   - вербальное действие (contact = none) — это разговор, не физика;
+ *   - социальные акты (граница/торг/вызов/предупреждение) — всегда.
+ *
+ * Ключ матрицы — свёрнутый frame, а не сырые action×state.
+ */
+
+type Gender = 'female' | 'male' | 'other';
+
+type EventKey = {
+    event: 'discharge' | 'breakdown' | 'overload' | 'peak' | 'edge' | 'minimal';
+    affect: 'positive' | 'negative' | 'mixed' | 'overload';
+    gender: Gender;
+};
+
+type RepeatKey = {
+    /** Категория действия по тегам (affection/pain/stimulation/intimate/restraint/clinical). */
+    category: 'affection' | 'pain' | 'stimulation' | 'intimate' | 'restraint' | 'clinical';
+    /** 2 = повтор 2–3, 4 = повтор 4+ (усталость/привыкание). */
+    tier: '2' | '4';
+    gender: Gender;
+};
+
+/**
+ * Реплики — только произносимые слова, без кавычек, ремарок и описаний.
+ * Каждая ячейка — массив вариаций; выбор детерминирован (см. selectFixedReply).
+ */
+const MATRIX: Record<string, string[]> = {
+    // ════════════════════════════════════════════════════════════════════
+    // ФИЗИОЛОГИЯ (event:)
+    // ════════════════════════════════════════════════════════════════════
+
+    // ── Оргазм (discharge) ────────────────────────────────────────────────
+    'discharge:positive:female': [
+        'Ах… не могу… не могу больше…',
+        'Сейчас… я… ах!',
+        'Не останавливайся… пожалуйста…',
+        'Я… я сейчас…',
+        'Господи… да…',
+        'Ещё… ещё… ах!',
+        'Да… да… да!',
+        'Я кончаю…',
+        'Не могу сдержаться…',
+        'Ах… как хорошо…',
+    ],
+    'discharge:positive:male': [
+        'Ах… не могу… не могу больше…',
+        'Сейчас… я… ах!',
+        'Не останавливайся…',
+        'Я… я сейчас…',
+        'Да… ещё…',
+        'Да… да… да!',
+        'Я кончаю…',
+        'Не могу сдержаться…',
+    ],
+    'discharge:negative:female': [
+        'Нет… не хочу… но… ах!',
+        'Я не должна… но тело…',
+        'Прекрати… я не хочу… ах!',
+        'Нет… нет… ах!',
+        'Не надо… но я… ах!',
+        'Я сопротивляюсь… но… ах!',
+    ],
+    'discharge:negative:male': [
+        'Нет… не хочу… но… ах!',
+        'Я не должен… но тело…',
+        'Прекрати… я не хочу… ах!',
+        'Нет… нет… ах!',
+    ],
+    'discharge:mixed:female': [
+        'Ах… что ты делаешь… не могу…',
+        'Я… я не должна… но… ах!',
+        'Сейчас… нет… да…',
+        'Не могу… и не хочу, чтобы это кончалось…',
+        'Ах… зачем… но… да…',
+        'Я не хотела… но… ах!',
+        'Нет… да… не останавливайся…',
+    ],
+    'discharge:mixed:male': [
+        'Ах… что ты делаешь… не могу…',
+        'Я… я не должен… но… ах!',
+        'Сейчас… нет… да…',
+        'Не могу… и не хочу, чтобы это кончалось…',
+        'Я не хотел… но… ах!',
+    ],
+    'discharge:overload:female': [
+        'Слишком… я не выдержу… ах!',
+        'Всё… сразу… ах!',
+        'Не могу… слишком… ах!',
+        'Ах… это слишком… но… да!',
+        'Я не выдерживаю… ах!',
+    ],
+    'discharge:overload:male': [
+        'Слишком… я не выдержу… ах!',
+        'Всё… сразу… ах!',
+        'Не могу… слишком… ах!',
+    ],
+
+    // ── Нервный срыв (breakdown) ─────────────────────────────────────────
+    'breakdown:positive:female': [
+        'Наконец… я больше не держусь…',
+        'Всё… я сдаюсь… и мне легче…',
+        'Хватит… я отпускаю…',
+        'Я не могу больше притворяться…',
+        'Всё… пусть будет как будет…',
+    ],
+    'breakdown:positive:male': [
+        'Наконец… я больше не держусь…',
+        'Всё… я сдаюсь… и мне легче…',
+        'Хватит… я отпускаю…',
+    ],
+    'breakdown:negative:female': [
+        'Хватит… пожалуйста, хватит…',
+        'Я больше не выдержу…',
+        'Не надо… прошу…',
+        'Остановись… я не могу…',
+        'Пожалуйста… перестань…',
+        'Я не выдерживаю…',
+        'Хватит… я умоляю…',
+        'Не могу больше… не могу…',
+    ],
+    'breakdown:negative:male': [
+        'Хватит… пожалуйста, хватит…',
+        'Я больше не выдержу…',
+        'Не надо… прошу…',
+        'Остановись… я не могу…',
+        'Я не выдерживаю…',
+        'Хватит… я умоляю…',
+    ],
+    'breakdown:mixed:female': [
+        'Я не понимаю… почему так…',
+        'Хватит… я не могу больше…',
+        'Пожалуйста… я не выдерживаю…',
+        'Я не знаю, что чувствую…',
+        'Не могу… и не понимаю…',
+        'Всё смешалось… я сдаюсь…',
+    ],
+    'breakdown:mixed:male': [
+        'Я не понимаю… почему так…',
+        'Хватит… я не могу больше…',
+        'Я не знаю, что чувствую…',
+        'Всё смешалось… я сдаюсь…',
+    ],
+    'breakdown:overload:female': [
+        'Слишком… я ломаюсь…',
+        'Всё сразу… я не выдерживаю…',
+        'Не могу… слишком много…',
+        'Я распадаюсь… хватит…',
+        'Перегруз… я не могу…',
+    ],
+    'breakdown:overload:male': [
+        'Слишком… я ломаюсь…',
+        'Всё сразу… я не выдерживаю…',
+        'Не могу… слишком много…',
+    ],
+
+    // ── Сенсорная перегрузка (overload) ──────────────────────────────────
+    'overload:positive:female': [
+        'Слишком хорошо… я не выдерживаю…',
+        'Ах… это слишком… но приятно…',
+        'Не могу… но не хочу, чтобы кончалось…',
+        'Слишком ярко… но так хорошо…',
+        'Я тону в этом… и мне нравится…',
+    ],
+    'overload:positive:male': [
+        'Слишком хорошо… я не выдерживаю…',
+        'Ах… это слишком… но приятно…',
+        'Не могу… но не хочу, чтобы кончалось…',
+    ],
+    'overload:negative:female': [
+        'Слишком… мне больно…',
+        'Не могу… это невыносимо…',
+        'Хватит… слишком сильно…',
+        'Я не выдерживаю… слишком…',
+        'Перестань… это слишком…',
+    ],
+    'overload:negative:male': [
+        'Слишком… мне больно…',
+        'Не могу… это невыносимо…',
+        'Хватит… слишком сильно…',
+    ],
+    'overload:mixed:female': [
+        'Не могу понять… приятно или нет…',
+        'Всё смешалось… я теряюсь…',
+        'Слишком… и не могу остановить…',
+        'Не понимаю, что чувствую…',
+        'И приятно, и невыносимо…',
+        'Я теряюсь… не могу…',
+    ],
+    'overload:mixed:male': [
+        'Не могу понять… приятно или нет…',
+        'Всё смешалось… я теряюсь…',
+        'Не понимаю, что чувствую…',
+        'И приятно, и невыносимо…',
+    ],
+    'overload:overload:female': [
+        'Слишком… слишком много…',
+        'Я не понимаю… всё смешалось…',
+        'Подожди… я не могу собраться…',
+        'Всё… сразу… не могу…',
+        'Слишком ярко… слишком…',
+        'Я теряюсь… не могу…',
+        'Всё плывёт… не могу…',
+    ],
+    'overload:overload:male': [
+        'Слишком… слишком много…',
+        'Я не понимаю… всё смешалось…',
+        'Подожди… я не могу собраться…',
+        'Всё… сразу… не могу…',
+        'Я теряюсь… не могу…',
+    ],
+
+    // ── У самой грани (peak) ──────────────────────────────────────────────
+    'peak:positive:female': [
+        'Ещё… ещё немного…',
+        'Не останавливайся…',
+        'Я на грани…',
+        'Почти… почти…',
+        'Ещё чуть-чуть…',
+        'Я так близко…',
+        'Не отпускай…',
+    ],
+    'peak:positive:male': [
+        'Ещё… ещё немного…',
+        'Не останавливайся…',
+        'Я на грани…',
+        'Почти… почти…',
+        'Я так близко…',
+    ],
+    'peak:negative:female': [
+        'Не надо… я на пределе…',
+        'Остановись… я не выдержу…',
+        'Пожалуйста… не сейчас…',
+        'Я на пределе… хватит…',
+        'Не могу больше…',
+    ],
+    'peak:negative:male': [
+        'Не надо… я на пределе…',
+        'Остановись… я не выдержу…',
+        'Я на пределе… хватит…',
+    ],
+    'peak:mixed:female': [
+        'Я не знаю… хочу и не хочу…',
+        'Так близко… и так страшно…',
+        'Не могу решить…',
+        'И хочу, и боюсь…',
+        'Почти… но я не готова…',
+    ],
+    'peak:mixed:male': [
+        'Я не знаю… хочу и не хочу…',
+        'Так близко… и так страшно…',
+        'Не могу решить…',
+    ],
+    'peak:overload:female': [
+        'Слишком… но я почти…',
+        'Не могу остановиться… почти…',
+        'Всё смешалось… я на грани…',
+        'Слишком… и я не выдерживаю…',
+    ],
+    'peak:overload:male': [
+        'Слишком… но я почти…',
+        'Не могу остановиться… почти…',
+        'Всё смешалось… я на грани…',
+    ],
+
+    // ── Удержание у грани (edge) ──────────────────────────────────────────
+    'edge:positive:female': [
+        'Ещё… не отпускай…',
+        'Я так близко…',
+        'Не останавливайся…',
+        'Держи меня здесь…',
+        'Ещё немного…',
+        'Я почти…',
+    ],
+    'edge:positive:male': [
+        'Ещё… не отпускай…',
+        'Я так близко…',
+        'Не останавливайся…',
+        'Ещё немного…',
+    ],
+    'edge:negative:female': [
+        'Хватит… я на пределе…',
+        'Не могу больше…',
+        'Остановись…',
+        'Я не выдержу…',
+        'Пожалуйста… хватит…',
+    ],
+    'edge:negative:male': [
+        'Хватит… я на пределе…',
+        'Не могу больше…',
+        'Остановись…',
+    ],
+    'edge:mixed:female': [
+        'Я не знаю… хочу и не хочу…',
+        'Так близко… и так страшно…',
+        'Не могу решить…',
+        'И хочу, и боюсь…',
+    ],
+    'edge:mixed:male': [
+        'Я не знаю… хочу и не хочу…',
+        'Так близко… и так страшно…',
+        'Не могу решить…',
+    ],
+    'edge:overload:female': [
+        'Слишком долго… я не выдерживаю…',
+        'Всё смешалось… и я на грани…',
+        'Не могу… слишком…',
+        'Я теряюсь… но не отпускай…',
+    ],
+    'edge:overload:male': [
+        'Слишком долго… я не выдерживаю…',
+        'Всё смешалось… и я на грани…',
+        'Не могу… слишком…',
+    ],
+
+    // ── Истощение (minimal control) ───────────────────────────────────────
+    'minimal:positive:female': [
+        'Хорошо… но сил нет…',
+        'Мне… хорошо…',
+        'Так… хорошо…',
+    ],
+    'minimal:positive:male': [
+        'Хорошо… но сил нет…',
+        'Мне… хорошо…',
+    ],
+    'minimal:negative:female': [
+        'Не могу…',
+        'Сил нет…',
+        'Я… не могу…',
+    ],
+    'minimal:negative:male': [
+        'Не могу…',
+        'Сил нет…',
+    ],
+    'minimal:mixed:female': [
+        'Не понимаю… сил нет…',
+        'Всё смешалось… я устала…',
+        'Не могу… и не понимаю…',
+    ],
+    'minimal:mixed:male': [
+        'Не понимаю… сил нет…',
+        'Всё смешалось… я устал…',
+    ],
+    'minimal:overload:female': [
+        'Не могу… всё плывёт…',
+        'Сил нет… не понимаю…',
+        'Всё… слишком…',
+    ],
+    'minimal:overload:male': [
+        'Не могу… всё плывёт…',
+        'Сил нет… не понимаю…',
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    // ПОВТОРЯЮЩЕЕСЯ ОБЫЧНОЕ ДЕЙСТВИЕ (repeat:)
+    // Категория действия × tier × gender. Реплики специфичны категории:
+    // нежность, боль, стимуляция, интим, фиксация, клиника.
+    // ════════════════════════════════════════════════════════════════════
+
+    // ── Нежность (affection): поглаживание, поцелуй, массаж ──────────────
+    'repeat:affection:2:female': [
+        'Снова… твои руки такие тёплые.',
+        'Ты опять… и я не против.',
+        'Ещё раз… мне это нравится.',
+        'Твоё прикосновение… я уже жду его.',
+        'Продолжай… так спокойно.',
+        'Мне нравится, когда ты так делаешь.',
+    ],
+    'repeat:affection:2:male': [
+        'Снова… твои руки такие тёплые.',
+        'Ты опять… и я не против.',
+        'Ещё раз… мне это нравится.',
+        'Мне нравится, когда ты так делаешь.',
+    ],
+    'repeat:affection:4:female': [
+        'Ты не устаёшь… а я уже привыкаю к твоим рукам.',
+        'Снова и снова… я тону в этой нежности.',
+        'Я уже жду твоего прикосновения.',
+        'Каждый раз… всё теплее.',
+        'Ты знаешь, что мне это нравится…',
+        'Не останавливайся… я привыкла.',
+    ],
+    'repeat:affection:4:male': [
+        'Ты не устаёшь… а я уже привыкаю к твоим рукам.',
+        'Снова и снова… я тону в этой нежности.',
+        'Я уже жду твоего прикосновения.',
+        'Каждый раз… всё теплее.',
+    ],
+
+    // ── Боль (pain): удар, пощёчина, укус, хлыст ─────────────────────────
+    'repeat:pain:2:female': [
+        'Опять… больно.',
+        'Ты снова бьёшь… хватит.',
+        'Я уже поняла… не надо.',
+        'Перестань… мне больно.',
+        'Каждый удар… я не выдерживаю.',
+    ],
+    'repeat:pain:2:male': [
+        'Опять… больно.',
+        'Ты снова бьёшь… хватит.',
+        'Я уже понял… не надо.',
+        'Перестань… мне больно.',
+    ],
+    'repeat:pain:4:female': [
+        'Сколько можно… я вся в синяках.',
+        'Ты не слышишь меня… хватит бить.',
+        'Опять и опять… я не выдержу.',
+        'Я уже просила… перестань.',
+        'Это невыносимо… прекрати.',
+    ],
+    'repeat:pain:4:male': [
+        'Сколько можно… я весь в синяках.',
+        'Ты не слышишь меня… хватит бить.',
+        'Опять и опять… я не выдержу.',
+        'Я уже просил… перестань.',
+    ],
+
+    // ── Стимуляция (stimulation): вибрация, электро, лёд, перо ───────────
+    'repeat:stimulation:2:female': [
+        'Снова… этот ток по телу.',
+        'Опять… я чувствую каждую волну.',
+        'Ещё раз… так остро.',
+        'Этот импульс… я не могу привыкнуть.',
+        'Продолжай… я дрожу.',
+    ],
+    'repeat:stimulation:2:male': [
+        'Снова… этот ток по телу.',
+        'Опять… я чувствую каждую волну.',
+        'Ещё раз… так остро.',
+        'Продолжай… я дрожу.',
+    ],
+    'repeat:stimulation:4:female': [
+        'Снова и снова… я уже не различаю волны.',
+        'Ты не останавливаешься… а я тону в этом.',
+        'Каждый импульс… всё глубже.',
+        'Я привыкаю… но тело всё равно дрожит.',
+        'Не останавливайся… я уже не могу без этого.',
+    ],
+    'repeat:stimulation:4:male': [
+        'Снова и снова… я уже не различаю волны.',
+        'Ты не останавливаешься… а я тону в этом.',
+        'Каждый импульс… всё глубже.',
+        'Я привыкаю… но тело всё равно дрожит.',
+    ],
+
+    // ── Интим (intimate): проникновение, оральный, секс ──────────────────
+    'repeat:intimate:2:female': [
+        'Снова… глубже.',
+        'Ты опять… и я не могу сдержаться.',
+        'Ещё… я чувствую тебя.',
+        'Продолжай… так хорошо.',
+        'Твоё движение… я уже жду его.',
+    ],
+    'repeat:intimate:2:male': [
+        'Снова… глубже.',
+        'Ты опять… и я не могу сдержаться.',
+        'Ещё… я чувствую тебя.',
+        'Продолжай… так хорошо.',
+    ],
+    'repeat:intimate:4:female': [
+        'Снова и снова… я тону в тебе.',
+        'Ты не останавливаешься… а я уже не могу.',
+        'Каждый раз… всё глубже.',
+        'Я привыкаю к тебе… и это пугает.',
+        'Не останавливайся… я твоя.',
+    ],
+    'repeat:intimate:4:male': [
+        'Снова и снова… я тону в тебе.',
+        'Ты не останавливаешься… а я уже не могу.',
+        'Каждый раз… всё глубже.',
+        'Я привыкаю к тебе… и это пугает.',
+    ],
+
+    // ── Фиксация (restraint): наручники, ошейник, подвес ─────────────────
+    'repeat:restraint:2:female': [
+        'Опять… я не могу пошевелиться.',
+        'Ты снова затягиваешь… хватит.',
+        'Я уже связана… не надо.',
+        'Эти ремни… я не вырвусь.',
+        'Перестань… я и так беспомощна.',
+    ],
+    'repeat:restraint:2:male': [
+        'Опять… я не могу пошевелиться.',
+        'Ты снова затягиваешь… хватит.',
+        'Я уже связан… не надо.',
+        'Эти ремни… я не вырвусь.',
+    ],
+    'repeat:restraint:4:female': [
+        'Сколько можно… я уже не чувствую рук.',
+        'Ты не слышишь… я не вырвусь.',
+        'Опять и опять… я беспомощна.',
+        'Я уже смирилась… но не надо.',
+        'Эти ремни… я устала бороться.',
+    ],
+    'repeat:restraint:4:male': [
+        'Сколько можно… я уже не чувствую рук.',
+        'Ты не слышишь… я не вырвусь.',
+        'Опять и опять… я беспомощен.',
+        'Я уже смирился… но не надо.',
+    ],
+
+    // ── Клиника (clinical): осмотр, инъекция, пальпация ──────────────────
+    'repeat:clinical:2:female': [
+        'Снова… этот холодный осмотр.',
+        'Ты опять… я чувствую себя вещью.',
+        'Ещё раз… и я не выдержу.',
+        'Эти инструменты… мне страшно.',
+        'Продолжай… я постараюсь не дёргаться.',
+    ],
+    'repeat:clinical:2:male': [
+        'Снова… этот холодный осмотр.',
+        'Ты опять… я чувствую себя вещью.',
+        'Ещё раз… и я не выдержу.',
+        'Эти инструменты… мне страшно.',
+    ],
+    'repeat:clinical:4:female': [
+        'Снова и снова… я уже не человек.',
+        'Ты не останавливаешься… а я пустею.',
+        'Каждый раз… всё холоднее.',
+        'Я привыкаю… и это хуже всего.',
+        'Эти процедуры… я уже не чувствую.',
+    ],
+    'repeat:clinical:4:male': [
+        'Снова и снова… я уже не человек.',
+        'Ты не останавливаешься… а я пустею.',
+        'Каждый раз… всё холоднее.',
+        'Я привыкаю… и это хуже всего.',
+    ],
+};
+
+function eventMatrixKey(key: EventKey): string {
+    return `${key.event}:${key.affect}:${key.gender}`;
+}
+
+function repeatMatrixKey(key: RepeatKey): string {
+    return `repeat:${key.category}:${key.tier}:${key.gender}`;
+}
+
+/** Сводит affect frame к одному из четырёх ключей матрицы. */
+function affectKey(frame: ReactionFrame): EventKey['affect'] {
+    const affect = frame.expressionMode.affect;
+    if (affect === 'overload') return 'overload';
+    if (affect === 'mixed') return 'mixed';
+    if (affect === 'negative') return 'negative';
+    return 'positive';
+}
+
+/** Сводит physiologicalEvent к ключу матрицы. */
+function eventKey(frame: ReactionFrame): EventKey['event'] {
+    const phys = frame.event.physiologicalEvent;
+    if (phys === 'discharge') return 'discharge';
+    if (phys === 'breakdown') return 'breakdown';
+    if (phys === 'overload') return 'overload';
+    if (phys === 'peak') return 'peak';
+    if (phys === 'edge') return 'edge';
+    return 'minimal';
+}
+
+/** Сводит теги действия к категории repeat-среза. */
+function repeatCategory(frame: ReactionFrame): RepeatKey['category'] {
+    const tags = new Set((frame.event.actionTags || []).map(t => t.toLowerCase()));
+    if (tags.has('pain') || tags.has('impact') || tags.has('punishment')) return 'pain';
+    if (tags.has('restraint') || tags.has('suspension')) return 'restraint';
+    if (tags.has('clinical') || tags.has('drug') || tags.has('chemical') || tags.has('piercing')) return 'clinical';
+    if (tags.has('intimate') || tags.has('sexual') || tags.has('penetration') || tags.has('oral')) return 'intimate';
+    if (tags.has('stimulation') || tags.has('electronic') || tags.has('tickling') || tags.has('sensory')) return 'stimulation';
+    if (tags.has('affection') || tags.has('comfort')) return 'affection';
+    return 'affection';
+}
+
+const PHYSIOLOGY_EVENTS = new Set(['discharge', 'breakdown', 'overload', 'peak', 'edge']);
+
+/**
+ * Сводит pointId (26 точек тела) к 10 зонам индивидуальной матрицы.
+ * Генитальные точки (vulva/vagina/clitoris/penis/testicles/prostate) → genitals.
+ */
+function zoneOf(frame: ReactionFrame): string | null {
+    const pointId = (frame.event.pointId || '').toLowerCase();
+    if (!pointId) return null;
+    if (['vulva', 'vagina', 'clitoris', 'penis', 'testicles', 'prostate'].includes(pointId)) return 'genitals';
+    if (['face', 'lips', 'head'].includes(pointId)) return 'face';
+    if (['neck'].includes(pointId)) return 'neck';
+    if (['chest', 'nipples'].includes(pointId)) return 'chest';
+    if (['belly', 'waist'].includes(pointId)) return 'belly';
+    if (['back', 'shoulders'].includes(pointId)) return 'back';
+    if (['arms', 'hands'].includes(pointId)) return 'arms';
+    if (['legs', 'inner_thighs', 'feet'].includes(pointId)) return pointId === 'feet' ? 'feet' : 'legs';
+    if (['buttocks', 'anus'].includes(pointId)) return 'anus';
+    if (['hair'].includes(pointId)) return 'face';
+    // posture/mind_state/systemic/slot_* — не телесные зоны.
+    return null;
+}
+
+/**
+ * Сводит отношение говорящего к адресату (relation.attitude) к 5 уровням
+ * индивидуальной матрицы. Пороги совпадают с relationText в reactionFrame.ts.
+ */
+function attitudeOf(frame: ReactionFrame): string | null {
+    const attitude = frame.addressee?.relation?.attitude;
+    if (attitude === undefined) return null;
+    if (attitude >= 70) return 'high';
+    if (attitude >= 55) return 'midhigh';
+    if (attitude >= 40) return 'mid';
+    if (attitude >= 25) return 'midlow';
+    return 'low';
+}
+
+/**
+ * Выбирает индивидуальную реплику по полному ключу
+ * `{category}:{zone}:{attitude}:{tier}:{gender}`, либо null, если ячейки нет.
+ */
+function selectIndividualReply(frame: ReactionFrame): string | null {
+    const category = repeatCategory(frame);
+    const zone = zoneOf(frame);
+    const attitude = attitudeOf(frame);
+    if (!zone || !attitude) return null;
+    const gender = frame.speaker.gender === 'male' ? 'male' : frame.speaker.gender === 'female' ? 'female' : null;
+    if (!gender) return null;
+    const tier = (frame.event.repetition ?? 1) >= 4 ? 't4' : 't2';
+    const key = `${category}:${zone}:${attitude}:${tier}:${gender}`;
+    const variants = INDIVIDUAL_REPLIES[key];
+    if (!variants || variants.length === 0) return null;
+    return pickVariation(variants, frame, key);
+}
+
+/**
+ * Детерминированный гейт: когда ответ типовой (фиксированная реплика),
+ * а когда требует генерации (LLM).
+ *
+ * Фиксируем:
+ *   - истощение (control = minimal) — физически не может говорить сложно;
+ *   - физиологию (оргазм/срыв/перегрузка/у грани) — по умолчанию;
+ *   - повторяющееся физическое действие (contact != none, repetition >= 2) —
+ *     то самое «третье поглаживание», где модель зацикливается.
+ *
+ * Оставляем LLM (escape-hatch):
+ *   - наблюдатель (не directlyExperienced);
+ *   - незавершённые темы (вопрос/обещание);
+ *   - доминирующая компульсия (level 3);
+ *   - задан вопрос;
+ *   - вербальное действие (contact = none) — это разговор;
+ *   - социальные акты (граница/торг/вызов/предупреждение) — всегда.
+ */
+export function shouldUseFixedReply(frame: ReactionFrame): boolean {
+    const control = frame.expressionMode.control;
+    const phys = frame.event.physiologicalEvent;
+
+    // Истощение — всегда фиксируем.
+    if (control === 'minimal') return true;
+
+    // Только физиология (не социальные акты, не разговор).
+    if (PHYSIOLOGY_EVENTS.has(phys)) {
+        // Наблюдатель — нужен конкретный смысл.
+        if (!frame.event.directlyExperienced) return false;
+        // Незавершённые темы — нужен конкретный ответ.
+        if (frame.continuity.openThreads?.length) return false;
+        // Доминирующая компульсия — сложный внутренний конфликт.
+        if (frame.compulsions?.some(c => c.level === 3)) return false;
+        // Задан вопрос — нужен ответ.
+        if (frame.event.playerSpeech?.trim().endsWith('?')) return false;
+        return true;
+    }
+
+    // Повторяющееся физическое действие (не вербальное, не социальный акт).
+    const repetition = frame.event.repetition ?? 1;
+    if (repetition >= 2 && frame.event.contact && frame.event.contact !== 'none') {
+        // Наблюдатель — нужен конкретный смысл.
+        if (!frame.event.directlyExperienced) return false;
+        // Незавершённые темы — нужен конкретный ответ.
+        if (frame.continuity.openThreads?.length) return false;
+        // Доминирующая компульсия — сложный внутренний конфликт.
+        if (frame.compulsions?.some(c => c.level === 3)) return false;
+        // Задан вопрос — нужен ответ.
+        if (frame.event.playerSpeech?.trim().endsWith('?')) return false;
+        return true;
+    }
+
+    return false;
+}
+
+// Последняя выбранная вариация на говорящего — чтобы не повторять подряд.
+const lastVariation = new Map<string, number>();
+
+function hashString(value: string): number {
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+        hash = (hash * 31 + value.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash);
+}
+
+function pickVariation(variants: string[], frame: ReactionFrame, seedKey: string): string {
+    const speakerId = frame.speaker.id;
+    const seed = hashString(`${speakerId}:${frame.event.repetition ?? 1}:${seedKey}`);
+    const previous = lastVariation.get(speakerId);
+    let index = seed % variants.length;
+    // Не повторять ту же вариацию подряд, если есть альтернатива.
+    if (previous !== undefined && previous === index && variants.length > 1) {
+        index = (index + 1) % variants.length;
+    }
+    lastVariation.set(speakerId, index);
+    return variants[index];
+}
+
+/**
+ * Выбирает фиксированную реплику по frame, либо null, если для этого состояния
+ * заготовки нет (тогда вызывающий идёт в LLM).
+ */
+export function selectFixedReply(frame: ReactionFrame): string | null {
+    const gender = frame.speaker.gender || 'other';
+    const phys = frame.event.physiologicalEvent;
+    const repetition = frame.event.repetition ?? 1;
+
+    // Повторяющееся физическое действие — индивидуальные реплики (точка ×
+    // отношение × повтор × пол), затем комбинаторная сборка, затем плоская
+    // матрица как fallback.
+    if (!PHYSIOLOGY_EVENTS.has(phys) && repetition >= 2 && frame.event.contact && frame.event.contact !== 'none') {
+        const individual = selectIndividualReply(frame);
+        if (individual) return individual;
+        const combinatorial = buildCombinatorialReply(frame);
+        if (combinatorial) return combinatorial;
+        const key: RepeatKey = {
+            category: repeatCategory(frame),
+            tier: repetition >= 4 ? '4' : '2',
+            gender,
+        };
+        const variants = MATRIX[repeatMatrixKey(key)];
+        if (variants && variants.length) return pickVariation(variants, frame, `repeat:${key.category}:${key.tier}`);
+    }
+
+    const key: EventKey = {
+        event: eventKey(frame),
+        affect: affectKey(frame),
+        gender,
+    };
+    // 'minimal' в матрице означает истощение (control=minimal), а не обычное
+    // состояние. При normal + intact/mixed control заготовки нет — это LLM.
+    if (key.event === 'minimal' && frame.expressionMode.control !== 'minimal') return null;
+    const variants = MATRIX[eventMatrixKey(key)];
+    if (!variants || variants.length === 0) return null;
+    return pickVariation(variants, frame, key.event);
+}
+
+/** Test hook: сбрасывает карту последних вариаций. */
+export function __resetFixedReplyState() {
+    lastVariation.clear();
+}

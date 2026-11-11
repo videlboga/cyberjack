@@ -1,0 +1,26 @@
+{
+  "ticksIntercepted": [
+    {
+      "subjectId": "S-AV-01",
+      "addressedCharacterId": "S-AV-01",
+      "playerId": "PL-1",
+      "sceneId": "scene_lab_calibrator",
+      "pointId": "arms",
+      "presetId": "gentle_stroke",
+      "skipLLM": false,
+      "deferLLM": true,
+      "llmMode": "scene_chance",
+      "skipImageGen": true,
+      "interactionContext": "Диагностический стол"
+    }
+  ],
+  "errors": [],
+  "foot": {
+    "x": 249.70781471646913,
+    "y": 421.65678317508394
+  },
+  "arm": {
+    "x": 272.61887997727507,
+    "y": 168.2548718106501
+  }
+}

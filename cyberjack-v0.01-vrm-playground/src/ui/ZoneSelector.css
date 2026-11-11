@@ -1,0 +1,19 @@
+.target-selector { position: relative; margin-bottom: 7px; }
+.target-selector > small { display: block; margin-bottom: 4px; color: #657a80; font-size: 8px; letter-spacing: .12em; }
+.target-selector > button, .fixed-target { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 8px 9px; border: 1px solid #405359; background: #111b1e; color: #b3c0c3; text-align: left; cursor: pointer; }
+.target-selector > button span, .fixed-target span { color: #70848a; font-size: 9px; }
+.zone-popover { position: absolute; z-index: 20; left: -8px; right: -8px; top: 58px; max-height: 430px; padding: 9px; overflow: auto; border: 1px solid #52666c; background: #0b1215; box-shadow: 0 14px 35px #000b; }
+.zone-popover section + section { margin-top: 9px; }
+.zone-popover h4 { margin: 0 0 5px; color: #71868c; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.zone-popover section > div { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.zone-popover button { min-width: 0; padding: 7px; border: 1px solid #2f4045; background: #111a1d; color: #aebbbf; text-align: left; cursor: pointer; }
+.zone-popover button strong, .zone-popover button small { display: block; overflow: hidden; text-overflow: ellipsis; }
+.zone-popover button strong { font-size: 10px; white-space: nowrap; }
+.zone-popover button small { margin-top: 2px; color: #697d83; font-size: 8px; }
+.zone-popover button:hover:not(:disabled) { border-color: #72d6bd; }
+.zone-popover button:disabled { opacity: .42; cursor: not-allowed; }
+.target-indicator { position: absolute; top: 12px; left: 12px; padding: 7px 9px; border-left: 2px solid #72d6bd; background: rgba(9,16,18,.9); }
+.target-indicator small, .target-indicator strong { display: block; }
+.target-indicator small { color: #60787e; font-size: 7px; letter-spacing: .12em; }
+.target-indicator strong { margin-top: 2px; color: #b8ddd4; font-size: 11px; }
+.stage-contexts .target-chip { border-color: #56877a; color: #a9dfd1; }

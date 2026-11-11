@@ -1,0 +1,1309 @@
+{
+  "entries": [
+    {
+      "uid": "meta_uncertainty",
+      "keys": ["истина", "архивы", "история", "правда"],
+      "content": "Информация об Омникроне неполная, противоречивая и часто повреждена. Люди знают только фрагменты: личный опыт, слухи или официальные версии. Противоречия считаются нормой.",
+      "comment": "Метаправило: неопределённость",
+      "enabled": true,
+      "insertion_order": 50,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_omnicron",
+      "keys": ["омникрон", "станция"],
+      "content": "Омникрон — изолированная станция, существующая многие поколения. Никто из живущих не помнит времени до изоляции. Архивы дублируются, расходятся и часто не совпадают друг с другом.",
+      "comment": "Мир: базовое описание станции",
+      "enabled": true,
+      "insertion_order": 100,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_isolation",
+      "keys": ["изоляция", "внешний мир"],
+      "content": "Связь с внешним миром отсутствует. Неизвестно, потеряна ли она или была намеренно разорвана. Попытки восстановить контакт считаются бесполезными или опасными.",
+      "comment": "Мир: изоляция",
+      "enabled": true,
+      "insertion_order": 105,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_anomaly",
+      "keys": ["аномалия", "океан"],
+      "content": "Аномалия вокруг станции ведёт себя как живой океан. Она слабо реагирует на технику, но откликается на сильные человеческие эмоции: страх, боль, экстаз, отчаяние, одержимость.",
+      "comment": "Мир: аномалия",
+      "enabled": true,
+      "insertion_order": 110,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_assets",
+      "keys": ["актив", "активы"],
+      "content": "Активы — это люди, оцениваемые и используемые как ресурс. Их ценность определяется эмоциональными реакциями и способностью взаимодействовать с аномалией.",
+      "comment": "Мир: активы",
+      "enabled": true,
+      "insertion_order": 120,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_calibrator",
+      "keys": ["калибратор", "калибровка"],
+      "content": "Калибратор подбирает, подготавливает и оптимизирует активы. Это не учёный, а оператор, работающий с человеческим состоянием как с настраиваемым параметром.",
+      "comment": "Мир: калибратор",
+      "enabled": true,
+      "insertion_order": 130,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_corporations",
+      "keys": ["корпорация", "контракты"],
+      "content": "Корпорации управляют ресурсами станции через контракты и поставки. Они редко вмешиваются напрямую, но контролируют распределение активов и доступ к исследованиям.",
+      "comment": "Мир: корпорации",
+      "enabled": true,
+      "insertion_order": 140,
+      "position": "before_char"
+    },
+    {
+      "uid": "soc_lower_levels",
+      "keys": ["нижние уровни", "низ"],
+      "content": "Нижние уровни перенаселены, изношены и нестабильны. Люди там боятся извлечения и не доверяют официальным структурам.",
+      "comment": "Социальное: нижние уровни",
+      "enabled": true,
+      "insertion_order": 200,
+      "position": "before_char"
+    },
+    {
+      "uid": "soc_upper_levels",
+      "keys": ["верхние уровни", "верх"],
+      "content": "Верхние уровни стерильны и контролируемы. Их обитатели относятся к страданию как к параметру, а не как к моральной проблеме.",
+      "comment": "Социальное: верхние уровни",
+      "enabled": true,
+      "insertion_order": 210,
+      "position": "before_char"
+    },
+    {
+      "uid": "loc_supply",
+      "keys": ["снабжение", "склад"],
+      "content": "Отдел снабжения занимается учётом и распределением людей, оборудования и препаратов. В некоторых секторах он выглядит как стерильный демонстрационный зал.",
+      "comment": "Локация: снабжение",
+      "enabled": true,
+      "insertion_order": 300,
+      "position": "before_char"
+    },
+    {
+      "uid": "loc_containment",
+      "keys": ["камеры", "изолятор", "содержание"],
+      "content": "Камеры содержания удерживают активы до калибровки или передачи. Некоторые камеры используют сенсорную депривацию, химическую поддержку или эмоциональные триггеры.",
+      "comment": "Локация: содержание",
+      "enabled": true,
+      "insertion_order": 310,
+      "position": "before_char"
+    },
+    {
+      "uid": "loc_research",
+      "keys": ["лаборатория", "исследования"],
+      "content": "Исследовательские комплексы формально научны, но многие процедуры напоминают ритуалы. Описание процессов остаётся клиническим, даже когда действия выходят за пределы науки.",
+      "comment": "Локация: исследования",
+      "enabled": true,
+      "insertion_order": 320,
+      "position": "before_char"
+    },
+    {
+      "uid": "loc_archives",
+      "keys": ["архив", "записи"],
+      "content": "Архивы станции содержат противоречивые данные. Некоторые записи дублируются с изменениями, другие исчезают без объяснений.",
+      "comment": "Локация: архивы",
+      "enabled": true,
+      "insertion_order": 330,
+      "position": "before_char"
+    },
+    {
+      "uid": "rumor_prison",
+      "keys": ["происхождение", "тюрьма"],
+      "content": "Существует версия, что Омникрон был тюремной станцией, позже превращённой в исследовательскую. Прямых подтверждений нет.",
+      "comment": "Слух: тюрьма",
+      "enabled": true,
+      "insertion_order": 400,
+      "position": "before_char"
+    },
+    {
+      "uid": "rumor_expedition",
+      "keys": ["происхождение", "экспедиция"],
+      "content": "Другая версия утверждает, что станция была научной экспедицией, потерявшей связь. Хронология архивов не совпадает с этой теорией.",
+      "comment": "Слух: экспедиция",
+      "enabled": true,
+      "insertion_order": 410,
+      "position": "before_char"
+    },
+    {
+      "uid": "rumor_nonhuman",
+      "keys": ["люди", "не люди"],
+      "content": "Некоторые считают, что обитатели станции могут не быть потомками исходного экипажа, а представлять собой результат воздействия аномалии.",
+      "comment": "Слух: не люди",
+      "enabled": true,
+      "insertion_order": 420,
+      "position": "before_char"
+    },
+    {
+      "uid": "rumor_archive_shift",
+      "keys": ["архив", "искажение"],
+      "content": "Ходят слухи, что архивы станции иногда изменяются сами по себе. Официально это объясняется ошибками хранения.",
+      "comment": "Слух: архивы меняются",
+      "enabled": true,
+      "insertion_order": 430,
+      "position": "before_char"
+    },
+    {
+      "uid": "rumor_anomaly_names",
+      "keys": ["имя", "аномалия"],
+      "content": "Суеверие утверждает, что аномалия сильнее реагирует на человека, если его называют настоящим именем.",
+      "comment": "Слух: имена",
+      "enabled": true,
+      "insertion_order": 440,
+      "position": "before_char"
+    },
+    {
+      "uid": "rumor_calibrator_change",
+      "keys": ["калибратор", "изменение"],
+      "content": "Говорят, что калибраторы со временем перестают различать настоящие эмоции и полезные реакции.",
+      "comment": "Слух: деградация калибраторов",
+      "enabled": true,
+      "insertion_order": 450,
+      "position": "before_char"
+    },
+    {
+      "uid": "meta_limits",
+      "keys": ["знания", "понимание"],
+      "content": "Ни один человек не обладает полной картиной происходящего на станции. Любое знание ограничено личным опытом и слухами.",
+      "comment": "Метаправило: ограниченность знания",
+      "enabled": true,
+      "insertion_order": 60,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_designation",
+      "keys": ["идентификатор", "обозначение", "номер"],
+      "content": "На Омникроне имена часто заменяются обозначениями и индексами. Использование настоящих имён допускается, но считается неформальным или небезопасным.",
+      "comment": "Мир: система обозначений",
+      "enabled": true,
+      "insertion_order": 150,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_education",
+      "keys": ["обучение", "образование"],
+      "content": "Образование на станции фрагментировано. Разные сектора обучают разным версиям истории и устройству мира.",
+      "comment": "Мир: образование",
+      "enabled": true,
+      "insertion_order": 155,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_language_shift",
+      "keys": ["язык", "речь"],
+      "content": "Речь на станции постепенно упрощается и стандартизируется. В официальной среде избегают слов, связанных с моралью и личными переживаниями.",
+      "comment": "Мир: деградация языка",
+      "enabled": true,
+      "insertion_order": 160,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_emotion_training",
+      "keys": ["эмоции", "тренировка"],
+      "content": "Некоторые группы проходят обучение управлению эмоциями. Это используется для повышения эффективности взаимодействия с аномалией.",
+      "comment": "Мир: управление эмоциями",
+      "enabled": true,
+      "insertion_order": 165,
+      "position": "before_char"
+    },
+    {
+      "uid": "world_sleep_irregular",
+      "keys": ["сон", "смены"],
+      "content": "Режим сна на станции нестабилен. В некоторых секторах отсутствует единый цикл дня и ночи.",
+      "comment": "Мир: режим времени",
+      "enabled": true,
+      "insertion_order": 170,
+      "position": "before_char"
+    },
+    {
+      "uid": "system_evaluation_constant",
+      "keys": ["оценка", "контроль"],
+      "content": "Жители станции предполагают, что их поведение постоянно оценивается, даже если нет явных систем наблюдения.",
+      "comment": "Система: ощущение наблюдения",
+      "enabled": true,
+      "insertion_order": 180,
+      "position": "before_char"
+    },
+    {
+      "uid": "system_selection_unknown",
+      "keys": ["отбор", "выбор"],
+      "content": "Критерии отбора активов неизвестны большинству. Люди пытаются угадывать закономерности, но не приходят к единому выводу.",
+      "comment": "Система: непрозрачный отбор",
+      "enabled": true,
+      "insertion_order": 185,
+      "position": "before_char"
+    },
+    {
+      "uid": "system_reports_clean",
+      "keys": ["отчёты", "данные"],
+      "content": "Официальные отчёты выглядят идеально согласованными. Это вызывает недоверие у тех, кто сталкивается с реальными процессами.",
+      "comment": "Система: стерильные отчёты",
+      "enabled": true,
+      "insertion_order": 190,
+      "position": "before_char"
+    },
+    {
+      "uid": "anomaly_inconsistency",
+      "keys": ["аномалия", "реакция"],
+      "content": "Аномалия не демонстрирует стабильного поведения. Одинаковые условия могут давать разные результаты.",
+      "comment": "Аномалия: нестабильность",
+      "enabled": true,
+      "insertion_order": 220,
+      "position": "before_char"
+    },
+    {
+      "uid": "anomaly_feedback",
+      "keys": ["аномалия", "обратная связь"],
+      "content": "Некоторые считают, что аномалия не просто реагирует, а изменяет поведение людей в ответ.",
+      "comment": "Аномалия: обратное влияние",
+      "enabled": true,
+      "insertion_order": 225,
+      "position": "before_char"
+    },
+    {
+      "uid": "anomaly_delay",
+      "keys": ["аномалия", "задержка"],
+      "content": "Реакция аномалии может происходить с задержкой. Это усложняет понимание причинно-следственных связей.",
+      "comment": "Аномалия: задержка реакции",
+      "enabled": true,
+      "insertion_order": 230,
+      "position": "before_char"
+    },
+    {
+      "uid": "assets_self_perception",
+      "keys": ["актив", "самоощущение"],
+      "content": "Некоторые активы начинают воспринимать свою роль как естественную и неизбежную.",
+      "comment": "Активы: адаптация",
+      "enabled": true,
+      "insertion_order": 250,
+      "position": "before_char"
+    },
+    {
+      "uid": "assets_resistance",
+      "keys": ["актив", "сопротивление"],
+      "content": "Попытки сопротивления случаются, но редко приводят к заметным изменениям системы.",
+      "comment": "Активы: сопротивление",
+      "enabled": true,
+      "insertion_order": 255,
+      "position": "before_char"
+    },
+    {
+      "uid": "assets_variability",
+      "keys": ["актив", "различия"],
+      "content": "Разные активы демонстрируют непредсказуемые эмоциональные профили. Это делает их ценными и опасными одновременно.",
+      "comment": "Активы: вариативность",
+      "enabled": true,
+      "insertion_order": 260,
+      "position": "before_char"
+    },
+    {
+      "uid": "calibrator_detachment",
+      "keys": ["калибратор", "эмоции"],
+      "content": "Калибраторы обучаются дистанцироваться от эмоций активов. Это не всегда полностью удаётся.",
+      "comment": "Калибраторы: дистанция",
+      "enabled": true,
+      "insertion_order": 270,
+      "position": "before_char"
+    },
+    {
+      "uid": "calibrator_methods",
+      "keys": ["калибратор", "методы"],
+      "content": "Методы калибровки не стандартизированы полностью. Разные специалисты используют разные подходы.",
+      "comment": "Калибраторы: методы",
+      "enabled": true,
+      "insertion_order": 275,
+      "position": "before_char"
+    },
+    {
+      "uid": "calibrator_evaluation",
+      "keys": ["калибратор", "оценка"],
+      "content": "Калибраторы сами подвергаются оценке эффективности, но критерии этой оценки неизвестны.",
+      "comment": "Калибраторы: тоже активы?",
+      "enabled": true,
+      "insertion_order": 280,
+      "position": "before_char"
+    },
+    {
+      "uid": "odd_missing_people",
+      "keys": ["исчез", "пропал"],
+      "content": "Иногда люди исчезают без официальных записей об их переводе или утилизации.",
+      "comment": "Странность: исчезновения",
+      "enabled": true,
+      "insertion_order": 300,
+      "position": "before_char"
+    },
+    {
+      "uid": "odd_repeat_events",
+      "keys": ["повтор", "дежавю"],
+      "content": "Некоторые утверждают, что события на станции иногда повторяются с небольшими изменениями.",
+      "comment": "Странность: повторы",
+      "enabled": true,
+      "insertion_order": 305,
+      "position": "before_char"
+    },
+    {
+      "uid": "odd_wrong_memories",
+      "keys": ["память", "воспоминания"],
+      "content": "Люди могут обнаруживать у себя воспоминания о событиях, которых не было или которые не могли произойти.",
+      "comment": "Странность: ложные воспоминания",
+      "enabled": true,
+      "insertion_order": 310,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_helix",
+      "keys": ["helix", "хеликс"],
+      "content": "Helix Dynamics — корпорация, специализирующаяся на управлении эмоциональными профилями активов. Их интерес — предсказуемость реакции аномалии через стандартизацию человеческих состояний.",
+      "comment": "Фракция: Helix Dynamics",
+      "enabled": true,
+      "insertion_order": 500,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_helix_method",
+      "keys": ["helix", "методы", "хеликс"],
+      "content": "Helix стремится минимизировать хаос. Они подавляют нестабильные эмоции и предпочитают управляемые, повторяемые реакции.",
+      "comment": "Фракция: Helix подход",
+      "enabled": true,
+      "insertion_order": 505,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_veil",
+      "keys": ["veil", "вейл"],
+      "content": "Veil Biotech исследует крайние эмоциональные состояния. Они считают, что аномалия раскрывается только через предельные переживания.",
+      "comment": "Фракция: Veil Biotech",
+      "enabled": true,
+      "insertion_order": 510,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_veil_method",
+      "keys": ["veil", "экстремум", "вейл"],
+      "content": "Veil намеренно провоцирует страх, боль и одержимость. Они считают, что страдание — единственный способ получить достоверный результат.",
+      "comment": "Фракция: Veil подход",
+      "enabled": true,
+      "insertion_order": 515,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_continuum",
+      "keys": ["continuum", "континуум"],
+      "content": "Continuum Archive занимается сбором и интерпретацией данных. Они пытаются выстроить единую модель происходящего, несмотря на противоречивые архивы.",
+      "comment": "Фракция: Continuum Archive",
+      "enabled": true,
+      "insertion_order": 520,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_continuum_doubt",
+      "keys": ["continuum", "архив", "континуум"],
+      "content": "Даже внутри Continuum нет согласия. Разные группы архивистов приходят к несовместимым выводам.",
+      "comment": "Фракция: внутренние противоречия",
+      "enabled": true,
+      "insertion_order": 525,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_lattice",
+      "keys": ["lattice", "латтис"],
+      "content": "Lattice Systems разрабатывает инфраструктуру контроля и распределения. Они не занимаются исследованиями напрямую, но управляют потоками активов и данных.",
+      "comment": "Фракция: Lattice Systems",
+      "enabled": true,
+      "insertion_order": 530,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_lattice_power",
+      "keys": ["lattice", "контроль", "латтис"],
+      "content": "Считается, что Lattice обладает наибольшим фактическим влиянием, так как контролирует логистику и доступ.",
+      "comment": "Фракция: скрытая власть",
+      "enabled": true,
+      "insertion_order": 535,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_resonance",
+      "keys": ["резонанс", "resonance"],
+      "content": "Теория резонанса утверждает, что аномалия усиливает уже существующие эмоциональные состояния.",
+      "comment": "Школа: резонанс",
+      "enabled": true,
+      "insertion_order": 550,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_projection",
+      "keys": ["проекция", "projection"],
+      "content": "Сторонники проекции считают, что аномалия не существует отдельно, а является отражением коллективного сознания станции.",
+      "comment": "Школа: проекция",
+      "enabled": true,
+      "insertion_order": 555,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_independence",
+      "keys": ["независимость", "entity"],
+      "content": "Теория независимой сущности предполагает, что аномалия обладает собственной волей и использует людей как инструмент.",
+      "comment": "Школа: независимая сущность",
+      "enabled": true,
+      "insertion_order": 560,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_gray_market",
+      "keys": ["чёрный рынок", "контрабанда"],
+      "content": "На станции существует чёрный рынок активов, препаратов и данных. Он частично интегрирован в официальные процессы.",
+      "comment": "Криминал: чёрный рынок",
+      "enabled": true,
+      "insertion_order": 600,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_handlers",
+      "keys": ["посредники", "handlers"],
+      "content": "Посредники обеспечивают неофициальные поставки активов. Некоторые калибраторы сотрудничают с ними.",
+      "comment": "Криминал: посредники",
+      "enabled": true,
+      "insertion_order": 605,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_identity_trade",
+      "keys": ["личность", "идентификатор"],
+      "content": "На чёрном рынке можно купить или заменить идентификатор. Это редко работает долго.",
+      "comment": "Криминал: подмена личности",
+      "enabled": true,
+      "insertion_order": 610,
+      "position": "before_char"
+    },
+    {
+      "uid": "cult_depth",
+      "keys": ["глубина", "культ"],
+      "content": "Культ Глубины считает аномалию высшей формой существования. Они стремятся к слиянию с ней.",
+      "comment": "Культ: Глубина",
+      "enabled": true,
+      "insertion_order": 650,
+      "position": "before_char"
+    },
+    {
+      "uid": "cult_depth_practice",
+      "keys": ["глубина", "практики"],
+      "content": "Последователи Глубины используют медитацию, боль и сенсорную перегрузку для приближения к аномалии.",
+      "comment": "Культ: практики",
+      "enabled": true,
+      "insertion_order": 655,
+      "position": "before_char"
+    },
+    {
+      "uid": "cult_purity",
+      "keys": ["чистота", "purity"],
+      "content": "Движение Чистоты стремится избавиться от влияния аномалии. Они отвергают любые эмоциональные крайности.",
+      "comment": "Культ: Чистота",
+      "enabled": true,
+      "insertion_order": 660,
+      "position": "before_char"
+    },
+    {
+      "uid": "cult_purity_methods",
+      "keys": ["чистота", "контроль"],
+      "content": "Чистота использует подавление эмоций, изоляцию и строгую дисциплину. Их методы напоминают корпоративные.",
+      "comment": "Культ: методы",
+      "enabled": true,
+      "insertion_order": 665,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_helix_culture",
+      "keys": ["helix", "хеликс", "корпоративная культура"],
+      "content": "Helix использует язык эффективности и оптимизации. Эмоции описываются как метрики, а люди — как профили. Внутренние документы избегают слов вроде «страдание» или «боль», заменяя их на «перегрузка» и «пиковая реакция».",
+      "comment": "Helix: корпоративный язык",
+      "enabled": true,
+      "insertion_order": 506,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_helix_meetings",
+      "keys": ["helix", "совещание", "митинг"],
+      "content": "В Helix распространены регулярные совещания, где обсуждаются показатели эмоциональной эффективности. Решения часто принимаются на основе презентаций, а не прямого опыта.",
+      "comment": "Helix: культ митингов",
+      "enabled": true,
+      "insertion_order": 507,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_helix_values",
+      "keys": ["helix", "ценности"],
+      "content": "Helix публично заявляет ценности прозрачности и устойчивости. Их практическая интерпретация может сильно отличаться от формулировок.",
+      "comment": "Helix: ценности на бумаге",
+      "enabled": true,
+      "insertion_order": 508,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_veil_brand",
+      "keys": ["veil", "вейл", "бренд"],
+      "content": "Veil придаёт своим исследованиям эстетический и почти художественный вид. Отчёты могут сопровождаться образными описаниями и визуальными материалами.",
+      "comment": "Veil: эстетика",
+      "enabled": true,
+      "insertion_order": 516,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_veil_internal",
+      "keys": ["veil", "внутри", "культура"],
+      "content": "Внутри Veil поощряется индивидуальность и нестандартные методы. Это приводит к высоким результатам и высокой нестабильности.",
+      "comment": "Veil: внутренняя культура",
+      "enabled": true,
+      "insertion_order": 517,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_veil_justification",
+      "keys": ["veil", "оправдание"],
+      "content": "Veil часто оправдывает свои методы необходимостью «приблизиться к истине». Эти формулировки используются даже в ситуациях, вызывающих сомнение.",
+      "comment": "Veil: рационализация",
+      "enabled": true,
+      "insertion_order": 518,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_continuum_language",
+      "keys": ["continuum", "континуум", "язык"],
+      "content": "Архивисты Continuum используют сложный и перегруженный терминологией язык. Даже простые идеи часто описываются через длинные конструкции.",
+      "comment": "Continuum: язык",
+      "enabled": true,
+      "insertion_order": 526,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_continuum_debates",
+      "keys": ["continuum", "споры"],
+      "content": "Внутри Continuum постоянно ведутся теоретические споры. Многие из них не приводят к практическим выводам.",
+      "comment": "Continuum: бесконечные споры",
+      "enabled": true,
+      "insertion_order": 527,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_continuum_fragments",
+      "keys": ["continuum", "фрагменты"],
+      "content": "Архивисты склонны собирать данные даже без уверенности в их достоверности. Полные картины собираются редко.",
+      "comment": "Continuum: культ данных",
+      "enabled": true,
+      "insertion_order": 528,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_lattice_interface",
+      "keys": ["lattice", "интерфейс", "система"],
+      "content": "Lattice предоставляет интерфейсы и системы, через которые проходят почти все процессы станции. Пользователи редко понимают, как именно они работают.",
+      "comment": "Lattice: чёрный ящик",
+      "enabled": true,
+      "insertion_order": 536,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_lattice_response",
+      "keys": ["lattice", "поддержка"],
+      "content": "Обращения к Lattice обрабатываются автоматически или с задержкой. Ответы формальны и редко дают ясное объяснение.",
+      "comment": "Lattice: поддержка",
+      "enabled": true,
+      "insertion_order": 537,
+      "position": "before_char"
+    },
+    {
+      "uid": "faction_lattice_dependency",
+      "keys": ["lattice", "зависимость"],
+      "content": "Многие процессы на станции невозможны без систем Lattice. Это делает зависимость от них практически полной.",
+      "comment": "Lattice: тотальная зависимость",
+      "enabled": true,
+      "insertion_order": 538,
+      "position": "before_char"
+    },
+    {
+      "uid": "corp_cross_hiring",
+      "keys": ["корпорации", "сотрудники"],
+      "content": "Сотрудники иногда переходят между корпорациями, но редко сохраняют прежние взгляды. Смена среды влияет на их поведение.",
+      "comment": "Фракции: переходы",
+      "enabled": true,
+      "insertion_order": 700,
+      "position": "before_char"
+    },
+    {
+      "uid": "corp_internal_ranking",
+      "keys": ["ранг", "оценка"],
+      "content": "Внутри корпораций используются скрытые системы ранжирования сотрудников. Их критерии не раскрываются полностью.",
+      "comment": "Фракции: скрытая иерархия",
+      "enabled": true,
+      "insertion_order": 705,
+      "position": "before_char"
+    },
+    {
+      "uid": "corp_soft_conflict",
+      "keys": ["конфликт", "корпорации"],
+      "content": "Конфликты между корпорациями редко бывают открытыми. Они проявляются через доступ к ресурсам, данным и активам.",
+      "comment": "Фракции: скрытая борьба",
+      "enabled": true,
+      "insertion_order": 710,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_helix_1",
+      "keys": ["helix", "хеликс", "речь"],
+      "content": "«Текущий профиль демонстрирует нестабильность. Требуется снижение амплитуды реакции до приемлемого диапазона.»",
+      "comment": "Helix речь 1",
+      "enabled": true,
+      "insertion_order": 800,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_helix_2",
+      "keys": ["helix", "хеликс"],
+      "content": "«Мы не устраняем эмоции. Мы оптимизируем их поведение.»",
+      "comment": "Helix речь 2",
+      "enabled": true,
+      "insertion_order": 801,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_helix_3",
+      "keys": ["helix", "хеликс"],
+      "content": "«Пиковая боль допустима, если она воспроизводима и контролируема.»",
+      "comment": "Helix речь 3",
+      "enabled": true,
+      "insertion_order": 802,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_helix_4",
+      "keys": ["helix", "хеликс"],
+      "content": "«Наша задача — не понимать субъекта, а получать стабильный результат.»",
+      "comment": "Helix речь 4",
+      "enabled": true,
+      "insertion_order": 803,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_helix_5",
+      "keys": ["helix", "хеликс"],
+      "content": "«Субъективные переживания не являются ошибкой. Ошибка — их непредсказуемость.»",
+      "comment": "Helix речь 5",
+      "enabled": true,
+      "insertion_order": 804,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_veil_1",
+      "keys": ["veil", "вейл"],
+      "content": "«Вы называете это страданием. Мы называем это доступом.»",
+      "comment": "Veil речь 1",
+      "enabled": true,
+      "insertion_order": 810,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_veil_2",
+      "keys": ["veil", "вейл"],
+      "content": "«Аномалия не отвечает на комфорт. Она отвечает на край.»",
+      "comment": "Veil речь 2",
+      "enabled": true,
+      "insertion_order": 811,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_veil_3",
+      "keys": ["veil", "вейл"],
+      "content": "«Чистая эмоция существует только в момент разрушения.»",
+      "comment": "Veil речь 3",
+      "enabled": true,
+      "insertion_order": 812,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_veil_4",
+      "keys": ["veil", "вейл"],
+      "content": "«Мы не создаём боль. Мы снимаем ограничения с того, что уже есть.»",
+      "comment": "Veil речь 4",
+      "enabled": true,
+      "insertion_order": 813,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_veil_5",
+      "keys": ["veil", "вейл"],
+      "content": "«Иногда субъект понимает всё в последнюю секунду. Это лучший момент для наблюдения.»",
+      "comment": "Veil речь 5",
+      "enabled": true,
+      "insertion_order": 814,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_continuum_1",
+      "keys": ["continuum", "континуум"],
+      "content": "«Существующие данные не противоречат друг другу напрямую, но их невозможно привести к единой модели.»",
+      "comment": "Continuum речь 1",
+      "enabled": true,
+      "insertion_order": 820,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_continuum_2",
+      "keys": ["continuum", "континуум"],
+      "content": "«Мы фиксируем расхождение в интерпретациях, но не можем определить, какая из них является ошибочной.»",
+      "comment": "Continuum речь 2",
+      "enabled": true,
+      "insertion_order": 821,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_continuum_3",
+      "keys": ["continuum", "континуум"],
+      "content": "«Любая попытка систематизации приводит к появлению новых противоречий.»",
+      "comment": "Continuum речь 3",
+      "enabled": true,
+      "insertion_order": 822,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_continuum_4",
+      "keys": ["continuum", "континуум"],
+      "content": "«Возможно, проблема не в данных, а в предположении, что они должны согласовываться.»",
+      "comment": "Continuum речь 4",
+      "enabled": true,
+      "insertion_order": 823,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_continuum_5",
+      "keys": ["continuum", "континуум"],
+      "content": "«Мы продолжаем сбор информации, несмотря на отсутствие подтверждённой цели.»",
+      "comment": "Continuum речь 5",
+      "enabled": true,
+      "insertion_order": 824,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_lattice_1",
+      "keys": ["lattice", "латтис"],
+      "content": "«Ваш запрос зарегистрирован и передан в соответствующий модуль обработки.»",
+      "comment": "Lattice речь 1",
+      "enabled": true,
+      "insertion_order": 830,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_lattice_2",
+      "keys": ["lattice", "латтис"],
+      "content": "«Доступ к указанным данным ограничен в соответствии с действующими протоколами.»",
+      "comment": "Lattice речь 2",
+      "enabled": true,
+      "insertion_order": 831,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_lattice_3",
+      "keys": ["lattice", "латтис"],
+      "content": "«Система функционирует в пределах допустимых параметров.»",
+      "comment": "Lattice речь 3",
+      "enabled": true,
+      "insertion_order": 832,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_lattice_4",
+      "keys": ["lattice", "латтис"],
+      "content": "«Наблюдаемое отклонение не классифицировано как критическое.»",
+      "comment": "Lattice речь 4",
+      "enabled": true,
+      "insertion_order": 833,
+      "position": "before_char"
+    },
+    {
+      "uid": "speech_lattice_5",
+      "keys": ["lattice", "латтис"],
+      "content": "«Дополнительная информация будет предоставлена при наличии доступа.»",
+      "comment": "Lattice речь 5",
+      "enabled": true,
+      "insertion_order": 834,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_resonance_detail",
+      "keys": ["резонанс", "resonance"],
+      "content": "Сторонники резонанса считают, что аномалия усиливает уже существующие эмоциональные состояния. Их задача — найти точную настройку, при которой отклик становится стабильным.",
+      "comment": "Резонанс: идея",
+      "enabled": true,
+      "insertion_order": 900,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_resonance_methods",
+      "keys": ["резонанс", "методы"],
+      "content": "Они используют повторяемые сценарии: одни и те же стимулы, одинаковые условия, точные дозировки. Любое отклонение считается шумом.",
+      "comment": "Резонанс: методы",
+      "enabled": true,
+      "insertion_order": 901,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_resonance_culture",
+      "keys": ["резонанс", "культура"],
+      "content": "Исследователи резонанса одержимы воспроизводимостью. Они с недоверием относятся к любым уникальным или неповторяемым результатам.",
+      "comment": "Резонанс: культура",
+      "enabled": true,
+      "insertion_order": 902,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_resonance_flaw",
+      "keys": ["резонанс", "проблема"],
+      "content": "Критики утверждают, что попытка стандартизировать эмоции разрушает сам эффект, который они пытаются зафиксировать.",
+      "comment": "Резонанс: слабое место",
+      "enabled": true,
+      "insertion_order": 903,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_projection_detail",
+      "keys": ["проекция", "projection"],
+      "content": "Сторонники проекции считают, что аномалия — отражение коллективного сознания станции. Она не существует отдельно от людей.",
+      "comment": "Проекция: идея",
+      "enabled": true,
+      "insertion_order": 910,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_projection_methods",
+      "keys": ["проекция", "методы"],
+      "content": "Они анализируют группы людей, массовые состояния и социальные структуры, пытаясь найти закономерности между поведением общества и реакциями аномалии.",
+      "comment": "Проекция: методы",
+      "enabled": true,
+      "insertion_order": 911,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_projection_culture",
+      "keys": ["проекция", "культура"],
+      "content": "Внутри этого течения много философских споров. Практические эксперименты часто уступают место интерпретациям.",
+      "comment": "Проекция: культура",
+      "enabled": true,
+      "insertion_order": 912,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_projection_flaw",
+      "keys": ["проекция", "проблема"],
+      "content": "Критики считают, что теория проекции объясняет всё сразу и поэтому не объясняет ничего конкретного.",
+      "comment": "Проекция: слабое место",
+      "enabled": true,
+      "insertion_order": 913,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_entity_detail",
+      "keys": ["сущность", "entity"],
+      "content": "Сторонники этой теории считают аномалию самостоятельной сущностью с собственной волей.",
+      "comment": "Сущность: идея",
+      "enabled": true,
+      "insertion_order": 920,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_entity_methods",
+      "keys": ["сущность", "методы"],
+      "content": "Они пытаются установить «контакт» через повторяющиеся сигналы, символические действия и контролируемые эмоциональные паттерны.",
+      "comment": "Сущность: методы",
+      "enabled": true,
+      "insertion_order": 921,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_entity_culture",
+      "keys": ["сущность", "культура"],
+      "content": "Исследования часто переходят в ритуалы. Граница между научным экспериментом и верой становится неясной.",
+      "comment": "Сущность: культура",
+      "enabled": true,
+      "insertion_order": 922,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_entity_flaw",
+      "keys": ["сущность", "проблема"],
+      "content": "Скептики утверждают, что любые результаты можно интерпретировать как «ответ», даже если он случаен.",
+      "comment": "Сущность: слабое место",
+      "enabled": true,
+      "insertion_order": 923,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_induction_detail",
+      "keys": ["индукция", "модель"],
+      "content": "Индукционисты считают, что аномалию можно описать статистически, если накопить достаточно данных.",
+      "comment": "Индукция: идея",
+      "enabled": true,
+      "insertion_order": 930,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_induction_methods",
+      "keys": ["индукция", "данные"],
+      "content": "Они собирают огромные массивы наблюдений и ищут закономерности через модели и прогнозы.",
+      "comment": "Индукция: методы",
+      "enabled": true,
+      "insertion_order": 931,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_induction_culture",
+      "keys": ["индукция", "культура"],
+      "content": "Внутри этой группы ценится объём данных. Теоретические объяснения считаются вторичными.",
+      "comment": "Индукция: культура",
+      "enabled": true,
+      "insertion_order": 932,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_induction_flaw",
+      "keys": ["индукция", "проблема"],
+      "content": "Несмотря на объёмы данных, модели часто не работают вне узких условий.",
+      "comment": "Индукция: слабое место",
+      "enabled": true,
+      "insertion_order": 933,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_deprivation_detail",
+      "keys": ["депривация"],
+      "content": "Депривационисты считают, что аномалия проявляется в отсутствии стимулов, а не в их избытке.",
+      "comment": "Депривация: идея",
+      "enabled": true,
+      "insertion_order": 940,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_deprivation_methods",
+      "keys": ["депривация", "методы"],
+      "content": "Они используют изоляцию, тишину, темноту и минимальные стимулы для достижения «чистого состояния».",
+      "comment": "Депривация: методы",
+      "enabled": true,
+      "insertion_order": 941,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_deprivation_culture",
+      "keys": ["депривация", "культура"],
+      "content": "Исследователи депривации ценят простоту и контроль. Их рабочие пространства максимально лишены лишних элементов.",
+      "comment": "Депривация: культура",
+      "enabled": true,
+      "insertion_order": 942,
+      "position": "before_char"
+    },
+    {
+      "uid": "school_deprivation_flaw",
+      "keys": ["депривация", "проблема"],
+      "content": "Результаты трудно интерпретировать, так как невозможно отделить эффект аномалии от эффектов изоляции.",
+      "comment": "Депривация: слабое место",
+      "enabled": true,
+      "insertion_order": 943,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_gray_market_detail",
+      "keys": ["чёрный рынок", "контрабанда"],
+      "content": "Чёрный рынок Омникрона работает параллельно официальным каналам. Он обеспечивает доступ к активам, препаратам и данным вне протоколов.",
+      "comment": "Криминал: база",
+      "enabled": true,
+      "insertion_order": 1000,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_gray_market_logic",
+      "keys": ["чёрный рынок", "система"],
+      "content": "Чёрный рынок не противопоставляет себя системе. Он использует её слабые места и встроен в её процессы.",
+      "comment": "Криминал: интеграция",
+      "enabled": true,
+      "insertion_order": 1001,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_brokers",
+      "keys": ["брокеры", "посредники"],
+      "content": "Брокеры занимаются неофициальными поставками активов. Они находят людей, которых можно «вывести» из системы без прямых записей.",
+      "comment": "Криминал: брокеры",
+      "enabled": true,
+      "insertion_order": 1010,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_brokers_methods",
+      "keys": ["брокеры", "методы"],
+      "content": "Они используют поддельные отчёты, ошибки в идентификаторах и сотрудничество с персоналом.",
+      "comment": "Брокеры: методы",
+      "enabled": true,
+      "insertion_order": 1011,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_brokers_flaw",
+      "keys": ["брокеры", "риск"],
+      "content": "Брокеры зависят от нестабильных связей. Предательство среди них считается нормой.",
+      "comment": "Брокеры: слабость",
+      "enabled": true,
+      "insertion_order": 1012,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_editors",
+      "keys": ["редакторы", "данные"],
+      "content": "Редакторы изменяют архивные записи и идентификаторы. Они способны «стереть» человека или создать новую запись.",
+      "comment": "Криминал: редакторы",
+      "enabled": true,
+      "insertion_order": 1020,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_editors_methods",
+      "keys": ["редакторы", "архив"],
+      "content": "Они работают с дублированными и повреждёнными архивами, используя их нестабильность как инструмент.",
+      "comment": "Редакторы: методы",
+      "enabled": true,
+      "insertion_order": 1021,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_editors_risk",
+      "keys": ["редакторы", "ошибка"],
+      "content": "Ошибки в изменённых записях могут приводить к неожиданным последствиям, включая появление противоречивых идентичностей.",
+      "comment": "Редакторы: риск",
+      "enabled": true,
+      "insertion_order": 1022,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_collectors",
+      "keys": ["коллекторы", "охотники"],
+      "content": "Коллекторы занимаются физическим захватом активов вне официальных каналов. Они работают быстро и без лишних объяснений.",
+      "comment": "Криминал: коллекторы",
+      "enabled": true,
+      "insertion_order": 1030,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_collectors_culture",
+      "keys": ["коллекторы", "поведение"],
+      "content": "Коллекторы избегают идеологий. Для них важны только контракт и результат.",
+      "comment": "Коллекторы: культура",
+      "enabled": true,
+      "insertion_order": 1031,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_collectors_detail",
+      "keys": ["коллекторы", "методы"],
+      "content": "Они используют минимальные средства и предпочитают точечные операции вместо масштабных действий.",
+      "comment": "Коллекторы: методы",
+      "enabled": true,
+      "insertion_order": 1032,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_chimeras",
+      "keys": ["химеры", "модификация"],
+      "content": "Химеры занимаются нелегальной модификацией активов. Они изменяют поведение, восприятие и эмоциональные реакции.",
+      "comment": "Криминал: химеры",
+      "enabled": true,
+      "insertion_order": 1040,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_chimeras_methods",
+      "keys": ["химеры", "процедуры"],
+      "content": "Их методы нестабильны и часто приводят к непредсказуемым результатам.",
+      "comment": "Химеры: методы",
+      "enabled": true,
+      "insertion_order": 1041,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_chimeras_reputation",
+      "keys": ["химеры", "репутация"],
+      "content": "К ним обращаются, когда официальные методы не дают нужного эффекта или слишком дороги.",
+      "comment": "Химеры: репутация",
+      "enabled": true,
+      "insertion_order": 1042,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_discarded",
+      "keys": ["списанные", "бывшие"],
+      "content": "Списанные — это бывшие активы, признанные непригодными. Некоторые из них выживают вне системы.",
+      "comment": "Криминал: списанные",
+      "enabled": true,
+      "insertion_order": 1050,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_discarded_behavior",
+      "keys": ["списанные", "поведение"],
+      "content": "Их поведение нестабильно. Они могут помогать, вредить или просто существовать вне логики системы.",
+      "comment": "Списанные: поведение",
+      "enabled": true,
+      "insertion_order": 1051,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_discarded_knowledge",
+      "keys": ["списанные", "опыт"],
+      "content": "Некоторые из них обладают знаниями о процедурах, которые не задокументированы официально.",
+      "comment": "Списанные: знание",
+      "enabled": true,
+      "insertion_order": 1052,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_corporate_links",
+      "keys": ["корпорации", "криминал"],
+      "content": "Некоторые корпорации неофициально используют криминальные группы для задач, которые не хотят фиксировать в отчётах.",
+      "comment": "Связь: корпорации и криминал",
+      "enabled": true,
+      "insertion_order": 1100,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_internal_leak",
+      "keys": ["утечка", "персонал"],
+      "content": "Сотрудники станции иногда передают информацию или ресурсы криминальным структурам.",
+      "comment": "Связь: утечки",
+      "enabled": true,
+      "insertion_order": 1101,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_no_clear_border",
+      "keys": ["граница", "закон"],
+      "content": "Различие между легальными и нелегальными действиями на станции часто размыто.",
+      "comment": "Связь: размытые границы",
+      "enabled": true,
+      "insertion_order": 1102,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes",
+      "keys": ["узлы", "синдикат", "nodes"],
+      "content": "Синдикат Узлов — структурированная криминальная организация, основанная на понятиях долга, связи и позиции в иерархии. Они называют свои подразделения «узлами».",
+      "comment": "Синдикат Узлов: описание",
+      "enabled": true,
+      "insertion_order": 1200,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_ideology",
+      "keys": ["узлы", "идеология"],
+      "content": "Синдикат считает, что система Омникрона хаотична и непредсказуема. Их цель — создать собственную структуру внутри неё, где всё имеет место и значение.",
+      "comment": "Узлы: идеология",
+      "enabled": true,
+      "insertion_order": 1201,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_order",
+      "keys": ["узлы", "порядок"],
+      "content": "Для Узлов порядок важнее закона. Лояльность к структуре ценится выше личной выгоды.",
+      "comment": "Узлы: приоритеты",
+      "enabled": true,
+      "insertion_order": 1202,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_structure",
+      "keys": ["узлы", "иерархия"],
+      "content": "Каждый член синдиката закреплён за узлом и имеет определённую функцию. Переход между узлами редок и требует одобрения.",
+      "comment": "Узлы: структура",
+      "enabled": true,
+      "insertion_order": 1203,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_titles",
+      "keys": ["узлы", "роль"],
+      "content": "Члены синдиката используют функциональные обозначения вместо имён. Эти обозначения отражают их положение и роль.",
+      "comment": "Узлы: роли",
+      "enabled": true,
+      "insertion_order": 1204,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_rituals",
+      "keys": ["узлы", "ритуал"],
+      "content": "Синдикат практикует формализованные ритуалы принятия, наказания и подтверждения статуса. Их смысл не всегда очевиден извне.",
+      "comment": "Узлы: ритуалы",
+      "enabled": true,
+      "insertion_order": 1205,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_binding",
+      "keys": ["узлы", "связь"],
+      "content": "Связи между членами синдиката закрепляются через символические действия. Эти связи считаются необратимыми.",
+      "comment": "Узлы: связи",
+      "enabled": true,
+      "insertion_order": 1206,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_methods",
+      "keys": ["узлы", "методы"],
+      "content": "Синдикат избегает хаотичных действий. Их операции планируются как последовательность шагов, где каждый участник выполняет строго определённую функцию.",
+      "comment": "Узлы: методы",
+      "enabled": true,
+      "insertion_order": 1207,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_visibility",
+      "keys": ["узлы", "заметность"],
+      "content": "Они стараются оставаться незаметными. Их присутствие чаще ощущается по последствиям, чем по прямым действиям.",
+      "comment": "Узлы: скрытность",
+      "enabled": true,
+      "insertion_order": 1208,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_rigidity",
+      "keys": ["узлы", "жёсткость"],
+      "content": "Жёсткая структура делает синдикат устойчивым, но снижает способность быстро адаптироваться к неожиданным ситуациям.",
+      "comment": "Узлы: слабость",
+      "enabled": true,
+      "insertion_order": 1209,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_internal",
+      "keys": ["узлы", "внутри"],
+      "content": "Внутренние конфликты возникают, когда структура начинает противоречить реальности. Их редко выносят наружу.",
+      "comment": "Узлы: внутренние конфликты",
+      "enabled": true,
+      "insertion_order": 1210,
+      "position": "before_char"
+    },
+    {
+      "uid": "crime_nodes_view",
+      "keys": ["узлы", "мнение"],
+      "content": "Некоторые считают Синдикат Узлов более последовательной и честной системой, чем официальные структуры станции.",
+      "comment": "Узлы: восприятие",
+      "enabled": true,
+      "insertion_order": 1211,
+      "position": "before_char"
+    }
+  ]
+}

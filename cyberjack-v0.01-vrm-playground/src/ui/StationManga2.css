@@ -1,0 +1,199 @@
+/* === Станция (manga2): полноэкранная 3D-карта + вкладка Входящие === */
+
+/* Обзор: карта на всю ширину, без боковой колонки статей */
+html[data-ui-theme="manga2"] .campaign-shell .station-overview-3d {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 10px 14px 14px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-radial-panel-3d {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #111;
+  background: #fff;
+}
+
+/* Входящие: слева сводка (контракты/снабжение), справа лента событий */
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 14px 14px;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  align-content: start;
+  min-height: 0;
+  overflow: hidden auto;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article header small {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article header b {
+  font-size: 15px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article strong {
+  font-size: 12px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article p {
+  margin: 0;
+  font-size: 10px;
+  color: #555;
+  line-height: 1.45;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article button {
+  justify-self: start;
+  min-height: 22px;
+  padding: 2px 8px;
+  font-size: 9px;
+  border: 1px solid #111;
+  background: #fff;
+  cursor: pointer;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-side article button:hover {
+  background: #111;
+  color: #fff;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events {
+  min-height: 0;
+  overflow: hidden auto;
+  border: 1px solid #111;
+  background: #fff;
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+/* Лента событий внутри станции: одна колонка, компактные карточки */
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding: 0;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list > article {
+  min-height: 0;
+  padding: 10px 12px;
+  border: 1px solid #111;
+  background: #fff;
+  gap: 6px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list > article h2 {
+  margin: 0;
+  font-size: 13px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list > article p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list > article footer {
+  margin-top: 2px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list > article footer button {
+  min-height: 22px;
+  padding: 2px 8px;
+  font-size: 9px;
+  border: 1px solid #111;
+  background: #fff;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-list > article footer button.primary {
+  background: #111;
+  color: #fff;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-channel {
+  margin: 0 0 12px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-channel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid #111;
+  padding-bottom: 3px;
+  margin-bottom: 8px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-channel-head small {
+  font-size: 9px;
+  letter-spacing: .16em;
+  font-weight: 700;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events .director-inbox-empty {
+  min-height: 160px;
+}
+
+/* Вкладки станции: компактные, в стиле manga2 */
+html[data-ui-theme="manga2"] .campaign-shell .station-tabs {
+  border-bottom: 1px solid #111;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-tabs button {
+  border: 1px solid #111;
+  border-bottom: none;
+  background: #fff;
+  font-size: 10px;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell .station-tabs button.active {
+  background: #111;
+  color: #fff;
+}
+
+/* 3D-карта: HUD и легенда чуть крупнее на широком экране */
+html[data-ui-theme="manga2"] .campaign-shell .station3d-hud h1 {
+  font-size: 15px;
+}
+
+@media (max-width: 1100px) {
+  html[data-ui-theme="manga2"] .campaign-shell .station-inbox {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    overflow: visible;
+  }
+  html[data-ui-theme="manga2"] .campaign-shell .station-inbox-events {
+    overflow: visible;
+  }
+}

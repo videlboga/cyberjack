@@ -1,0 +1,194 @@
+[
+  {
+    "name": "KK cf_m_face_00",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": false,
+    "softSkin": false,
+    "softFace": true,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_mayuge_00",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_noseline_00",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_tooth",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_eyeline_down",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_eyeline_00_up",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_sirome_00",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_hitomi_00_cf_Ohitomi_L02",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_hitomi_00_cf_Ohitomi_R02",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_tang",
+    "normalScale": [
+      0.3499999940395355,
+      -0.3499999940395355
+    ],
+    "kneeFilter": false,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_body",
+    "normalScale": [
+      0,
+      0
+    ],
+    "kneeFilter": true,
+    "preservesSource": true,
+    "softSkin": false,
+    "softFace": false,
+    "hard": false
+  },
+  {
+    "name": "KK cf_m_hair_b_21_00 4133",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": false,
+    "softSkin": false,
+    "softFace": false,
+    "hard": true
+  },
+  {
+    "name": "KK cf_m_hair_b_21_00 4133 00",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": false,
+    "softSkin": false,
+    "softFace": false,
+    "hard": true
+  },
+  {
+    "name": "KK cf_m_hair_b_21_00 4133 01",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": false,
+    "softSkin": false,
+    "softFace": false,
+    "hard": true
+  },
+  {
+    "name": "KK cf_m_hair_b_21_00 4133 02",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": false,
+    "softSkin": false,
+    "softFace": false,
+    "hard": true
+  },
+  {
+    "name": "KK cf_m_hair_f_305_00 4353",
+    "normalScale": [
+      1,
+      -1
+    ],
+    "kneeFilter": false,
+    "preservesSource": false,
+    "softSkin": false,
+    "softFace": false,
+    "hard": true
+  }
+]

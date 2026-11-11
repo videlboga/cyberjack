@@ -1,0 +1,51 @@
+{
+  "manga": {
+    "character": "mira",
+    "ready": true,
+    "style": {
+      "preset": "blender",
+      "strength": 1,
+      "materials": 39,
+      "blenderMaterials": 15,
+      "outlineMeshes": 24
+    },
+    "clip": "Stand_03_00",
+    "emotion": "neutral",
+    "replyId": "4",
+    "talking": true,
+    "boundBones": 137,
+    "grounding": {
+      "floorY": 0,
+      "samples": 73,
+      "rootY": -0.010102737530567936,
+      "offset": -0.010102737530567936,
+      "minimum": 0
+    },
+    "reaction": null
+  },
+  "original": {
+    "character": "mira",
+    "ready": true,
+    "style": {
+      "preset": "original",
+      "strength": 1,
+      "materials": 39,
+      "blenderMaterials": 15,
+      "outlineMeshes": 24
+    },
+    "clip": "Stand_03_00",
+    "emotion": "neutral",
+    "replyId": "4",
+    "talking": true,
+    "boundBones": 137,
+    "grounding": {
+      "floorY": 0,
+      "samples": 73,
+      "rootY": -0.010102737530567936,
+      "offset": -0.010102737530567936,
+      "minimum": 0
+    },
+    "reaction": null
+  },
+  "errors": []
+}

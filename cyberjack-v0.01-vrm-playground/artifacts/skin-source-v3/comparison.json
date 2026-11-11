@@ -1,0 +1,13 @@
+{
+  "region_xywh": [
+    260,
+    360,
+    105,
+    220
+  ],
+  "mean_abs_source_fixed": 0.25991341991341993,
+  "mean_abs_source_old": 15.398528138528139,
+  "source_red_minus_green": 11.576883116883117,
+  "fixed_red_minus_green": 11.592034632034633,
+  "old_red_minus_green": 9.51922077922078
+}

@@ -1,0 +1,7 @@
+import assert from 'node:assert/strict';import * as THREE from 'three';import {prepareSkinJoints} from '../public/vrm-stage/skin-style.js';
+const root=new THREE.Bone(),names={};
+for(const [side,x]of [['left',.2],['right',-.2]]){const knee=new THREE.Bone(),foot=new THREE.Bone();knee.position.set(x,.5,0);foot.position.set(0,-.4,0);root.add(knee);knee.add(foot);names[side+'LowerLeg']=knee;names[side+'Foot']=foot}
+const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute([.2,.5,0,.2,.5,-.05,.2,.5,.05,-.2,.5,0,-.2,.5,-.05,-.2,.5,.05,0,1.2,0],3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(Array.from({length:14},(_,i)=>i/14),2));
+const mat=new THREE.MeshBasicMaterial();mat.name='Any body material';const mesh=new THREE.SkinnedMesh(geometry,mat);mesh.add(root);mesh.updateMatrixWorld(true);mesh.bind(new THREE.Skeleton([root,...Object.values(names)]));const scene=new THREE.Group();scene.add(mesh);const vrm={scene,humanoid:{getRawBoneNode:name=>names[name]}};
+const first=prepareSkinJoints(vrm),mask=Array.from(geometry.attributes.skinStyleJointMask.array);assert.ok(first[0].joints.every(j=>j.vertices===3));for(let i=0;i<3;i++)assert.equal(mask[i],mask[i+3]);assert.equal(mask[6],0);
+geometry.attributes.uv.array.reverse();prepareSkinJoints(vrm);assert.deepEqual(Array.from(geometry.attributes.skinStyleJointMask.array),mask,'UV changes must not affect anatomical mask');console.log('PASS left/right symmetry, front/rear coverage and UV-independent joint masks');

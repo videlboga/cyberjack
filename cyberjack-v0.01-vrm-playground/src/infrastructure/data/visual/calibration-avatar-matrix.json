@@ -1,0 +1,61 @@
+{
+  "version": 4,
+  "model": "calibration-avatar",
+  "charactersSource": "character-image-matrix.json#characters",
+  "characters": ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01"],
+  "axes": {
+    "poses": [
+      "standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle", "suspended",
+      "sitting_spread", "standing_exposed", "covering", "feet_presented"
+    ],
+    "clothing": ["nude", "underwear", "dress", "dress_stockings", "jumpsuit", "lab_gown", "calibration_set"],
+    "affects": ["neutral", "receptive", "guarded", "high_positive", "high_negative", "subspace", "climax", "unconscious"],
+    "equipmentPresets": [
+      "none", "blindfold", "gag", "blindfold_gag", "collar", "wrist_cuffs",
+      "wrist_cuffs_blindfold", "ankle_cuffs", "wrist_ankle_cuffs", "restraint_belt",
+      "table_straps", "restraint_frame", "suspension"
+    ]
+  },
+  "equipmentCompatibility": {
+    "none": ["*"],
+    "blindfold": ["*"],
+    "gag": ["*"],
+    "blindfold_gag": ["*"],
+    "collar": ["*"],
+    "wrist_cuffs": ["standing", "sitting", "kneeling", "lying", "all_fours", "sitting_spread", "standing_exposed", "covering", "feet_presented"],
+    "wrist_cuffs_blindfold": ["standing", "sitting", "kneeling", "lying", "all_fours", "sitting_spread", "standing_exposed", "covering", "feet_presented"],
+    "ankle_cuffs": ["standing", "sitting", "kneeling", "lying", "spread_eagle", "sitting_spread", "standing_exposed"],
+    "wrist_ankle_cuffs": ["kneeling", "lying", "spread_eagle", "sitting_spread"],
+    "restraint_belt": ["standing", "sitting", "kneeling", "standing_exposed"],
+    "table_straps": ["lying", "spread_eagle"],
+    "restraint_frame": ["standing", "spread_eagle", "standing_exposed"],
+    "suspension": ["suspended"]
+  },
+  "contextPresetRules": [
+    { "preset": "suspension", "all": ["act_suspend_wrists"] },
+    { "preset": "restraint_frame", "all": ["lab_restraint_frame"] },
+    { "preset": "table_straps", "all": ["lab_diagnostic_table"] },
+    { "preset": "wrist_cuffs_blindfold", "all": ["act_apply_handcuffs", "eq_blindfold_apply"] },
+    { "preset": "blindfold_gag", "all": ["eq_blindfold_apply", "eq_gag_apply"] },
+    { "preset": "wrist_ankle_cuffs", "all": ["act_apply_handcuffs", "act_apply_ankle_cuffs"] },
+    { "preset": "restraint_belt", "all": ["act_apply_restraint_belt"] },
+    { "preset": "wrist_cuffs", "all": ["act_apply_handcuffs"] },
+    { "preset": "ankle_cuffs", "all": ["act_apply_ankle_cuffs"] },
+    { "preset": "blindfold", "all": ["eq_blindfold_apply"] },
+    { "preset": "gag", "all": ["eq_gag_apply"] },
+    { "preset": "collar", "all": ["act_apply_collar"] },
+    { "preset": "none", "all": [] }
+  ],
+  "migration": {
+    "baseAssetConvention": "/character-images/rendered/$character/$pose__$clothing__none__$affect.png",
+    "baseCoverage": { "equipmentPreset": "none", "poses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle", "suspended"] },
+    "legacyPoseAliases": {
+      "standing_exposed": "exposure/standing",
+      "sitting_spread": "exposure/sitting_spread",
+      "covering": "exposure/covering",
+      "feet_presented": "foot/bare_presented"
+    },
+    "excludedRoots": ["/character-images/rendered/mira/rmbg_v1"]
+  },
+  "assetConvention": "/character-images/calibration-v4/$character/$pose/$clothing__$equipmentPreset__$affect.png"
+}

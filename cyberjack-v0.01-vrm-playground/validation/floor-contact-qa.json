@@ -1,0 +1,44 @@
+{
+  "before": {
+    "character": "mira",
+    "ready": true,
+    "clip": "Stand_00_00",
+    "emotion": "neutral",
+    "replyId": "",
+    "talking": false,
+    "boundBones": 137,
+    "grounding": {
+      "floorY": 0,
+      "samples": 73,
+      "rootY": 0.008641508770381572,
+      "offset": 0.008641508770381572,
+      "minimum": 0
+    }
+  },
+  "measurements": [
+    -2.9750084340474103e-11,
+    9.000430175459817e-12,
+    9.000430175459817e-12,
+    -5.6242699137277335e-11
+  ],
+  "reaction": {
+    "state": {
+      "character": "mira",
+      "ready": true,
+      "clip": "Stand_01_00",
+      "emotion": "smile",
+      "replyId": "",
+      "talking": false,
+      "boundBones": 137,
+      "grounding": {
+        "floorY": 0,
+        "samples": 73,
+        "rootY": -0.010644559832673475,
+        "offset": -0.010644559832673475,
+        "minimum": 0
+      }
+    },
+    "floor": -4.233547540311022e-12
+  },
+  "errors": []
+}

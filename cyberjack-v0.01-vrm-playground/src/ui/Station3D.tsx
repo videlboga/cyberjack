@@ -1,0 +1,470 @@
+import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+/**
+ * Интерактивная 3D-карта станции Омникрон — рабочий пульт.
+ *
+ * Рендерит GLB-модель станции в «чертёжном» стиле (Sobel edge detection по
+ * ID-буферу). Поверх — HTML-маркеры POI, привязанные к кольцам станции. Клик
+ * по маркеру открывает живую карточку: контракты фракции с принятием,
+ * события с действиями, ограниченные лоты с покупкой — всё без ухода с карты.
+ */
+
+export type StationPoiAction = {
+  label: string;
+  kind?: "primary" | "quiet";
+  disabled?: boolean;
+  onClick: () => void;
+};
+
+export type StationPoiItem = {
+  title: string;
+  meta?: string;
+  note?: string;
+  action?: StationPoiAction;
+};
+
+export type StationPoi = {
+  id: string;
+  name: string;
+  ring: string;
+  angle: number;
+  desc: string;
+  kind: "supply" | "faction" | "market" | "inbox";
+  factionId?: string;
+  /** Число активных дел (контракты/события/лоты). */
+  badge?: number;
+  /** Новый/срочный контент — маркер пульсирует. */
+  attention?: boolean;
+  /** Живое содержимое карточки (список дел). */
+  items: StationPoiItem[];
+  /** Резервное действие, когда список пуст. */
+  actions?: StationPoiAction[];
+};
+
+const RINGS = [
+  { id: "eye", name: "Центр / Око", radius: 1.6, minor: 0.0 },
+  { id: "scholarium", name: "Внутреннее кольцо", radius: 4.0, minor: 0.35 },
+  { id: "archive", name: "Срединное кольцо", radius: 6.5, minor: 0.5 },
+  { id: "cultivation", name: "Внешнее кольцо", radius: 9.0, minor: 0.7 },
+  { id: "perimeter", name: "Обшивка / Периметр", radius: 11.0, minor: 0.4 },
+] as const;
+
+const ringById = (id: string) => RINGS.find((r) => r.id === id);
+
+const MODULE_SCALE = 2.2;
+const SPOKE_SCALE = 2.0;
+const OUTER_SPOKE_SCALE = 4.0;
+
+function assignIds(root: THREE.Object3D) {
+  let id = 0;
+  root.traverse((node) => {
+    if ((node as THREE.Mesh).isMesh) {
+      id++;
+      const r = ((id % 16) * 16) / 255;
+      const g = ((Math.floor(id / 16) % 16) * 16) / 255;
+      const b = ((Math.floor(id / 256) % 16) * 16) / 255;
+      (node as THREE.Mesh).material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(r, g, b),
+      });
+      if (/^Module_/.test(node.name)) node.scale.multiplyScalar(MODULE_SCALE);
+      if (/^Spoke_/.test(node.name)) {
+        node.scale.y *= SPOKE_SCALE;
+        node.scale.z *= SPOKE_SCALE;
+      }
+      if (/^OuterSpoke_/.test(node.name)) {
+        node.scale.y *= OUTER_SPOKE_SCALE;
+        node.scale.z *= OUTER_SPOKE_SCALE;
+      }
+    }
+  });
+}
+
+export function Station3D({
+  pois,
+}: {
+  pois: StationPoi[];
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [openPoiId, setOpenPoiId] = useState<string | null>(null);
+  const openPoiIdRef = useRef<string | null>(null);
+  const markersRef = useRef<StationPoi[]>(pois);
+  useEffect(() => {
+    openPoiIdRef.current = openPoiId;
+  }, [openPoiId]);
+  const stateRef = useRef<{
+    station: THREE.Group;
+    camera: THREE.PerspectiveCamera;
+    renderer: THREE.WebGLRenderer;
+    rt: THREE.WebGLRenderTarget;
+    edgeMat: THREE.ShaderMaterial;
+    quadScene: THREE.Scene;
+    quadCam: THREE.OrthographicCamera;
+    rotY: number;
+    rotX: number;
+    zoom: number;
+    autoRotate: boolean;
+    dragging: boolean;
+    lastX: number;
+    lastY: number;
+    markerEls: { poiId: string; el: HTMLDivElement }[];
+  } | null>(null);
+
+  // Keep markers in sync with props (без пересоздания DOM — см. ниже).
+  useEffect(() => {
+    markersRef.current = pois;
+  }, [pois]);
+
+  // Init three.js scene once.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      200,
+    );
+    camera.position.set(0, 12, 26);
+    camera.lookAt(0, 0, 0);
+
+    const station = new THREE.Group();
+    scene.add(station);
+
+    const rt = new THREE.WebGLRenderTarget(
+      container.clientWidth,
+      container.clientHeight,
+    );
+
+    const edgeMat = new THREE.ShaderMaterial({
+      uniforms: {
+        tColor: { value: null },
+        resolution: {
+          value: new THREE.Vector2(
+            container.clientWidth,
+            container.clientHeight,
+          ),
+        },
+        threshold: { value: 0.05 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() { vUv = uv; gl_Position = vec4(position, 1.0); }
+      `,
+      fragmentShader: `
+        uniform sampler2D tColor;
+        uniform vec2 resolution;
+        uniform float threshold;
+        varying vec2 vUv;
+        float diff(vec3 a, vec3 b) {
+          return max(max(abs(a.r-b.r), abs(a.g-b.g)), abs(a.b-b.b));
+        }
+        void main() {
+          vec2 texel = 1.0 / resolution;
+          vec3 c0 = texture2D(tColor, vUv + vec2(-texel.x,  texel.y)).rgb;
+          vec3 c1 = texture2D(tColor, vUv + vec2(0.0,       texel.y)).rgb;
+          vec3 c2 = texture2D(tColor, vUv + vec2( texel.x,  texel.y)).rgb;
+          vec3 c3 = texture2D(tColor, vUv + vec2(-texel.x,  0.0)).rgb;
+          vec3 c4 = texture2D(tColor, vUv).rgb;
+          vec3 c5 = texture2D(tColor, vUv + vec2( texel.x,  0.0)).rgb;
+          vec3 c6 = texture2D(tColor, vUv + vec2(-texel.x, -texel.y)).rgb;
+          vec3 c7 = texture2D(tColor, vUv + vec2(0.0,      -texel.y)).rgb;
+          vec3 c8 = texture2D(tColor, vUv + vec2( texel.x, -texel.y)).rgb;
+          float d0 = diff(c0, c4);
+          float d1 = diff(c1, c4);
+          float d2 = diff(c2, c4);
+          float d3 = diff(c3, c4);
+          float d5 = diff(c5, c4);
+          float d6 = diff(c6, c4);
+          float d7 = diff(c7, c4);
+          float d8 = diff(c8, c4);
+          float maxDiff = max(max(max(d0, d1), max(d2, d3)), max(max(d5, d6), max(d7, d8)));
+          float line = step(threshold, maxDiff);
+          gl_FragColor = vec4(mix(vec3(1.0), vec3(0.0), line), 1.0);
+        }
+      `,
+    });
+
+    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), edgeMat);
+    const quadScene = new THREE.Scene();
+    quadScene.add(quad);
+    const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const loader = new GLTFLoader();
+    loader.load(
+      "/models/station.glb",
+      (gltf) => {
+        const model = gltf.scene;
+        assignIds(model);
+        station.add(model);
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 20 / maxDim;
+        station.scale.setScalar(scale);
+        station.position.sub(center.multiplyScalar(scale));
+      },
+      undefined,
+      (err) => console.error("Station GLB load error", err),
+    );
+
+    const state = {
+      station,
+      camera,
+      renderer,
+      rt,
+      edgeMat,
+      quadScene,
+      quadCam,
+      rotY: 0,
+      rotX: 0.35,
+      zoom: 1,
+      autoRotate: true,
+      dragging: false,
+      lastX: 0,
+      lastY: 0,
+      markerEls: [] as { poiId: string; el: HTMLDivElement }[],
+    };
+    stateRef.current = state;
+
+    // Pointer handlers.
+    const onPointerDown = (e: PointerEvent) => {
+      state.dragging = true;
+      state.lastX = e.clientX;
+      state.lastY = e.clientY;
+      state.autoRotate = false;
+    };
+    const onPointerUp = () => {
+      state.dragging = false;
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (state.dragging) {
+        state.rotY += (e.clientX - state.lastX) * 0.005;
+        state.rotX = Math.max(
+          0.05,
+          Math.min(1.4, state.rotX + (e.clientY - state.lastY) * 0.003),
+        );
+        state.lastX = e.clientX;
+        state.lastY = e.clientY;
+      }
+    };
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      state.zoom = Math.max(
+        0.55,
+        Math.min(3, state.zoom * (e.deltaY > 0 ? 0.9 : 1.1)),
+      );
+      state.autoRotate = false;
+    };
+    const onResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer.setSize(w, h);
+      rt.setSize(w, h);
+      edgeMat.uniforms.resolution.value.set(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    canvas.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("resize", onResize);
+
+    const clock = new THREE.Clock();
+    let raf = 0;
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      if (state.autoRotate) state.rotY += dt * 0.15;
+      station.rotation.y = state.rotY;
+      station.rotation.x = state.rotX;
+      const dist = 26 / state.zoom;
+      camera.position.set(0, 12 / state.zoom, dist);
+      camera.lookAt(0, 0, 0);
+
+      renderer.setRenderTarget(rt);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      edgeMat.uniforms.tColor.value = rt.texture;
+      renderer.render(quadScene, quadCam);
+
+      // Project markers. Позиция — целыми пикселями через transform (без
+      // сабпиксельного дрожания), при уходе за край метка прячется.
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      for (const { poiId, el } of state.markerEls) {
+        const poi = markersRef.current.find((m) => m.id === poiId);
+        if (!poi) continue;
+        const p = projectPoi(poi, state, w, h);
+        if (!p) {
+          el.style.opacity = "0";
+          el.style.pointerEvents = "none";
+          continue;
+        }
+        const px = Math.round(p.x);
+        const py = Math.round(p.y);
+        // Точка должна оставаться на модели; если прижимается к краю ближе
+        // 24px — прячем метку, пока не вернётся в зону.
+        const margin = 60;
+        if (px < margin || px > w - margin || py < margin || py > h - margin) {
+          el.style.opacity = "0";
+          el.style.pointerEvents = "none";
+          continue;
+        }
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+        el.style.transform = `translate(${px}px, ${py}px)`;
+      }
+
+      // Карточка открытого POI: якорится на маркер, но целиком внутри холста.
+      const card = container.querySelector<HTMLDivElement>(":scope > .station3d-card");
+      if (card) {
+        const openPoi = markersRef.current.find((m) => m.id === openPoiIdRef.current);
+        const anchor = openPoi ? projectPoi(openPoi, state, w, h) : null;
+        const cw = card.offsetWidth || 300;
+        const ch = card.offsetHeight || 220;
+        let cx: number;
+        let cy: number;
+        if (anchor) {
+          cx = anchor.x + 16;
+          cy = anchor.y - 20;
+        } else {
+          cx = w - cw - 12;
+          cy = 60;
+        }
+        cx = Math.max(8, Math.min(cx, w - cw - 8));
+        cy = Math.max(8, Math.min(cy, h - ch - 8));
+        card.style.left = `${Math.round(cx)}px`;
+        card.style.top = `${Math.round(cy)}px`;
+      }
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("wheel", onWheel);
+      window.removeEventListener("resize", onResize);
+      renderer.dispose();
+      rt.dispose();
+      edgeMat.dispose();
+    };
+  }, []);
+
+  // Rebuild marker DOM when the POI id set changes (не на каждый апдейт данных).
+  const poiIds = pois.map((p) => p.id).join("|");
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    container
+      .querySelectorAll(":scope > .station3d-marker")
+      .forEach((el) => el.remove());
+    const state = stateRef.current;
+    const els = pois.map((poi) => {
+      const div = document.createElement("div");
+      div.className = "station3d-marker";
+      div.innerHTML = `<span class="dot${
+        poi.attention ? " attention" : ""
+      }"></span><span class="label">${poi.name}${
+        poi.badge ? ` · ${poi.badge}` : ""
+      }</span>`;
+      div.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setOpenPoiId((cur) => (cur === poi.id ? null : poi.id));
+        if (state) state.autoRotate = false;
+      });
+      container.appendChild(div);
+      return { poiId: poi.id, el: div };
+    });
+    if (state) state.markerEls = els;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poiIds]);
+
+  const openPoi = pois.find((p) => p.id === openPoiId) || null;
+
+  return (
+    <div className="station3d" ref={containerRef}>
+      <canvas ref={canvasRef} className="station3d-canvas" />
+      <div className="station3d-hud">
+        <small>ОМНИКРОН · СТАНЦИЯ</small>
+        <h1>Пульт станции</h1>
+      </div>
+      {openPoi && (
+        <div className="station3d-card" onClick={(e) => e.stopPropagation()}>
+          <span className="close" onClick={() => setOpenPoiId(null)}>
+            ✕
+          </span>
+          <small>{ringById(openPoi.ring)?.name.toUpperCase()}</small>
+          <h3>{openPoi.name}</h3>
+          <p className="station3d-card-desc">{openPoi.desc}</p>
+          <div className="station3d-card-items">
+            {openPoi.items.length === 0 && (
+              <div className="station3d-item-empty">Пусто — всё разобрано</div>
+            )}
+            {openPoi.items.map((item, index) => (
+              <div className="station3d-item" key={`${openPoi.id}-${index}`}>
+                <div className="station3d-item-main">
+                  <strong>{item.title}</strong>
+                  {item.meta && <span>{item.meta}</span>}
+                  {item.note && <em>{item.note}</em>}
+                </div>
+                {item.action && (
+                  <button
+                    className={item.action.kind === "quiet" ? "quiet" : ""}
+                    disabled={item.action.disabled}
+                    onClick={item.action.onClick}
+                  >
+                    {item.action.label}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function projectPoi(
+  poi: StationPoi,
+  state: {
+    station: THREE.Group;
+    camera: THREE.PerspectiveCamera;
+  },
+  width: number,
+  height: number,
+) {
+  const ring = ringById(poi.ring);
+  if (!ring) return null;
+  const a = (poi.angle * Math.PI) / 180;
+  const R = ring.radius;
+  const y = ring.minor + 0.35;
+  const world = new THREE.Vector3(R * Math.cos(a), y, R * Math.sin(a));
+  state.station.localToWorld(world);
+  const v = world.project(state.camera);
+  if (v.z > 1) return null;
+  return {
+    x: (v.x * 0.5 + 0.5) * width,
+    y: (-v.y * 0.5 + 0.5) * height,
+  };
+}

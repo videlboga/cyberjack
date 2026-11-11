@@ -1,0 +1,282 @@
+[
+  {
+    "id": "eq_handcuffs",
+    "name": "Жесткие наручники",
+    "description": "Металлические наручники для надежной фиксации запястий.",
+    "type": "equipment",
+    "tags": [
+      "metal",
+      "restraint"
+    ]
+  },
+  {
+    "id": "eq_collar",
+    "name": "Управляемый ошейник",
+    "description": "Ошейник с возможностью удаленного шокового воздействия.",
+    "type": "equipment",
+    "tags": [
+      "electronic",
+      "control"
+    ]
+  },
+  {
+    "id": "eq_tens_unit",
+    "name": "Электро-стимулятор (TENS)",
+    "description": "Устройство для нейро-электрической стимуляции. Может доставлять как удовольствие, так и боль.",
+    "type": "equipment",
+    "tags": [
+      "electronic",
+      "stimulation"
+    ]
+  },
+  {
+    "id": "eq_plug",
+    "name": "Сенсорный плаг",
+    "description": "Телеметрический плаг для внутреннего контроля и стимуляции.",
+    "type": "equipment",
+    "tags": [
+      "intimate",
+      "stimulation"
+    ]
+  },
+  {
+    "id": "eq_speculum",
+    "name": "Медицинский расширитель",
+    "description": "Металлический инструмент для полного раскрытия и осмотра.",
+    "type": "equipment",
+    "tags": [
+      "clinical",
+      "metal"
+    ]
+  },
+  {
+    "id": "eq_vibrator",
+    "name": "Многорежимный вибратор",
+    "description": "Интенсивное устройство для направленной гиперстимуляции.",
+    "type": "equipment",
+    "tags": [
+      "electronic",
+      "stimulation"
+    ]
+  },
+  {
+    "id": "eq_sensory_pod",
+    "name": "Сенсорная капсула",
+    "description": "Герметичная капсула для полной сенсорной депривации.",
+    "type": "equipment",
+    "tags": [
+      "machine",
+      "isolation"
+    ]
+  },
+  {
+    "id": "eq_fuck_machine",
+    "name": "Фак-машина",
+    "description": "Устройство для безжалостного механического воздействия.",
+    "type": "equipment",
+    "tags": [
+      "machine",
+      "intimate"
+    ]
+  },
+  {
+    "id": "eq_med_analyzer",
+    "name": "Медицинский сканер",
+    "description": "Фиксирующее кольцо для глубокого структурного сканирования.",
+    "type": "equipment",
+    "tags": [
+      "machine",
+      "clinical"
+    ]
+  },
+  {
+    "id": "drug_truth_serum",
+    "name": "Сыворотка правды (Veritas-9)",
+    "description": "Снижает когнитивную защиту, развязывает язык и делает субъекта податливым.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "mental"
+    ]
+  },
+  {
+    "id": "drug_aphrodisiac",
+    "name": "Синтетический афродизиак (Eros-V)",
+    "description": "Резко повышает чувствительность и возбудимость нервной системы.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "stimulation"
+    ]
+  },
+  {
+    "id": "drug_painkiller",
+    "name": "Болеутоляющее (Numb-X)",
+    "description": "Подавляет болевые рецепторы, делая субъекта устойчивым к повреждениям.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "clinical"
+    ]
+  },
+  {
+    "id": "drug_sensitizer",
+    "name": "Гипер-сенсибилизатор (NeuroSpike)",
+    "description": "Многократно усиливает любые тактильные и болевые ощущения.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "torture"
+    ]
+  },
+  {
+    "id": "drug_regenerative",
+    "name": "Регенеративный раствор (Regen-R)",
+    "description": "Капсульная ампула для ускоренного восстановления и снижения физиологической нагрузки.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "clinical",
+      "capsule",
+      "recovery"
+    ]
+  },
+  {
+    "id": "drug_neurostabilizer",
+    "name": "Нейростабилизатор (NeuroCalm)",
+    "description": "Капсульная ампула, сглаживающая реактивность и риск перегрузки.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "clinical",
+      "capsule",
+      "stabilizer"
+    ]
+  },
+  {
+    "id": "drug_plasticity_catalyst",
+    "name": "Пластический катализатор (Mnemosyne-P)",
+    "description": "Капсульная ампула, усиливающая закрепление последующего опыта.",
+    "type": "consumable",
+    "tags": [
+      "chemical",
+      "clinical",
+      "capsule",
+      "plasticity"
+    ]
+  },
+  {
+    "id": "eq_jumpsuit",
+    "name": "Сенсорный Комбинезон",
+    "description": "Плотный изоляционный комбинезон, закрывающий почти всё тело. Значительно снижает тактильную чувствительность.",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "isolation"
+    ]
+  },
+  {
+    "id": "eq_dress",
+    "name": "Простое белое платье",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "dress"
+    ],
+    "description": "Лёгкое белое платье лабораторного образца"
+  },
+  {
+    "id": "eq_stockings",
+    "name": "Чулки",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "stockings"
+    ],
+    "description": "Чёрные чулки выше колена"
+  },
+  {
+    "id": "eq_underwear",
+    "name": "Нижнее бельё",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "underwear"
+    ],
+    "description": "Белое бельё"
+  },
+  {
+    "id": "eq_blindfold",
+    "name": "Повязка на глаза",
+    "type": "equipment",
+    "tags": [
+      "bondage",
+      "sensory"
+    ],
+    "description": "Чёрная повязка для глаз"
+  },
+  {
+    "id": "eq_gag",
+    "name": "Кляп",
+    "type": "equipment",
+    "tags": [
+      "bondage",
+      "mouth"
+    ],
+    "description": "Шаровой кляп"
+  },
+  {
+    "id": "eq_panties",
+    "name": "Трусики",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "panties"
+    ],
+    "description": "Белые трусики"
+  },
+  {
+    "id": "eq_lab_gown",
+    "name": "Лабораторная рубашка",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "clinical",
+      "gown"
+    ],
+    "description": "Свободная лабораторная рубашка до середины бедра, раскрывающаяся сзади."
+  },
+  {
+    "id": "eq_calibration_set",
+    "name": "Калибровочный комплект",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "calibration",
+      "sportswear"
+    ],
+    "description": "Короткий топ и облегающие шорты с открытыми зонами для датчиков."
+  },
+  {
+    "id": "eq_ankle_cuffs",
+    "name": "Ножные манжеты",
+    "type": "equipment",
+    "tags": [
+      "metal",
+      "restraint",
+      "ankles"
+    ],
+    "description": "Пара фиксирующих манжет для лодыжек с короткой соединительной цепью."
+  },
+  {
+    "id": "eq_restraint_belt",
+    "name": "Фиксирующий пояс",
+    "type": "equipment",
+    "tags": [
+      "restraint",
+      "waist",
+      "hands"
+    ],
+    "description": "Широкий пояс с креплениями, удерживающими запястья у талии."
+  }
+]

@@ -1,0 +1,2522 @@
+[
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/handheld__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/handheld__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/handheld__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/internal__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/internal__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/internal__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/machine__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/machine__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/vibration/machine__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/stirrups__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/stirrups__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/stirrups__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/restrained__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/restrained__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/restrained__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/suspended__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/suspended__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/suspended__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/milking__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/milking__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/milking__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/hmd__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/hmd__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/hmd__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/mind_control__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/mind_control__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/sex_machine/mind_control__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/chair__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/chair__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/chair__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/clamps__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/clamps__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/clamps__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/genital__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/genital__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/genital__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/tentacles__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/tentacles__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/mira/electrostimulation/tentacles__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "standing",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/standing__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "standing",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/standing__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "sitting_spread",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/sitting_spread__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "sitting_spread",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/sitting_spread__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "spread_eagle",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/spread_eagle__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "spread_eagle",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/spread_eagle__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "exposure",
+    "variant": "covering",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/exposure/covering__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "foot",
+    "variant": "bare_presented",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/foot/bare_presented__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "foot",
+    "variant": "pantyhose_presented",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/foot/pantyhose_presented__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/foot/stocks_tickle__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "intense",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/foot/stocks_tickle__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "peak",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/foot/stocks_tickle__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/kneeling__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/kneeling__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/kneeling__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/deep__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/deep__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/deep__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "assisted",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/assisted__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "oral",
+    "variant": "assisted",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/oral/assisted__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/doggy__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "intense",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/doggy__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/doggy__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/missionary__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "intense",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/missionary__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/missionary__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "standing",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/standing__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "penetration",
+    "variant": "standing",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/penetration/standing__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/hmd__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/hmd__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/hmd__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/machine__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/machine__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/machine__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/electric__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/electric__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/capsule/electric__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "glory",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/mira/capsule/glory__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "capsule",
+    "variant": "glory",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/mira/capsule/glory__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "sustain",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/lesbian/fingering_kiss__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "intense",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/lesbian/fingering_kiss__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "peak",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/lesbian/fingering_kiss__peak.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "sustain",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/lesbian/facesitting__sustain.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "intense",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/lesbian/facesitting__intense.png"
+  },
+  {
+    "characterId": "S-AV-01",
+    "character": "Мира",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "peak",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/mira/lesbian/facesitting__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/handheld__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/handheld__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/handheld__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/internal__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/internal__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/internal__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/machine__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/machine__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/vibration/machine__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/stirrups__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/stirrups__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/stirrups__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/restrained__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/restrained__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/restrained__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/suspended__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/suspended__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/suspended__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/milking__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/milking__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/milking__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/hmd__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/hmd__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/hmd__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/mind_control__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/mind_control__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/sex_machine/mind_control__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/chair__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/chair__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/chair__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/clamps__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/clamps__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/clamps__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/genital__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/genital__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/genital__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/tentacles__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/tentacles__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/iona/electrostimulation/tentacles__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "standing",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/standing__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "standing",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/standing__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "sitting_spread",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/sitting_spread__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "sitting_spread",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/sitting_spread__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "spread_eagle",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/spread_eagle__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "spread_eagle",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/spread_eagle__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "exposure",
+    "variant": "covering",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/exposure/covering__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "foot",
+    "variant": "bare_presented",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/foot/bare_presented__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "foot",
+    "variant": "pantyhose_presented",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/foot/pantyhose_presented__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/foot/stocks_tickle__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "intense",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/foot/stocks_tickle__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "peak",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/foot/stocks_tickle__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/kneeling__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/kneeling__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/kneeling__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/deep__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/deep__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/deep__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "assisted",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/assisted__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "oral",
+    "variant": "assisted",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/oral/assisted__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/doggy__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "intense",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/doggy__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/doggy__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/missionary__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "intense",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/missionary__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/missionary__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "standing",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/standing__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "penetration",
+    "variant": "standing",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/penetration/standing__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/hmd__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/hmd__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/hmd__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/machine__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/machine__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/machine__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/electric__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/electric__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/capsule/electric__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "glory",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/iona/capsule/glory__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "capsule",
+    "variant": "glory",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/iona/capsule/glory__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "sustain",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/lesbian/fingering_kiss__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "intense",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/lesbian/fingering_kiss__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "peak",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/lesbian/fingering_kiss__peak.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "sustain",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/lesbian/facesitting__sustain.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "intense",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/lesbian/facesitting__intense.png"
+  },
+  {
+    "characterId": "NPC-LAB-01",
+    "character": "Иона",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "peak",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/iona/lesbian/facesitting__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/handheld__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/handheld__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "handheld",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/handheld__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/internal__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/internal__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "internal",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/internal__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/machine__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/machine__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "vibration",
+    "variant": "machine",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/vibration/machine__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/stirrups__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/stirrups__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "stirrups",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/stirrups__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/restrained__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/restrained__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "restrained",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/restrained__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/suspended__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/suspended__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "suspended",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/suspended__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/milking__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/milking__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "milking",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/milking__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/hmd__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/hmd__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "hmd",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/hmd__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/mind_control__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/mind_control__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "sex_machine",
+    "variant": "mind_control",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/sex_machine/mind_control__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/chair__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/chair__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "chair",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/chair__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/clamps__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/clamps__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "clamps",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/clamps__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/genital__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/genital__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "genital",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/genital__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/tentacles__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/tentacles__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "electrostimulation",
+    "variant": "tentacles",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/nika/electrostimulation/tentacles__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "standing",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/standing__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "standing",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/standing__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "sitting_spread",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/sitting_spread__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "sitting_spread",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/sitting_spread__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "spread_eagle",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/spread_eagle__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "spread_eagle",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/spread_eagle__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "exposure",
+    "variant": "covering",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/exposure/covering__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "foot",
+    "variant": "bare_presented",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/foot/bare_presented__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "foot",
+    "variant": "pantyhose_presented",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/foot/pantyhose_presented__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "sustain",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/foot/stocks_tickle__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "intense",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/foot/stocks_tickle__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "foot",
+    "variant": "stocks_tickle",
+    "phase": "peak",
+    "coverage": "verified-with-selection",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/foot/stocks_tickle__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/kneeling__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/kneeling__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "kneeling",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/kneeling__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/deep__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "intense",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/deep__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "deep",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/deep__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "assisted",
+    "phase": "sustain",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/assisted__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "oral",
+    "variant": "assisted",
+    "phase": "peak",
+    "coverage": "verified",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/oral/assisted__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/doggy__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "intense",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/doggy__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "doggy",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/doggy__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/missionary__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "intense",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/missionary__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "missionary",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/missionary__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "standing",
+    "phase": "sustain",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/standing__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "penetration",
+    "variant": "standing",
+    "phase": "peak",
+    "coverage": "verified-no-pov",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/penetration/standing__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/hmd__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/hmd__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "hmd",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/hmd__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/machine__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/machine__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "machine",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/machine__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/electric__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "intense",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/electric__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "electric",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/capsule/electric__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "glory",
+    "phase": "sustain",
+    "coverage": "experimental",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/nika/capsule/glory__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "capsule",
+    "variant": "glory",
+    "phase": "peak",
+    "coverage": "experimental",
+    "optional": true,
+    "relativePath": "public/character-images/interactions/nika/capsule/glory__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "sustain",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/lesbian/fingering_kiss__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "intense",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/lesbian/fingering_kiss__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "lesbian",
+    "variant": "fingering_kiss",
+    "phase": "peak",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/lesbian/fingering_kiss__peak.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "sustain",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/lesbian/facesitting__sustain.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "intense",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/lesbian/facesitting__intense.png"
+  },
+  {
+    "characterId": "NPC-CAND-01",
+    "character": "Ника",
+    "family": "lesbian",
+    "variant": "facesitting",
+    "phase": "peak",
+    "coverage": "verified-single-character-lora",
+    "optional": false,
+    "relativePath": "public/character-images/interactions/nika/lesbian/facesitting__peak.png"
+  }
+]

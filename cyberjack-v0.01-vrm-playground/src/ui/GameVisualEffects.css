@@ -1,0 +1,47 @@
+.game-effect-overlay {
+  position: fixed !important;
+  z-index: 10000 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  isolation: isolate;
+}
+
+.game-effect-overlay.fx-contained {
+  position: absolute !important;
+  z-index: 8 !important;
+  inset: 0 -15px 0 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+.game-effect-overlay .fx-process-window img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+}
+
+/* Keep the normal effect window, but do not crop a portrait oral frame. */
+.game-effect-overlay .fx-action-cut--full-height > img {
+  object-fit: contain !important;
+  object-position: center bottom;
+}
+
+.game-effect-overlay.fx-sustained--oral .fx-process-window img {
+  object-fit: contain !important;
+  object-position: center bottom;
+}
+.game-effect-overlay.fx-sustained--oral .fx-process-window__motion {
+  display: none;
+}
+
+.fx-portrait-reaction-only .fx-face-cut {
+  right: 4%;
+  top: 12%;
+}

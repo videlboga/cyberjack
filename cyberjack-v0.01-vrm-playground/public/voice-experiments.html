@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cyberjack · Отбор голосов</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101116;--panel:#181a22;--line:#343746;--text:#eeeef2;--muted:#9296a8;--accent:#ef667d;--ok:#62d49b;--bad:#e35c64}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.35 Inter,system-ui,sans-serif}
+    header{position:sticky;top:0;z-index:3;display:flex;align-items:end;justify-content:space-between;gap:24px;padding:18px 24px;background:#101116f2;border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
+    h1{margin:0;font-size:24px}header p{margin:4px 0 0;color:var(--muted)}button,select{border:1px solid var(--line);background:#20232d;color:var(--text);padding:9px 12px;font:inherit;cursor:pointer}button:hover{border-color:var(--accent)}
+    nav{display:flex;gap:8px;flex-wrap:wrap}.tab.active{background:var(--accent);border-color:var(--accent);color:#160c0e}
+    main{padding:20px 24px 48px}.summary{display:flex;gap:18px;margin-bottom:18px;color:var(--muted)}.summary b{color:var(--text)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}.card{background:var(--panel);border:1px solid var(--line);padding:12px;min-width:0}.card.playing{border-color:var(--accent)}
+    .card header{position:static;display:block;padding:0 0 10px;background:none;border:0;backdrop-filter:none}.card small{display:block;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.card strong{display:block;margin-top:3px;font-size:16px;overflow-wrap:anywhere}
+    audio{width:100%;height:34px}.review{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.review button{padding:7px}.review .keep.active{border-color:var(--ok);background:#183a2d}.review .maybe.active{border-color:#d8b65e;background:#3b321b}.review .reject.active{border-color:var(--bad);background:#3c1c21}
+    .missing{height:34px;display:grid;place-items:center;color:var(--muted);border:1px dashed var(--line)}
+    @media(max-width:700px){header{align-items:start;flex-direction:column}main{padding:14px}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header><div><h1>Отбор вокализаций</h1><p>Изолированные тесты тембра и эмоциональных оттенков</p></div><nav id="tabs"></nav><button id="export">Экспорт отбора</button></header>
+  <main><div class="summary" id="summary"></div><section class="grid" id="grid"></section></main>
+  <script type="module">
+    const base='/audio/sources/voice-experiments/';
+    const data=await fetch(base+'jobs-all.json').then(r=>r.json());
+    const axes=['age','profession','archetype','emotion'];
+    const labels={age:'Возраст',profession:'Профессии',archetype:'Архетипы',emotion:'Эмоции'};
+    const storageKey='cyberjack.voice-experiment-review.v1';
+    const reviews=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    let axis=location.hash.slice(1);if(!axes.includes(axis))axis='age';
+    const tabs=document.querySelector('#tabs'),grid=document.querySelector('#grid'),summary=document.querySelector('#summary');
+    const stopOthers=except=>document.querySelectorAll('audio').forEach(a=>{if(a!==except){a.pause();a.currentTime=0}});
+    function save(id,value){if(reviews[id]===value)delete reviews[id];else reviews[id]=value;localStorage.setItem(storageKey,JSON.stringify(reviews));render()}
+    function render(){
+      tabs.innerHTML=axes.map(a=>`<button class="tab ${a===axis?'active':''}" data-axis="${a}">${labels[a]}</button>`).join('');
+      const jobs=data.jobs.filter(j=>j.axis===axis), counts={keep:0,maybe:0,reject:0};Object.values(reviews).forEach(v=>counts[v]++);
+      summary.innerHTML=`<span><b>${jobs.length}</b> вариантов</span><span>Выбрано <b>${counts.keep}</b></span><span>Под вопросом <b>${counts.maybe}</b></span><span>Отклонено <b>${counts.reject}</b></span>`;
+      grid.innerHTML=jobs.map(j=>`<article class="card" data-id="${j.id}"><header><small>${labels[j.axis]}</small><strong>${j.tag}</strong></header><audio controls preload="none" src="${base}${j.id}.mp3"></audio><div class="review"><button class="keep ${reviews[j.id]==='keep'?'active':''}" data-v="keep">✓ взять</button><button class="maybe ${reviews[j.id]==='maybe'?'active':''}" data-v="maybe">• может</button><button class="reject ${reviews[j.id]==='reject'?'active':''}" data-v="reject">× убрать</button></div></article>`).join('');
+      document.querySelectorAll('audio').forEach(a=>{a.addEventListener('play',()=>{stopOthers(a);a.closest('.card').classList.add('playing')});a.addEventListener('pause',()=>a.closest('.card').classList.remove('playing'));a.addEventListener('error',()=>{const d=document.createElement('div');d.className='missing';d.textContent='ещё генерируется';a.replaceWith(d)})});
+    }
+    tabs.addEventListener('click',e=>{const a=e.target.dataset.axis;if(a){axis=a;location.hash=a;render()}});
+    grid.addEventListener('click',e=>{const v=e.target.dataset.v,id=e.target.closest('.card')?.dataset.id;if(v&&id)save(id,v)});
+    document.querySelector('#export').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,reviews},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='voice-experiment-review.json';a.click();URL.revokeObjectURL(a.href)};
+    render();
+  </script>
+</body>
+</html>

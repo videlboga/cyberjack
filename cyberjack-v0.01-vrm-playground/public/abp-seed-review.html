@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>ABP Review v3</title>
+<style>
+body{background:#111;color:#ddd;font-family:system-ui;padding:20px;margin:0}
+h1{font-size:16px;margin:0 0 10px}
+.bar{position:sticky;top:0;background:#111;padding:8px 0;border-bottom:1px solid #333;margin-bottom:16px;z-index:99}
+.bar select,.bar span{margin-right:8px}
+.bar select{background:#222;color:#ddd;border:1px solid #444;padding:4px 8px}
+.card{border:1px solid #333;border-radius:6px;margin-bottom:16px;padding:10px;background:#1a1a2e}
+.card h2{font-size:14px;margin:0 0 8px;color:#8ecae6}
+.card h2 .pt{color:#ffb703}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.pick{border:3px solid transparent;border-radius:4px;cursor:pointer;text-align:center}
+.pick:hover{border-color:#555}
+.pick.on{border-color:#0f0}
+.pick img{width:260px;display:block}
+.pick .tag{background:#0d2137;padding:3px;font-size:11px}
+.pick.on .tag{background:#0f0;color:#000}
+.foot{display:flex;gap:8px;align-items:center}
+.foot button{background:#333;color:#ddd;border:1px solid #444;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:12px}
+.foot button.rj.on{background:#c33;color:#fff;border-color:#c33}
+.foot input{flex:1;background:#0d2137;color:#ddd;border:1px solid #333;padding:5px 8px;border-radius:3px;font-size:12px}
+.badge{font-size:11px;padding:2px 6px;border-radius:8px;margin-left:auto}
+.badge.none{background:#333;color:#777}
+.badge.ok{background:#0a0;color:#000}
+.badge.no{background:#c33;color:#fff}
+</style>
+</head>
+<body>
+<h1>ABP Seed Review</h1>
+<div class="bar">
+<select id="f"><option value="">Все точки</option></select>
+<span id="p"></span>
+</div>
+<div id="g"></div>
+
+<script>
+let groups=[],sel={};
+const API='/review-api/abp-seed-selections';
+let t=null;
+
+function save(){
+  fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sel)})
+    .then(r=>r.json()).then(d=>console.log('saved',d)).catch(e=>console.error('save err',e));
+}
+function asave(){clearTimeout(t);t=setTimeout(save,500);}
+
+function getNote(key){return (sel[key]&&sel[key].note)||'';}
+
+function upd(){
+  document.getElementById('p').textContent=Object.keys(sel).length+'/'+groups.length;
+}
+
+function build(g){
+  const s=sel[g.key]||{};
+  const rej=s.status==='rejected';
+  const on=s.status==='selected'?s.seed:null;
+
+  const d=document.createElement('div');
+  d.className='card';
+  if(rej)d.style.opacity='.4';
+
+  const h=document.createElement('h2');
+  h.innerHTML='<span class="pt">'+g.point+'</span> &mdash; '+g.action;
+  let bs='';
+  if(rej)bs=' <span class="badge no">REJECTED</span>';
+  else if(on!==null)bs=' <span class="badge ok">s'+on+'</span>';
+  else bs=' <span class="badge none">pending</span>';
+  h.innerHTML+=bs;
+  d.appendChild(h);
+
+  const row=document.createElement('div');
+  row.className='row';
+  g.images.forEach(im=>{
+    const p=document.createElement('div');
+    p.className='pick'+(on===im.seed?' on':'');
+    const img=document.createElement('img');
+    img.src=im.url+'?t='+Date.now();img.loading='lazy';
+    const tag=document.createElement('div');
+    tag.className='tag';tag.textContent=im.seedLabel;
+    p.appendChild(img);p.appendChild(tag);
+    p.onclick=()=>{
+      const c=sel[g.key];
+      if(c&&c.status==='selected'&&c.seed===im.seed){
+        // Clicking selected image: keep note, clear selection
+        sel[g.key]={seed:0,status:'none',note:c.note||''};
+        delete sel[g.key];
+      } else {
+        sel[g.key]={seed:im.seed,status:'selected',note:getNote(g.key)};
+      }
+      renderAll();upd();asave();
+    };
+    row.appendChild(p);
+  });
+  d.appendChild(row);
+
+  const foot=document.createElement('div');
+  foot.className='foot';
+
+  const btn=document.createElement('button');
+  btn.className='rj'+(rej?' on':'');
+  btn.textContent=rej?'Cancel reject':'Reject all';
+  btn.onclick=()=>{
+    const c=sel[g.key];
+    if(c&&c.status==='rejected'){
+      // Cancel reject: keep note, set to none
+      if(c.note){
+        sel[g.key]={seed:0,status:'none',note:c.note};
+      } else {
+        delete sel[g.key];
+      }
+    } else {
+      // Reject: keep existing note
+      sel[g.key]={seed:0,status:'rejected',note:getNote(g.key)};
+    }
+    renderAll();upd();asave();
+  };
+  foot.appendChild(btn);
+
+  const inp=document.createElement('input');
+  inp.type='text';inp.placeholder='comment...';
+  inp.value=getNote(g.key);
+  inp.onclick=e=>e.stopPropagation();
+  inp.oninput=()=>{
+    // Only update note, never change status
+    if(!sel[g.key])sel[g.key]={seed:0,status:'none'};
+    sel[g.key].note=inp.value;
+    asave();
+  };
+  foot.appendChild(inp);
+
+  d.appendChild(foot);
+  return d;
+}
+
+function renderAll(){
+  const fv=document.getElementById('f').value;
+  const g=document.getElementById('g');
+  g.innerHTML='';
+  (fv?groups.filter(x=>x.point===fv):groups).forEach(x=>g.appendChild(build(x)));
+}
+
+async function init(){
+  const r=await fetch('/review-api/abp-seeds');
+  const d=await r.json();
+  const allGroups=d.groups||[];
+  const f=document.getElementById('f');
+  (d.points||[]).forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;f.appendChild(o);});
+  try{
+  const sr=await fetch(API);
+  if(sr.ok){const t=await sr.text();if(t.trim()&&t!=='{}')sel=JSON.parse(t);}
+  }catch(e){console.error('load err',e);}
+  // Show groups that are NOT selected (need review) + regenerated groups
+  groups=allGroups.filter(g=>{
+    const s=sel[g.key];
+    // Show if: not selected at all, OR was rejected before (we cleared it)
+    return !s || s.status !== 'selected';
+  });
+  renderAll();upd();
+}
+
+document.getElementById('f').onchange=renderAll;
+init();
+</script>
+</body>
+</html>

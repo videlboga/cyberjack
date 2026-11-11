@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<title>VRM stage QA harness</title>
+<style>body{font:14px system-ui;margin:12px}iframe{width:520px;height:640px;border:1px solid #999}#out{white-space:pre-wrap;font-family:ui-monospace,monospace;margin-top:8px}</style>
+<!-- Validation-only page: embeds the stage and posts one posture state so a test can read the active clip. -->
+<iframe id="stage" src="/vrm-stage/index.html?character=mira&outfit=00"></iframe>
+<div id="out">waiting</div>
+<script>
+const pose = new URLSearchParams(location.search).get('pose') || 'pose_all_fours';
+const extra = new URLSearchParams(location.search).get('also') || '';
+const frame = document.getElementById('stage');
+const out = document.getElementById('out');
+let sent = false;
+function send() {
+  if (sent) return;
+  sent = true;
+  const contexts = [{actionId: pose}, ...extra.split(',').filter(Boolean).map((actionId) => ({actionId}))];
+  frame.contentWindow.postMessage({type: 'cyberjack-vrm-state', character: 'mira', postureContexts: contexts, emotion: 'neutral', condition: {}, interaction: {}}, location.origin);
+  setTimeout(report, 1800);
+}
+function report() {
+  const api = frame.contentWindow.__gameVrm;
+  const s = api && api.state;
+  const hips = api?.vrm?.humanoid?.getRawBoneNode?.('hips');
+  const knee = api?.vrm?.humanoid?.getRawBoneNode?.('leftLowerLeg');
+  const hipsY = hips ? +hips.matrixWorld.elements[13].toFixed(3) : null;
+  const kneeY = knee ? +knee.matrixWorld.elements[13].toFixed(3) : null;
+  const foot = api?.vrm?.humanoid?.getRawBoneNode?.('leftFoot');
+  const hand = api?.vrm?.humanoid?.getRawBoneNode?.('leftHand');
+  const footY = foot ? +foot.matrixWorld.elements[13].toFixed(3) : null;
+  const handY = hand ? +hand.matrixWorld.elements[13].toFixed(3) : null;
+  out.textContent = JSON.stringify(s ? {ready: s.ready, clip: s.clip, posture: s.posture, grounding: s.grounding, hipsY, kneeY, footY, handY, library: s.library} : {error: 'stage not ready'}, null, 1);
+}
+addEventListener('message', (e) => {
+  if (e.source !== frame.contentWindow) return;
+  if (e.data && (e.data.type === 'cyberjack-vrm-ready' || e.data.type === 'cyberjack-vrm-motion')) send();
+});
+setTimeout(send, 12000);
+setTimeout(report, 15000);
+</script>
+</html>

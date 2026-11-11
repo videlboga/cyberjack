@@ -1,0 +1,29 @@
+{
+  "initialCoords": {
+    "feet": {
+      "x": 260.06739417819756,
+      "y": 411.3068392406383
+    },
+    "hands": {
+      "x": 248.1565400136975,
+      "y": 161.1694839386328
+    },
+    "head": {
+      "x": 239.12621335349377,
+      "y": 95.72069149763787
+    }
+  },
+  "focused": {
+    "focusId": "feet",
+    "cinematic": false,
+    "tool": null
+  },
+  "armed": "Мягко погладить",
+  "requests": [
+    [
+      "http://127.0.0.1:5174/api/tick",
+      "{\"subjectId\":\"S-AV-01\",\"addressedCharacterId\":\"S-AV-01\",\"playerId\":\"PL-1\",\"sceneId\":\"scene_lab_calibrator\",\"pointId\":\"arms\",\"presetId\":\"gentle_stroke\",\"skipLLM\":false,\"deferLLM\":true,\"llmMode\":\"scene_chance\",\"skipImageGen\":true,\"interactionContext\":\"Диагностический стол\"}"
+    ]
+  ],
+  "errors": []
+}

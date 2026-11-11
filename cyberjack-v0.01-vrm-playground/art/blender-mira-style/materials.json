@@ -1,0 +1,77 @@
+[
+  {
+    "source": "KK cf_m_face_00",
+    "kind": "face",
+    "image": "cf_m_face_00_light.png"
+  },
+  {
+    "source": "KK cf_m_body",
+    "kind": "skin",
+    "image": "body_outfit_00_light.png"
+  },
+  {
+    "source": "KK pufferlong 8400",
+    "kind": "cloth",
+    "image": "pufferlong 8400_light.png"
+  },
+  {
+    "source": "KK cf_m_bot_spants 8480",
+    "kind": "cloth",
+    "image": "cf_m_bot_spants 8480_light.png"
+  },
+  {
+    "source": "KK bra_lace_mat 8560",
+    "kind": "cloth",
+    "image": "bra_lace_mat 8560_light.png"
+  },
+  {
+    "source": "KK panties_highleg_mat 8660",
+    "kind": "cloth",
+    "image": "panties_highleg_mat 8660_light.png"
+  },
+  {
+    "source": "KK ztoki_socks_02_00_ma 8780",
+    "kind": "cloth",
+    "image": "ztoki_socks_02_00_ma 8780_light.png"
+  },
+  {
+    "source": "KK m_cf_shoes_steampunk00 8900",
+    "kind": "cloth",
+    "image": "m_cf_shoes_steampunk00 8900_light.png"
+  },
+  {
+    "source": "KK acs_chocker_belt 4760",
+    "kind": "cloth",
+    "image": "acs_chocker_belt 4760_light.png"
+  },
+  {
+    "source": "KK acs_m_chocker_bell 4770",
+    "kind": "cloth",
+    "image": "acs_m_chocker_bell 4770_light.png"
+  },
+  {
+    "source": "KK cf_m_hair_b_21_00 4130",
+    "kind": "hair",
+    "image": "cf_m_hair_b_21_00 4130_light.png"
+  },
+  {
+    "source": "KK cf_m_hair_b_21_00 4130 00",
+    "kind": "hair",
+    "image": "cf_m_hair_b_21_00 4130 00_light.png"
+  },
+  {
+    "source": "KK cf_m_hair_b_21_00 4130 01",
+    "kind": "hair",
+    "image": "cf_m_hair_b_21_00 4130 01_light.png"
+  },
+  {
+    "source": "KK cf_m_hair_b_21_00 4130 02",
+    "kind": "hair",
+    "image": "cf_m_hair_b_21_00 4130 02_light.png"
+  },
+  {
+    "source": "KK cf_m_hair_f_305_00 4350",
+    "kind": "hair",
+    "image": "cf_m_hair_f_305_00 4350_light.png"
+  }
+]

@@ -1,0 +1,52 @@
+{
+  "version": 4,
+  "model": "calibration-interaction",
+  "characters": ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01"],
+  "phases": ["sustain", "intense", "peak"],
+  "affectsByPhase": {
+    "sustain": ["neutral", "receptive", "guarded", "high_positive", "high_negative"],
+    "intense": ["receptive", "guarded", "high_positive", "high_negative", "subspace"],
+    "peak": ["high_positive", "high_negative", "subspace", "climax"]
+  },
+  "families": [
+    {
+      "id": "vibration",
+      "variants": ["handheld", "internal"],
+      "equipmentPresets": ["none", "blindfold", "wrist_cuffs", "wrist_cuffs_blindfold"]
+    },
+    {
+      "id": "electrostimulation",
+      "variants": ["clamps", "genital"],
+      "equipmentPresets": ["none", "blindfold", "wrist_cuffs", "wrist_cuffs_blindfold", "table_straps", "restraint_frame"]
+    },
+    {
+      "id": "foot",
+      "variants": ["manual_tickle"],
+      "equipmentPresets": ["none", "blindfold", "wrist_cuffs", "wrist_cuffs_blindfold"],
+      "future": true
+    },
+    {
+      "id": "manual_intimate",
+      "variants": [],
+      "equipmentPresets": [],
+      "future": true
+    }
+  ],
+  "clothing": ["nude", "underwear", "dress", "dress_stockings", "jumpsuit", "lab_gown", "calibration_set"],
+  "migration": {
+    "sourceRoot": "/character-images/interactions-expanded",
+    "wardrobeAliases": {
+      "nude": ["nude"],
+      "underwear": ["underwear", "calibration_set"],
+      "stockings": ["dress_stockings"],
+      "open_top": ["dress", "lab_gown"],
+      "device_outfit": ["jumpsuit"]
+    },
+    "restraintAliases": {
+      "free": ["none", "blindfold"],
+      "wrists": ["wrist_cuffs", "wrist_cuffs_blindfold"],
+      "spread": ["wrist_ankle_cuffs", "table_straps", "restraint_frame"]
+    }
+  },
+  "assetConvention": "/character-images/calibration-interactions-v4/$character/$family/$variant/$clothing__$equipmentPreset__$affect__$phase.png"
+}

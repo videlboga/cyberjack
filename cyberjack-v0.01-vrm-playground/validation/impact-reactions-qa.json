@@ -1,0 +1,106 @@
+{
+  "rows": [
+    {
+      "state": {
+        "character": "mira",
+        "ready": true,
+        "clip": "Stand_03_00",
+        "emotion": "neutral",
+        "replyId": "4",
+        "talking": true,
+        "boundBones": 137,
+        "grounding": {
+          "floorY": 0,
+          "samples": 73,
+          "rootY": 0.010206087972500846,
+          "offset": 0.010206087972500846,
+          "minimum": 0
+        },
+        "reaction": "soft"
+      },
+      "contact": -2.7389843865188723e-12
+    },
+    {
+      "state": {
+        "character": "mira",
+        "ready": true,
+        "clip": "Stand_00_00",
+        "emotion": "neutral",
+        "replyId": "4",
+        "talking": true,
+        "boundBones": 137,
+        "grounding": {
+          "floorY": 0,
+          "samples": 73,
+          "rootY": 0.010206087972500846,
+          "offset": 0.010206087972500846,
+          "minimum": 0
+        },
+        "reaction": "nod"
+      },
+      "contact": -2.7389843865188723e-12
+    },
+    {
+      "state": {
+        "character": "mira",
+        "ready": true,
+        "clip": "Stand_17_00",
+        "emotion": "neutral",
+        "replyId": "4",
+        "talking": true,
+        "boundBones": 137,
+        "grounding": {
+          "floorY": 0,
+          "samples": 73,
+          "rootY": 0.009541450126762621,
+          "offset": 0.009541450126762621,
+          "minimum": 0
+        },
+        "reaction": "startle"
+      },
+      "contact": -8.665890921522035e-12
+    },
+    {
+      "state": {
+        "character": "mira",
+        "ready": true,
+        "clip": "Stand_07_00",
+        "emotion": "neutral",
+        "replyId": "4",
+        "talking": true,
+        "boundBones": 137,
+        "grounding": {
+          "floorY": 0,
+          "samples": 73,
+          "rootY": 0.009541450126762621,
+          "offset": 0.009541450126762621,
+          "minimum": 0
+        },
+        "reaction": "surprise"
+      },
+      "contact": -8.665890921522035e-12
+    },
+    {
+      "state": {
+        "character": "mira",
+        "ready": true,
+        "clip": "Stand_Joy_01",
+        "emotion": "neutral",
+        "replyId": "4",
+        "talking": true,
+        "boundBones": 137,
+        "grounding": {
+          "floorY": 0,
+          "samples": 73,
+          "rootY": 0.008441307964132038,
+          "offset": 0.008441307964132038,
+          "minimum": 0
+        },
+        "reaction": "joy"
+      },
+      "contact": -1.4344072804539643e-11
+    }
+  ],
+  "writes": [],
+  "errors": []
+}

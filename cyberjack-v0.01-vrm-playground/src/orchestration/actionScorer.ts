@@ -1,0 +1,208 @@
+import { 
+    subjectRepo, 
+    pointStateRepo, 
+    characterRelationRepo, 
+    sceneRepo, 
+    presetRepo,
+    memoryAssociationRepo,
+    subjectiveAssociationRepo
+} from '../infrastructure/repositories';
+import { isActionTargetAllowed } from '../domain/actionTargets';
+import { canPerformPartnerPointAction, partnerPointAffinity } from '../domain/intimatePartnerMechanics';
+import { deriveAcquiredTraits } from '../domain/conditioning';
+
+interface PreferenceData {
+    points?: Record<string, number>;
+    actions?: Record<string, number>;
+    contexts?: Record<string, number>;
+    tags?: Record<string, number>;
+}
+
+export interface ActionScoreResult {
+    actionId: string;
+    pointId: string;
+    score: number;
+    tags: string[];
+    details: {
+        baseScore: number;
+        preferenceBonus: number;
+        barrierPenalty: number;
+    };
+}
+
+export class ActionScorer {
+    /**
+     * Оценивает все доступные действия в сцене для конкретного актора и цели.
+     * Возвращает отсортированный по убыванию привлекательности список действий.
+     */
+    static scoreAvailableActions(
+        sceneId: string, 
+        actorId: string, 
+        targetId: string,
+        targetPointIds: string[] // Список ID точек, доступных для взаимодействия
+    ): ActionScoreResult[] {
+        const scene = sceneRepo.get(sceneId);
+        if (!scene) return [];
+
+        const actor = subjectRepo.get(actorId);
+        const target = subjectRepo.get(targetId);
+        const relation = characterRelationRepo.get(actorId, targetId);
+
+        if (!actor || !target || !relation) return [];
+
+        const preferences: PreferenceData = actor.preferences 
+            ? JSON.parse(actor.preferences) 
+            : {};
+            
+        const results: ActionScoreResult[] = [];
+
+        // Получаем стейты всех точек цели
+        const pointStates: Record<string, any> = {};
+        for (const pid of targetPointIds) {
+            const state = pointStateRepo.get(targetId, pid);
+            if (state) pointStates[pid] = state;
+        }
+        const actorPointIds = pointStateRepo.getAllForSubject(actorId).map(point => point.pointId);
+
+        for (const actionId of scene.availableActions) {
+            const preset = presetRepo.getActionPreset(actionId);
+            if (!preset) continue;
+            if (!canPerformPartnerPointAction(actorPointIds, actionId, preset.tags || [])) continue;
+
+            const actionPrefBonus = (preferences.actions?.[actionId] || 0) * 4;
+            
+            // Если действие имеет определенные тэги, мы можем их проверить
+            let contextBonus = 0;
+            if (preset.tags) {
+                for (const tag of preset.tags) {
+                    // Older saves accidentally looked for semantic tags in the
+                    // context-id bucket. Keep that fallback while using the
+                    // dedicated learned tag bucket going forward.
+                    contextBonus += ((preferences.tags?.[tag] ?? preferences.contexts?.[tag]) || 0) * 3;
+                }
+                // Subjective episode memories are a separate, bounded signal:
+                // they colour anticipation, but do not overwrite learned traits.
+                contextBonus += memoryAssociationRepo.scoreTags(actorId, preset.tags) * 3;
+                contextBonus += subjectiveAssociationRepo.scoreAction(actorId, targetId, preset.tags) * 3;
+            }
+
+            for (const pointId of targetPointIds) {
+                if (!isActionTargetAllowed(preset.validTargets, pointId)) continue;
+                if (!canPerformPartnerPointAction(actorPointIds, actionId, preset.tags || [], pointId)) continue;
+                const pState = pointStates[pointId];
+                if (!pState) continue;
+
+                // 1. Отношения и базовое желание взаимодействовать
+                // attitude > 50 означает симпатию. 
+                const attitudeDiff = relation.attitude - 50;
+                
+                // 2. Предпочтения актора к точке
+                const pointPrefBonus = (preferences.points?.[pointId] || 0) * 6
+                    + partnerPointAffinity(actor.preferences, targetId, pointId) * 10;
+
+                // 3. Барьер интимности цели
+                const pointOpenness = pState.localOpenness ?? 50;
+                const actorOpennessLevel = relation.openness ?? 0;
+                
+                // Насколько сильно актор "пробивает" интимность точки
+                // Если барьер высок (pointOpenness < actorOpennessLevel значит барьер пробит)
+                // Чем меньше localOpenness, тем интимнее точка. Если actorOpenness < (100 - localOpenness), то есть штраф.
+                // Формула: Цель дает доступ (localOpenness). Актор имеет право (relation.openness).
+                // Упрощенно: Интимность барьера = 100 - localOpenness (если 10, то интимность 90).
+                // Штраф, если relation.openness не покрывает интимность.
+                const intimacyBarrier = 100 - pointOpenness; 
+                let barrierPenalty = 0;
+                if (actorOpennessLevel < intimacyBarrier) {
+                    barrierPenalty = (actorOpennessLevel - intimacyBarrier); // Отрицательное число
+                }
+
+                // TODO: Учесть plasticity для мягких/жестких действий (для этого нужно знать агрессивность actionPreset)
+
+                const baseScore = attitudeDiff;
+                const preferenceBonus = actionPrefBonus + contextBonus + pointPrefBonus;
+
+                const totalScore = baseScore + preferenceBonus + barrierPenalty;
+
+                results.push({
+                    actionId,
+                    pointId,
+                    score: totalScore,
+                    tags: preset.tags || [],
+                    details: {
+                        baseScore,
+                        preferenceBonus,
+                        barrierPenalty
+                    }
+                });
+            }
+        }
+
+        // Сортируем от наиболее желанных к наименее
+        return results.sort((a, b) => b.score - a.score);
+    }
+
+    /**
+     * Оценка self-действий (на себя): без relation к цели, только по
+     * закреплённым трейтам (компульсия уровня 2+) и накопленному возбуждению
+     * (tension). Каждый трейт отображается на своё действие/точку; щекотка
+     * на себе нереализуема и пропущена.
+     */
+    static scoreSelfActions(
+        sceneId: string,
+        actorId: string,
+        tension: number,
+    ): ActionScoreResult[] {
+        const scene = sceneRepo.get(sceneId);
+        if (!scene) return [];
+        const actor = subjectRepo.get(actorId);
+        if (!actor) return [];
+
+        // Трейт → список [действие, точка, метка] для self.
+        // Порог компульсии уровня 2 (strength >= 3.25) уже в deriveAcquiredTraits.
+        const SELF_TRAIT_ACTIONS: Array<[string, string, string]> = [
+            // Мастурбация: сексуальная зависимость и генитальные точки.
+            ['trait_sexual_dependency', 'finger_insertion', 'vagina'],
+            ['trait_point_vagina', 'finger_insertion', 'vagina'],
+            ['trait_point_anus', 'finger_insertion', 'anus'],
+            // Нежная самостимуляция: руки/вульва/клитор (по validTargets gentle_stroke).
+            ['trait_point_hands', 'gentle_stroke', 'hands'],
+            ['trait_point_vulva', 'gentle_stroke', 'vulva'],
+            ['trait_point_clitoris', 'gentle_stroke', 'clitoris'],
+            // Оральная самостимуляция: губы (по validTargets licking).
+            ['trait_point_lips', 'licking', 'lips'],
+            // Ступни: фетиш (облизывание, licking поддерживает feet).
+            ['trait_point_feet', 'licking', 'feet'],
+            // Мазохизм: болезненная самостимуляция на руках.
+            ['trait_masochist', 'pinch', 'arms'],
+            ['trait_masochist', 'scratching', 'arms'],
+        ];
+
+        const prefs = actor.preferences ? JSON.parse(actor.preferences) : {};
+        const traits = new Map(deriveAcquiredTraits(prefs).map(trait => [trait.id, trait]));
+
+        // Порог возбуждения: самоудовлетворение берёт верх только при
+        // достаточном накопленном драйве.
+        if (tension < 55) return [];
+
+        const availableSet = new Set(scene.availableActions);
+        const results: ActionScoreResult[] = [];
+        for (const [traitId, actionId, pointId] of SELF_TRAIT_ACTIONS) {
+            const trait = traits.get(traitId);
+            if (!trait || trait.level < 2) continue;   // компульсия уровня 2+
+            if (!availableSet.has(actionId)) continue;
+            const preset = presetRepo.getActionPreset(actionId);
+            if (!preset || !isActionTargetAllowed(preset.validTargets, pointId)) continue;
+
+            // Чем выше трейт и возбуждение, тем сильнее позыв.
+            const pressure = (trait.level * 18) + (tension - 55);
+            results.push({
+                actionId,
+                pointId,
+                score: pressure,
+                tags: preset.tags || [],
+                details: { baseScore: pressure, preferenceBonus: 0, barrierPenalty: 0 },
+            });
+        }
+        return results.sort((a, b) => b.score - a.score);
+    }
+}

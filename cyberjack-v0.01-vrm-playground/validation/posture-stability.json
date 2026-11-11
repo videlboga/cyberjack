@@ -1,0 +1,24 @@
+{
+  "result": {
+    "delta": 0.0058252640034503755,
+    "posture": {
+      "base": "pose_sitting",
+      "arms": "front",
+      "head": "left",
+      "blockedArms": false,
+      "weight": 0.9999869927023459,
+      "yaw": 0.4499941467160557
+    },
+    "names": [
+      "head",
+      "neck",
+      "chest",
+      "spine",
+      "leftHand",
+      "rightHand",
+      "leftIndexProximal",
+      "rightIndexProximal"
+    ]
+  },
+  "errors": []
+}
