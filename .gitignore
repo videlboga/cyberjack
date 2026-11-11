@@ -241,3 +241,8 @@ cyberjack-v0.01-vrm-playground/src/infrastructure/data/visual/*.generated.json
 # --- метаданные конвертации моделей (без самих .glb бесполезны) ---
 cyberjack-v0.01/public/models/sex-machines-models-*/*/metadata/
 cyberjack-v0.01/public/models/sex-machines-models-*/glb-nohuman/*_metadata.json
+
+# --- мёртвые gitlink-и: локальные клоны внутри репозитория ---
+cyberjack/
+cyberjack-v3-vrm-clone-1773819307/
+
